@@ -1,7 +1,10 @@
 import React from 'react'
 import HeroAnnouncement from '../../components/fpo/HeroAnnouncement'
 import KPIGrid from '../../components/fpo/KPIGrid'
+import SupplyNetworkSection from '../../components/fpo/SupplyNetworkSection'
+import ProcurementRequestsSection from '../../components/fpo/ProcurementRequestsSection'
 import MatchingEngineSection from '../../components/fpo/MatchingEngineSection'
+import HubNetworkSection from '../../components/fpo/HubNetworkSection'
 import ColdChainSection from '../../components/fpo/ColdChainSection'
 import DashboardTables from '../../components/fpo/DashboardTables'
 import BottomTriad from '../../components/fpo/BottomTriad'
@@ -12,8 +15,11 @@ export default function FPODashboard() {
     hubInfo,
     announcement,
     kpiCards,
-    matchingEngine,
-    dispatchHub,
+    supplyNetworkWorkflow,
+    incomingProcurementRequests,
+    fulfillmentAllocationEngine,
+    hubNetwork,
+    hubLogistics,
     buyerOrders,
     farmerActivity,
     priceTransparency,
@@ -27,19 +33,28 @@ export default function FPODashboard() {
       {/* 1. Editorial Principle Announcement Banner */}
       <HeroAnnouncement announcement={announcement} />
 
-      {/* 2. Quilted Pastel KPI Cards (Sky, Peach, Sage, White) */}
+      {/* 2. KPI Cards (Open Procurement Requests, Fulfillment Planned, Active Farmers, Active Buyers, Today's Supply, Pending Deliveries, Farmer Settlements, Reserve Fund) */}
       <KPIGrid kpiCards={kpiCards} syncTime={hubInfo.syncTime} />
 
-      {/* 3. Main Supply Network Workflow: Matching Engine */}
-      <MatchingEngineSection matchingEngine={matchingEngine} />
+      {/* 3. Supply Network Workflow (Procurement Requests → FPO Offers → Orders → Hub Allocation → Farmer Allocation → Collection → Delivery → Settlement) */}
+      <SupplyNetworkSection workflow={supplyNetworkWorkflow} />
 
-      {/* 4. Logistics & Cold-Chain Telemetry Card */}
-      <ColdChainSection dispatchHub={dispatchHub} />
+      {/* 4. Incoming Procurement Requests (Hotel Krishna, Apex Supermart, etc. with [Review Request]) */}
+      <ProcurementRequestsSection requests={incomingProcurementRequests} />
 
-      {/* 5. Two Data Tables: Buyer Allocation & Farmer Activity */}
+      {/* 5. Fulfillment Allocation Engine (Active Order, Required Quantity, Hub breakdown, Farmer allocation progress, [Open Allocation Engine]) */}
+      <MatchingEngineSection fulfillmentAllocationEngine={fulfillmentAllocationEngine} />
+
+      {/* 6. Hub Network (Hub A, Hub B, Hub C capacity, farmers, usage & status) */}
+      <HubNetworkSection hubNetwork={hubNetwork} />
+
+      {/* 7. Hub & Logistics (Active Hubs, Collection Capacity, Today's Dispatches, Active Vehicles) */}
+      <ColdChainSection hubLogistics={hubLogistics} />
+
+      {/* 8. Active Orders & Farmer Activity Data Tables */}
       <DashboardTables buyerOrders={buyerOrders} farmerActivity={farmerActivity} />
 
-      {/* 6. Bottom Triad: Price Transparency, Action Alerts, Analytics Preview */}
+      {/* 9. Bottom Triad: Price Transparency, Priority Alerts, Demand vs Supply 7-Day Chart */}
       <BottomTriad
         priceTransparency={priceTransparency}
         priorityAlerts={priorityAlerts}

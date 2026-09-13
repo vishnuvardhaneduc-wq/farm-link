@@ -3,9 +3,9 @@ import { Link } from 'react-router'
 
 export default function BottomTriad({ priceTransparency, priorityAlerts, weeklyAnalytics, produceShare }) {
   return (
-    <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 pb-6">
+    <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 pb-6 items-stretch">
       {/* Card A: Price Transparency */}
-      <div className="rounded-[22px] bg-[#ffffff] border border-[#c3cda7] p-6 flex flex-col justify-between shadow-xs">
+      <div className="rounded-[22px] bg-[#ffffff] border border-[#c3cda7] p-6 flex flex-col justify-between shadow-xs h-full">
         <div>
           <div className="flex items-start justify-between gap-2">
             <div className="flex items-start gap-3">
@@ -32,19 +32,19 @@ export default function BottomTriad({ priceTransparency, priorityAlerts, weeklyA
 
           <div className="mt-5 space-y-3">
             <div className="flex items-center justify-between p-3 rounded-[16px] bg-[#f1efdf] border border-[#c3cda7]/60">
-              <span className="text-xs text-[#353535]">Market Reference (APMC Mandi)</span>
+              <span className="text-xs text-[#353535]">Reference Market Price</span>
               <span className="text-sm font-semibold text-[#212529] font-mono">
                 {priceTransparency.marketRef}
               </span>
             </div>
             <div className="flex items-center justify-between p-3 rounded-[16px] bg-[#e6ecd5] border border-[#c3cda7]">
-              <span className="text-xs font-semibold text-[#1b6e53]">FarmLink Net Realization</span>
+              <span className="text-xs font-semibold text-[#1b6e53]">FarmLink Farmer Realization</span>
               <span className="text-base font-bold text-[#1b6e53] font-mono">
                 {priceTransparency.realization}
               </span>
             </div>
             <div className="flex items-center justify-between p-3 rounded-[16px] bg-[#f1efdf] border border-[#c3cda7]/60">
-              <span className="text-xs text-[#353535]">Net Realization Premium</span>
+              <span className="text-xs text-[#353535]">Difference (Net Premium)</span>
               <span className="text-xs font-bold text-[#1b6e53] font-mono">
                 {priceTransparency.gainAmount}
               </span>
@@ -57,7 +57,7 @@ export default function BottomTriad({ priceTransparency, priorityAlerts, weeklyA
             </div>
             <div>
               <span className="text-[11px] text-[#353535] uppercase font-semibold">
-                Estimated Extra Farmer Earnings
+                Estimated Additional Farmer Earnings
               </span>
               <div className="font-editorial text-2xl text-[#212529] font-normal leading-tight">
                 {priceTransparency.extraEarnings}{' '}
@@ -77,8 +77,8 @@ export default function BottomTriad({ priceTransparency, priorityAlerts, weeklyA
       </div>
 
       {/* Card B: Action Required Alerts */}
-      <div className="rounded-[22px] bg-[#ffffff] border border-[#c3cda7] p-6 flex flex-col justify-between shadow-xs">
-        <div>
+      <div className="rounded-[22px] bg-[#ffffff] border border-[#c3cda7] p-6 flex flex-col justify-between shadow-xs h-full">
+        <div className="flex-1 flex flex-col min-h-0">
           <div className="flex items-start justify-between gap-2">
             <div className="flex items-start gap-3">
               <div className="w-9 h-9 rounded-full bg-[#ba1a1a] text-[#ffffff] flex items-center justify-center shrink-0 shadow-sm mt-0.5">
@@ -100,23 +100,23 @@ export default function BottomTriad({ priceTransparency, priorityAlerts, weeklyA
           </div>
 
           <p className="text-xs text-[#6d6d6d] mt-1">
-            Operational interventions for hub director
+            Real-time alerts & operational interventions
           </p>
 
-          <div className="mt-4 space-y-2.5 text-xs">
+          <div className="mt-4 space-y-2.5 text-xs overflow-y-auto max-h-[360px] pr-1 flex-1">
             {priorityAlerts.map((alert) => (
               <div
                 key={alert.id}
-                className={`p-3 rounded-[16px] ${alert.cardBg} border border-[#c3cda7]/70 flex flex-col gap-1`}
+                className={`p-3 rounded-[16px] ${alert.cardBg} border border-[#c3cda7]/70 flex flex-col gap-1 hover:shadow-2xs transition`}
               >
                 <div className="flex items-center justify-between">
                   <span className={`font-semibold ${alert.titleColor} flex items-center gap-1.5`}>
                     <span className={`w-1.5 h-1.5 rounded-full ${alert.dotColor}`}></span>
                     {alert.type}
                   </span>
-                  <span className="text-[10px] text-[#6d6d6d]">{alert.timeAgo}</span>
+                  <span className="text-[10px] text-[#6d6d6d] font-mono">{alert.timeAgo}</span>
                 </div>
-                <p className="text-[#353535]">{alert.message}</p>
+                <p className="text-[#353535] leading-snug">{alert.message}</p>
                 <button className={`self-start text-[11px] font-bold ${alert.ctaColor} hover:underline mt-1 cursor-pointer`}>
                   {alert.cta}
                 </button>
@@ -124,10 +124,15 @@ export default function BottomTriad({ priceTransparency, priorityAlerts, weeklyA
             ))}
           </div>
         </div>
+
+        <div className="pt-4 border-t border-[#c3cda7]/50 mt-4 flex items-center justify-between text-xs text-[#6d6d6d]">
+          <span className="font-mono text-[11px]">System Status: Operational</span>
+          <span className="font-semibold text-[#ba1a1a]">{priorityAlerts.length} Action Items</span>
+        </div>
       </div>
 
-      {/* Card C: Analytics Preview */}
-      <div className="rounded-[22px] bg-[#ffffff] border border-[#c3cda7] p-6 flex flex-col justify-between shadow-xs">
+      {/* Card C: Analytics Preview (Demand vs Supply) */}
+      <div className="rounded-[22px] bg-[#ffffff] border border-[#c3cda7] p-6 flex flex-col justify-between shadow-xs h-full">
         <div>
           <div className="flex items-start justify-between gap-2">
             <div className="flex items-start gap-3">
@@ -139,7 +144,7 @@ export default function BottomTriad({ priceTransparency, priorityAlerts, weeklyA
                   VOLUME EQUILIBRIUM
                 </div>
                 <h3 className="font-editorial text-2xl font-bold text-[#00372a] tracking-tight leading-tight">
-                  Analytics Preview
+                  Demand vs Supply
                 </h3>
               </div>
             </div>
