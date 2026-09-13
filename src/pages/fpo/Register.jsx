@@ -94,6 +94,7 @@ export default function FPORegister() {
       const randomNum = Math.floor(10000 + Math.random() * 90000)
       setGeneratedFpoId(`FPO-MH-${randomNum}`)
       setIsSuccess(true)
+      window.scrollTo({ top: 0, behavior: 'smooth' })
     }, 700)
   }
 
@@ -543,7 +544,10 @@ export default function FPORegister() {
                     Need to revise form details?{' '}
                     <button
                       type="button"
-                      onClick={() => setIsSuccess(false)}
+                      onClick={() => {
+                        setIsSuccess(false)
+                        window.scrollTo({ top: 0, behavior: 'smooth' })
+                      }}
                       className="text-[#1b6e53] underline font-bold cursor-pointer"
                     >
                       Back to edit form

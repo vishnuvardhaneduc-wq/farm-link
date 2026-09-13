@@ -1,4 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router'
+import ScrollToTop from './components/ScrollToTop'
 
 // Layouts
 import FPOLayout from './layouts/FPOLayout'
@@ -42,7 +43,9 @@ import HubDelivery from './pages/hub/Delivery'
 
 function App() {
   return (
-    <Routes>
+    <>
+      <ScrollToTop />
+      <Routes>
       {/* Landing / Portal Selector */}
       <Route path="/" element={<Home />} />
 
@@ -94,6 +97,7 @@ function App() {
       {/* Fallback */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    </>
   )
 }
 
