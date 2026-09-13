@@ -12,7 +12,12 @@ import Home from './pages/Home'
 // Auth Pages
 import FPOLogin from './pages/fpo/Login'
 import FPORegister from './pages/fpo/Register'
+import BuyerLogin from './pages/buyer/Login'
+import BuyerRegister from './pages/buyer/Register'
+import HubLogin from './pages/hub/Login'
+import HubSetup from './pages/hub/Setup'
 import ForgotPassword from './pages/auth/ForgotPassword'
+import VerificationSuccess from './pages/auth/Verification'
 
 // FPO Pages
 import FPODashboard from './pages/fpo/Dashboard'
@@ -49,10 +54,15 @@ function App() {
       {/* Landing / Portal Selector */}
       <Route path="/" element={<Home />} />
 
-      {/* Auth Routes */}
+      {/* Standalone Phase 2 Auth Routes */}
       <Route path="/fpo/login" element={<FPOLogin />} />
       <Route path="/fpo/register" element={<FPORegister />} />
+      <Route path="/buyer/login" element={<BuyerLogin />} />
+      <Route path="/buyer/register" element={<BuyerRegister />} />
+      <Route path="/hub/login" element={<HubLogin />} />
+      <Route path="/hub/setup" element={<HubSetup />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/verification" element={<VerificationSuccess />} />
 
       {/* FPO Portal Routes */}
       <Route path="/fpo" element={<FPOLayout />}>
@@ -75,8 +85,6 @@ function App() {
       {/* Buyer Portal Routes */}
       <Route path="/buyer" element={<BuyerLayout />}>
         <Route index element={<Navigate to="/buyer/dashboard" replace />} />
-        <Route path="login" element={<Navigate to="/buyer/dashboard" replace />} />
-        <Route path="register" element={<Navigate to="/buyer/dashboard" replace />} />
         <Route path="dashboard" element={<BuyerDashboard />} />
         <Route path="demands" element={<Demands />} />
         <Route path="demands/new" element={<CreateDemand />} />
@@ -86,7 +94,6 @@ function App() {
       {/* Hub Operations Portal Routes */}
       <Route path="/hub" element={<HubLayout />}>
         <Route index element={<Navigate to="/hub/dashboard" replace />} />
-        <Route path="login" element={<Navigate to="/hub/dashboard" replace />} />
         <Route path="dashboard" element={<HubDashboard />} />
         <Route path="collection" element={<HubCollection />} />
         <Route path="weighing" element={<HubWeighing />} />
