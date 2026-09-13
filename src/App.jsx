@@ -8,6 +8,11 @@ import HubLayout from './layouts/HubLayout'
 // Home Page
 import Home from './pages/Home'
 
+// Auth Pages
+import FPOLogin from './pages/fpo/Login'
+import FPORegister from './pages/fpo/Register'
+import ForgotPassword from './pages/auth/ForgotPassword'
+
 // FPO Pages
 import FPODashboard from './pages/fpo/Dashboard'
 import Farmers from './pages/fpo/Farmers'
@@ -41,11 +46,15 @@ function App() {
       {/* Landing / Portal Selector */}
       <Route path="/" element={<Home />} />
 
+      {/* Auth Routes */}
+      <Route path="/fpo/login" element={<FPOLogin />} />
+      <Route path="/fpo/register" element={<FPORegister />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+
       {/* FPO Portal Routes */}
       <Route path="/fpo" element={<FPOLayout />}>
         <Route index element={<Navigate to="/fpo/dashboard" replace />} />
-        <Route path="login" element={<Navigate to="/fpo/dashboard" replace />} />
-        <Route path="register" element={<Navigate to="/fpo/dashboard" replace />} />
+        <Route path="setup" element={<Navigate to="/fpo/dashboard" replace />} />
         <Route path="dashboard" element={<FPODashboard />} />
         <Route path="farmers" element={<Farmers />} />
         <Route path="buyers" element={<Buyers />} />
