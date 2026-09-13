@@ -1,8 +1,50 @@
-import React from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 
 export default function FPOHeader({ hubInfo, onMenuClick }) {
+  const [isVisible, setIsVisible] = useState(true)
+  const isVisibleRef = useRef(true)
+  const ticking = useRef(false)
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!ticking.current) {
+        window.requestAnimationFrame(() => {
+          const scrollY = window.scrollY
+
+          // 1. Show only when completely at or returning to the top of the page (<= 10px)
+          if (scrollY <= 10) {
+            if (!isVisibleRef.current) {
+              isVisibleRef.current = true
+              setIsVisible(true)
+            }
+          }
+          // 2. Hide once user scrolls down past the initial top threshold (> 40px)
+          // Header remains hidden anywhere else on the page, even when scrolling up in the middle.
+          else if (scrollY > 40) {
+            if (isVisibleRef.current) {
+              isVisibleRef.current = false
+              setIsVisible(false)
+            }
+          }
+
+          ticking.current = false
+        })
+        ticking.current = true
+      }
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+    }
+  }, [])
+
   return (
-    <header className="bg-[#f1efdf] border-b border-[#c3cda7]/50 px-6 lg:px-10 py-5 sticky top-0 z-10 backdrop-blur-sm bg-opacity-95">
+    <header
+      className={`bg-[#f1efdf] border-b border-[#c3cda7]/50 px-6 lg:px-10 py-5 sticky top-0 z-10 backdrop-blur-sm bg-opacity-95 transform transition-all duration-[600ms] ease-in-out ${
+        isVisible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0 pointer-events-none'
+      }`}
+    >
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         {/* Left Title & Status */}
         <div>
