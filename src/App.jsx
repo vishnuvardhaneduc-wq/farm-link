@@ -44,6 +44,8 @@ function App() {
       {/* FPO Portal Routes */}
       <Route path="/fpo" element={<FPOLayout />}>
         <Route index element={<Navigate to="/fpo/dashboard" replace />} />
+        <Route path="login" element={<Navigate to="/fpo/dashboard" replace />} />
+        <Route path="register" element={<Navigate to="/fpo/dashboard" replace />} />
         <Route path="dashboard" element={<FPODashboard />} />
         <Route path="farmers" element={<Farmers />} />
         <Route path="buyers" element={<Buyers />} />
@@ -61,6 +63,8 @@ function App() {
       {/* Buyer Portal Routes */}
       <Route path="/buyer" element={<BuyerLayout />}>
         <Route index element={<Navigate to="/buyer/dashboard" replace />} />
+        <Route path="login" element={<Navigate to="/buyer/dashboard" replace />} />
+        <Route path="register" element={<Navigate to="/buyer/dashboard" replace />} />
         <Route path="dashboard" element={<BuyerDashboard />} />
         <Route path="demands" element={<Demands />} />
         <Route path="demands/new" element={<CreateDemand />} />
@@ -70,6 +74,7 @@ function App() {
       {/* Hub Operations Portal Routes */}
       <Route path="/hub" element={<HubLayout />}>
         <Route index element={<Navigate to="/hub/dashboard" replace />} />
+        <Route path="login" element={<Navigate to="/hub/dashboard" replace />} />
         <Route path="dashboard" element={<HubDashboard />} />
         <Route path="collection" element={<HubCollection />} />
         <Route path="weighing" element={<HubWeighing />} />
