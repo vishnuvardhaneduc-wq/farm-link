@@ -276,53 +276,83 @@ export const fpoDashboardData = {
     },
   ],
 
-  fulfillmentAllocationEngine: {
-    kernelVersion: 'Allocation v2.4 Kernel',
-    title: 'Fulfillment Allocation Engine',
+  fulfillmentHubPlan: {
+    kernelVersion: 'Fulfillment Engine v2.4',
+    title: 'Fulfillment Hub Plan',
+    subtitle: 'Select the minimum suitable hub network required to fulfill the order.',
     description:
-      'Multi-tier algorithmic fulfillment engine balancing buyer demand, hub capacity, and farmer lot availability for maximum price realization.',
+      "Fulfillment engine selecting the minimum suitable hub network and fairly allocating each hub's requirement across eligible farmers.",
     activeOrder: {
       orderId: 'ORD-8921',
       buyer: 'Hotel Krishna',
-      crop: 'Tomato (Grade A)',
+      crop: 'Tomato',
+      grade: 'Grade A',
       requiredQuantity: '1,000 kg',
-      hubsAllocatedCount: 3,
-      hubs: [
-        { name: 'Hub A (Nashik Central)', allocated: '350 kg', status: 'Available' },
-        { name: 'Hub B (Pimpalgaon)', allocated: '300 kg', status: 'Near Capacity' },
-        { name: 'Hub C (Sinnar)', allocated: '350 kg', status: 'Available' },
-      ],
-      farmersAllocated: '31 / 42 allocated',
-      farmersProgress: 74,
     },
+    case1SingleHub: {
+      recommendedHub: 'Hub A — Nashik Central',
+      required: '1,000 kg',
+      availableCapacity: '1,300 kg',
+      cropCapability: 'Tomato ✓',
+      gradeCapability: 'Grade A ✓',
+      operatingStatus: 'Open ✓',
+      distance: 'Suitable (4.2 km) ✓',
+      status: 'Single Hub Fulfillment',
+      reason: 'Hub A can fulfill the complete order without requiring another hub.',
+      otherSuitableHubs: [
+        { name: 'Hub B — Pimpalgaon', status: 'Available', capacity: '850 kg', farmers: 14 },
+        { name: 'Hub C — Sinnar', status: 'Available', capacity: '1,200 kg', farmers: 10 },
+      ],
+      farmerAllocation: {
+        status: 'Hub Allocation Complete',
+        farmersAssigned: '31 / 42 farmers assigned',
+        progress: 74,
+        hubNote: 'All assigned farmers belong to Hub A primary cluster (Ramesh B., Suresh K., Tukaram M.)',
+      },
+    },
+    case2MultiHub: {
+      title: 'Single hub capacity insufficient',
+      required: '1,000 kg',
+      status: '2 Hubs Required',
+      reason: 'Hub A cannot fulfill the complete order alone.',
+      allocations: [
+        { name: 'Hub A (Nashik Central)', allocated: '600 kg', capacity: '600 kg available' },
+        { name: 'Hub B (Pimpalgaon)', allocated: '400 kg', capacity: '400 kg required' },
+      ],
+      otherSuitableHubs: [
+        { name: 'Hub C — Sinnar', status: 'Not Needed (Hub A + Hub B satisfy requirement)', capacity: '1,200 kg' },
+      ],
+      farmerAllocation: {
+        status: 'Multi-Hub Allocation Complete',
+        farmersAssigned: '31 / 42 farmers assigned',
+        progress: 74,
+        hubNote: 'Farmers allocated from their primary hub: Hub A (18 farmers → 600 kg), Hub B (13 farmers → 400 kg).',
+      },
+    },
+    suitabilityFactors: [
+      { label: 'Available Capacity', value: '1,300 kg headroom', icon: 'inventory_2' },
+      { label: 'Crop Capability', value: 'Tomato verified', icon: 'eco' },
+      { label: 'Grade Capability', value: 'Grade A optical sorter', icon: 'verified' },
+      { label: 'Operating Hours', value: '05:00 – 12:00 IST', icon: 'schedule' },
+      { label: 'Farmer Availability', value: '42 registered in cluster', icon: 'groups' },
+      { label: 'Distance / Service Area', value: '< 18 km radius (Suitable)', icon: 'near_me' },
+      { label: 'Logistics Efficiency', value: 'Direct dispatch lane', icon: 'local_shipping' },
+    ],
     droneImage:
       'https://lh3.googleusercontent.com/aida-public/AB6AXuATNEnSbIqCZBBF78cXOm-qfmbBRzRVOPufkcjTh2xrAIhpE9A6okjURld2Pk4pdcaWgkhO-BqmJ35oAYlZkDYwMI9S8UvW5z8JsrGktO57MjZMln6gM-t0cZzsX2aAW1oEvXrXao912j_Ey23WqA7b9ziyrHeqs1T7pdbvyKNM1FJBLrn7dQI8bHSHlhudRTk7vqY8WePk7iz2wdcITsoVVq6uE3y7R1QNlQlvRcq10P6Ji7Z8Ugvl3g',
     droneTelemetry: {
-      surveyTime: 'Fulfillment Audit • 06:30 AM',
+      surveyTime: 'Cluster Audit • 06:30 AM',
       perimeter: '18km Hub Network Perimeter',
-      title: 'Cluster Production & Multi-Hub Allocation Status',
+      title: 'Cluster Production & Minimum Hub Route Optimization',
       activeAcreage: '380 Hectares',
       soilMoisture: '68% Ideal',
       expectedYield: '48 Tonnes',
     },
-    stats: [
-      { label: 'Active Order Demand', value: '1,000 kg', highlight: false },
-      { label: 'Hub Capacity Allocated', value: '1,000 kg', highlight: true, highlightColor: 'text-[#e8fe85]' },
-      { label: 'Farmers Assigned', value: '31 Farmers', highlight: false },
-      { label: 'Fulfillment Rate', value: '100%', highlight: true, highlightColor: 'text-[#e8fe85]' },
-      { label: 'Pending Dispatch', value: '0.8 Tonnes', highlight: false },
-    ],
-    distribution: [
-      { label: 'Hub A (350 kg)', color: 'bg-[#e8fe85]', width: '35%' },
-      { label: 'Hub B (300 kg)', color: 'bg-[#b2cee7]', width: '30%' },
-      { label: 'Hub C (350 kg)', color: 'bg-[#fceace]', width: '35%' },
-    ],
-    criteria: [
-      { icon: 'verified', label: 'Grade A matching (96%)' },
-      { icon: 'hub', label: 'Multi-hub optimal routing' },
-      { icon: 'near_me', label: 'Cluster radius < 18km' },
-    ],
     lastCycleTime: '14 mins ago',
+  },
+  // Alias for backward compatibility
+  get fulfillmentAllocationEngine() {
+    return this.fulfillmentHubPlan
   },
 
   hubNetwork: [

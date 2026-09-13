@@ -17,7 +17,7 @@ export default function FPODashboard() {
     kpiCards,
     supplyNetworkWorkflow,
     incomingProcurementRequests,
-    fulfillmentAllocationEngine,
+    fulfillmentHubPlan,
     hubNetwork,
     hubLogistics,
     buyerOrders,
@@ -42,8 +42,8 @@ export default function FPODashboard() {
       {/* 4. Incoming Procurement Requests (Hotel Krishna, Apex Supermart, etc. with [Review Request]) */}
       <ProcurementRequestsSection requests={incomingProcurementRequests} />
 
-      {/* 5. Fulfillment Allocation Engine (Active Order, Required Quantity, Hub breakdown, Farmer allocation progress, [Open Allocation Engine]) */}
-      <MatchingEngineSection fulfillmentAllocationEngine={fulfillmentAllocationEngine} />
+      {/* 5. Fulfillment Hub Plan (Single-hub-first allocation with minimum hub network selection) */}
+      <MatchingEngineSection fulfillmentHubPlan={fulfillmentHubPlan} />
 
       {/* 6. Hub Network (Hub A, Hub B, Hub C capacity, farmers, usage & status) */}
       <HubNetworkSection hubNetwork={hubNetwork} />
