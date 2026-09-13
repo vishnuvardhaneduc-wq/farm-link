@@ -1,9 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react'
+import { useLocation } from 'react-router'
 
 export default function FPOHeader({ hubInfo, onMenuClick }) {
   const [isVisible, setIsVisible] = useState(true)
   const isVisibleRef = useRef(true)
   const ticking = useRef(false)
+  const location = useLocation()
+
+  // Always reset scroll to top & make header visible when route changes
+  useEffect(() => {
+    window.scrollTo(0, 0)
+    isVisibleRef.current = true
+    setIsVisible(true)
+  }, [location.pathname])
 
   useEffect(() => {
     const handleScroll = () => {
