@@ -280,6 +280,16 @@ export default function FPORequestDetail() {
         {/* Item Cards */}
         <div className="space-y-6">
           {items.map((item, idx) => {
+            const isItemConfirmed = Boolean(
+              item.isConfirmed ||
+              item.confirmedOfferId ||
+              item.status === 'ORDER CONFIRMED' ||
+              item.status === 'Confirmed'
+            )
+            const myResponse = (item.responses || []).find(
+              (r) => r.fpoId === fpoProfile.id || r.fpoName === fpoProfile.name
+            )
+
             const resp = itemResponses[item.itemId] || {
               type: 'ACCEPT',
               availableQty: item.quantity,
@@ -298,7 +308,9 @@ export default function FPORequestDetail() {
               <div
                 key={item.itemId || idx}
                 className={`rounded-[24px] bg-[#ffffff] border transition-all p-6 lg:p-7 shadow-xs space-y-6 ${
-                  isAccept
+                  isItemConfirmed
+                    ? 'border-rose-300 bg-rose-50/15'
+                    : isAccept
                     ? 'border-[#1b6e53]/60'
                     : isBackOffer
                     ? 'border-[#683600]/60'
@@ -325,8 +337,14 @@ export default function FPORequestDetail() {
                     </div>
                   </div>
 
-                  {/* Quality & Packing pills */}
-                  <div className="flex flex-wrap gap-1.5 self-start lg:self-center">
+                  {/* Status / Quality & Packing pills */}
+                  <div className="flex flex-wrap gap-1.5 self-start lg:self-center items-center">
+                    {isItemConfirmed && (
+                      <span className="px-3.5 py-1.5 rounded-[100px] text-xs font-mono font-bold tracking-wider uppercase bg-rose-50 text-rose-700 border border-rose-300 flex items-center gap-1.5 shadow-2xs">
+                        <span className="w-2 h-2 rounded-full bg-rose-600 animate-pulse"></span>
+                        <span>ORDER CONFIRMED</span>
+                      </span>
+                    )}
                     {item.qualitySpecs && (
                       <span className="text-[10px] font-mono bg-[#f1efdf] text-[#353535] px-2.5 py-1 rounded-[100px] border border-[#c3cda7]">
                         🔬 {item.qualitySpecs}
@@ -340,280 +358,319 @@ export default function FPORequestDetail() {
                   </div>
                 </div>
 
-                {/* Response Type Selector Buttons */}
-                <div className="space-y-3">
-                  <span className="text-[11px] font-mono uppercase font-bold text-[#6d6d6d] block">
-                    Select Response for Item 0{idx + 1} ({item.crop}):
-                  </span>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    {/* 1. Accept */}
-                    <button
-                      type="button"
-                      onClick={() => handleSwitchType(item, 'ACCEPT')}
-                      className={`py-3 px-4 rounded-[16px] text-xs font-bold transition flex items-center justify-between border cursor-pointer ${
-                        isAccept
-                          ? 'bg-[#1b6e53] text-[#ffffff] border-[#1b6e53] shadow-xs'
-                          : 'bg-[#ffffff] text-[#1b6e53] border-[#c3cda7] hover:bg-[#e6ecd5]'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className="material-symbols-outlined text-[18px]">check_circle</span>
-                        <span>Accept Item</span>
+                {/* If Order Confirmed for this item */}
+                {isItemConfirmed && (
+                  <div className="bg-rose-50/80 rounded-[20px] p-5 border border-rose-200 space-y-3 animate-in fade-in">
+                    <div className="flex items-center justify-between gap-2 flex-wrap">
+                      <div className="flex items-center gap-2 text-rose-700 font-bold text-xs font-mono uppercase tracking-wider">
+                        <span className="material-symbols-outlined text-[18px]">verified</span>
+                        <span>ORDER CONFIRMED</span>
                       </div>
-                      <span className="text-[10px] font-mono font-normal opacity-90">Target Terms</span>
-                    </button>
-
-                    {/* 2. Back Offer */}
-                    <button
-                      type="button"
-                      onClick={() => handleSwitchType(item, 'BACK_OFFER')}
-                      className={`py-3 px-4 rounded-[16px] text-xs font-bold transition flex items-center justify-between border cursor-pointer ${
-                        isBackOffer
-                          ? 'bg-[#683600] text-[#ffffff] border-[#683600] shadow-xs'
-                          : 'bg-[#ffffff] text-[#683600] border-[#c3cda7] hover:bg-[#fceace]'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className="material-symbols-outlined text-[18px]">cached</span>
-                        <span>Back Offer</span>
-                      </div>
-                      <span className="text-[10px] font-mono font-normal opacity-90">Counter Terms</span>
-                    </button>
-
-                    {/* 3. Decline */}
-                    <button
-                      type="button"
-                      onClick={() => handleSwitchType(item, 'DECLINE')}
-                      className={`py-3 px-4 rounded-[16px] text-xs font-bold transition flex items-center justify-between border cursor-pointer ${
-                        isDecline
-                          ? 'bg-rose-700 text-[#ffffff] border-rose-700 shadow-xs'
-                          : 'bg-[#ffffff] text-rose-700 border-[#c3cda7] hover:bg-rose-50'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className="material-symbols-outlined text-[18px]">cancel</span>
-                        <span>Decline Item</span>
-                      </div>
-                      <span className="text-[10px] font-mono font-normal opacity-90">Unavailable</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Active Response Form Box */}
-                {isAccept && (
-                  <div className="bg-[#e6ecd5]/40 rounded-[20px] p-5 border border-[#1b6e53]/30 space-y-4 animate-in fade-in">
-                    <div className="flex items-center justify-between border-b border-[#c3cda7]/50 pb-2">
-                      <span className="text-xs font-mono font-bold text-[#1b6e53] uppercase flex items-center gap-1.5">
-                        <span className="material-symbols-outlined text-[16px]">verified</span>
-                        Offer Accepted Terms for {item.crop}
-                      </span>
-                      <span className="text-[10px] font-mono text-[#6d6d6d]">
-                        Committed directly from cluster inventory
+                      <span className="px-3 py-0.5 rounded-[100px] bg-rose-100 text-rose-800 text-[10px] font-mono font-bold border border-rose-300">
+                        Requirement Closed
                       </span>
                     </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                      {/* Available Qty */}
-                      <div>
-                        <label className="block text-[11px] font-semibold text-[#353535] mb-1 font-mono uppercase">
-                          Available Quantity (kg) <span className="text-rose-600">*</span>
-                        </label>
-                        <input
-                          type="number"
-                          required
-                          value={resp.availableQty}
-                          onChange={(e) => handleUpdateResponse(item.itemId, 'availableQty', e.target.value)}
-                          className="w-full text-xs px-3.5 py-2.5 bg-[#ffffff] border border-[#c3cda7] rounded-[100px] focus:outline-none focus:ring-1 focus:ring-[#1b6e53] font-mono text-[#212529]"
-                        />
+                    <p className="text-xs text-rose-900 font-sans">
+                      This product requirement ({item.crop} — {item.quantity}, {item.grade}) has already been confirmed by the buyer. No further responses or modifications can be submitted for this item.
+                    </p>
+                    {myResponse && (myResponse.offeredPrice || myResponse.counterPrice || myResponse.status) && (
+                      <div className="bg-[#ffffff] rounded-[16px] p-3.5 border border-rose-200 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs font-mono text-[#212529]">
+                        <div>
+                          <span className="text-[#6d6d6d] block text-[10px] uppercase">Recorded Response</span>
+                          <strong className="text-rose-700 font-extrabold text-sm">{myResponse.offeredPrice || myResponse.counterPrice || 'Standard Terms'}</strong>
+                        </div>
+                        <div>
+                          <span className="text-[#6d6d6d] block text-[10px] uppercase">Volume</span>
+                          <strong className="text-[#212529] font-bold text-sm">{myResponse.offeredQty || item.quantity}</strong>
+                        </div>
+                        <div>
+                          <span className="text-[#6d6d6d] block text-[10px] uppercase">Target Date</span>
+                          <strong className="text-[#212529] font-bold text-sm">{myResponse.deliveryDate || demand.deliveryDate}</strong>
+                        </div>
                       </div>
-
-                      {/* Offered Price */}
-                      <div>
-                        <label className="block text-[11px] font-semibold text-[#353535] mb-1 font-mono uppercase">
-                          Offered Rate (₹ / kg) <span className="text-rose-600">*</span>
-                        </label>
-                        <input
-                          type="number"
-                          step="0.1"
-                          required
-                          value={resp.offeredPrice}
-                          onChange={(e) => handleUpdateResponse(item.itemId, 'offeredPrice', e.target.value)}
-                          className="w-full text-xs px-3.5 py-2.5 bg-[#ffffff] border border-[#c3cda7] rounded-[100px] focus:outline-none focus:ring-1 focus:ring-[#1b6e53] font-mono text-[#212529]"
-                        />
-                      </div>
-
-                      {/* Delivery Date */}
-                      <div>
-                        <label className="block text-[11px] font-semibold text-[#353535] mb-1 font-mono uppercase">
-                          Expected Delivery Date <span className="text-rose-600">*</span>
-                        </label>
-                        <input
-                          type="date"
-                          required
-                          value={resp.deliveryDate}
-                          onChange={(e) => handleUpdateResponse(item.itemId, 'deliveryDate', e.target.value)}
-                          className="w-full text-xs px-3.5 py-2.5 bg-[#ffffff] border border-[#c3cda7] rounded-[100px] focus:outline-none focus:ring-1 focus:ring-[#1b6e53] font-mono text-[#212529]"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Notes */}
-                    <div>
-                      <label className="block text-[11px] font-semibold text-[#353535] mb-1 font-mono uppercase">
-                        Dispatch Notes &amp; Cluster Packaging Confirmation
-                      </label>
-                      <input
-                        type="text"
-                        value={resp.notes}
-                        onChange={(e) => handleUpdateResponse(item.itemId, 'notes', e.target.value)}
-                        placeholder="e.g. Full Grade A volume allocated. Packed in 20kg crates."
-                        className="w-full text-xs px-3.5 py-2.5 bg-[#ffffff] border border-[#c3cda7] rounded-[100px] focus:outline-none focus:ring-1 focus:ring-[#1b6e53] text-[#212529]"
-                      />
-                    </div>
+                    )}
                   </div>
                 )}
 
-                {isBackOffer && (
-                  <div className="bg-[#fceace]/50 rounded-[20px] p-5 border border-[#683600]/40 space-y-4 animate-in fade-in">
-                    <div className="flex items-center justify-between border-b border-[#c3cda7]/50 pb-2">
-                      <span className="text-xs font-mono font-bold text-[#683600] uppercase flex items-center gap-1.5">
-                        <span className="material-symbols-outlined text-[16px]">change_circle</span>
-                        Commercial Back Offer Specification for {item.crop}
+                {/* Editable Response Controls if Item is NOT confirmed */}
+                {!isItemConfirmed && (
+                  <>
+                    {/* Response Type Selector Buttons */}
+                    <div className="space-y-3">
+                      <span className="text-[11px] font-mono uppercase font-bold text-[#6d6d6d] block">
+                        Select Response for Item 0{idx + 1} ({item.crop}):
                       </span>
-                      <span className="text-[10px] font-mono font-bold bg-[#fceace] text-[#683600] px-2 py-0.5 rounded-[100px] border border-[#c3cda7]">
-                        Back Offer (Requires Buyer Acceptance)
-                      </span>
-                    </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-                      {/* Available Qty */}
-                      <div>
-                        <label className="block text-[11px] font-semibold text-[#353535] mb-1 font-mono uppercase">
-                          Offered Qty (kg) <span className="text-rose-600">*</span>
-                        </label>
-                        <input
-                          type="number"
-                          required
-                          value={resp.availableQty}
-                          onChange={(e) => handleUpdateResponse(item.itemId, 'availableQty', e.target.value)}
-                          placeholder="e.g. 400"
-                          className="w-full text-xs px-3.5 py-2.5 bg-[#ffffff] border border-[#c3cda7] rounded-[100px] focus:outline-none focus:ring-1 focus:ring-[#683600] font-mono text-[#212529]"
-                        />
-                      </div>
-
-                      {/* Counter Rate */}
-                      <div>
-                        <label className="block text-[11px] font-semibold text-[#353535] mb-1 font-mono uppercase">
-                          Counter Rate (₹ / kg) <span className="text-rose-600">*</span>
-                        </label>
-                        <input
-                          type="number"
-                          step="0.5"
-                          required
-                          value={resp.offeredPrice}
-                          onChange={(e) => handleUpdateResponse(item.itemId, 'offeredPrice', e.target.value)}
-                          placeholder="e.g. 25"
-                          className="w-full text-xs px-3.5 py-2.5 bg-[#ffffff] border border-[#c3cda7] rounded-[100px] focus:outline-none focus:ring-1 focus:ring-[#683600] font-mono text-[#212529]"
-                        />
-                      </div>
-
-                      {/* Offered Grade */}
-                      <div>
-                        <label className="block text-[11px] font-semibold text-[#353535] mb-1 font-mono uppercase">
-                          Offered Grade <span className="text-rose-600">*</span>
-                        </label>
-                        <select
-                          value={resp.offeredGrade || 'Grade A'}
-                          onChange={(e) => handleUpdateResponse(item.itemId, 'offeredGrade', e.target.value)}
-                          className="w-full text-xs px-3.5 py-2.5 bg-[#ffffff] border border-[#c3cda7] rounded-[100px] focus:outline-none focus:ring-1 focus:ring-[#683600] text-[#212529]"
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        {/* 1. Accept */}
+                        <button
+                          type="button"
+                          onClick={() => handleSwitchType(item, 'ACCEPT')}
+                          className={`py-3 px-4 rounded-[16px] text-xs font-bold transition flex items-center justify-between border cursor-pointer ${
+                            isAccept
+                              ? 'bg-[#1b6e53] text-[#ffffff] border-[#1b6e53] shadow-xs'
+                              : 'bg-[#ffffff] text-[#1b6e53] border-[#c3cda7] hover:bg-[#e6ecd5]'
+                          }`}
                         >
-                          <option value="Grade A">Grade A (Premium)</option>
-                          <option value="Grade B">Grade B (Standard Commercial)</option>
-                          <option value="Export Grade">Export Grade</option>
-                          <option value="Processing Grade">Processing Grade</option>
-                        </select>
-                      </div>
+                          <div className="flex items-center gap-2">
+                            <span className="material-symbols-outlined text-[18px]">check_circle</span>
+                            <span>Accept Item</span>
+                          </div>
+                          <span className="text-[10px] font-mono font-normal opacity-90">Target Terms</span>
+                        </button>
 
-                      {/* Delivery Date */}
-                      <div>
-                        <label className="block text-[11px] font-semibold text-[#353535] mb-1 font-mono uppercase">
-                          Counter Delivery Date <span className="text-rose-600">*</span>
-                        </label>
-                        <input
-                          type="date"
-                          required
-                          value={resp.deliveryDate}
-                          onChange={(e) => handleUpdateResponse(item.itemId, 'deliveryDate', e.target.value)}
-                          className="w-full text-xs px-3.5 py-2.5 bg-[#ffffff] border border-[#c3cda7] rounded-[100px] focus:outline-none focus:ring-1 focus:ring-[#683600] font-mono text-[#212529]"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Counter Rationale */}
-                    <div>
-                      <label className="block text-[11px] font-semibold text-[#353535] mb-1 font-mono uppercase">
-                        Commercial Rationale / Staging Explanation <span className="text-rose-600">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        value={resp.notes}
-                        onChange={(e) => handleUpdateResponse(item.itemId, 'notes', e.target.value)}
-                        placeholder="e.g. Proposing 400 kg at ₹25/kg due to peak cold storage staging. Delivery shifted by +1 day."
-                        className="w-full text-xs px-3.5 py-2.5 bg-[#ffffff] border border-[#c3cda7] rounded-[100px] focus:outline-none focus:ring-1 focus:ring-[#683600] text-[#212529]"
-                      />
-                    </div>
-                  </div>
-                )}
-
-                {isDecline && (
-                  <div className="bg-rose-50/60 rounded-[20px] p-5 border border-rose-200 space-y-4 animate-in fade-in">
-                    <div className="flex items-center justify-between border-b border-rose-200 pb-2">
-                      <span className="text-xs font-mono font-bold text-rose-700 uppercase flex items-center gap-1.5">
-                        <span className="material-symbols-outlined text-[16px]">do_not_disturb_on</span>
-                        Decline Specification for {item.crop}
-                      </span>
-                      <span className="text-[10px] font-mono text-rose-600">
-                        Will be marked as unavailable to buyer
-                      </span>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {/* Reason */}
-                      <div>
-                        <label className="block text-[11px] font-semibold text-[#353535] mb-1 font-mono uppercase">
-                          Decline Reason <span className="text-rose-600">*</span>
-                        </label>
-                        <select
-                          value={resp.declineReason || 'Insufficient quantity'}
-                          onChange={(e) => handleUpdateResponse(item.itemId, 'declineReason', e.target.value)}
-                          className="w-full text-xs px-3.5 py-2.5 bg-[#ffffff] border border-rose-200 rounded-[100px] focus:outline-none focus:ring-1 focus:ring-rose-500 text-rose-800"
+                        {/* 2. Back Offer */}
+                        <button
+                          type="button"
+                          onClick={() => handleSwitchType(item, 'BACK_OFFER')}
+                          className={`py-3 px-4 rounded-[16px] text-xs font-bold transition flex items-center justify-between border cursor-pointer ${
+                            isBackOffer
+                              ? 'bg-[#683600] text-[#ffffff] border-[#683600] shadow-xs'
+                              : 'bg-[#ffffff] text-[#683600] border-[#c3cda7] hover:bg-[#fceace]'
+                          }`}
                         >
-                          <option value="Insufficient quantity">Insufficient quantity</option>
-                          <option value="Grade unavailable">Grade unavailable / Quality mismatch</option>
-                          <option value="Delivery unavailable">Delivery timeline / logistics unavailable</option>
-                          <option value="Price not feasible">Price not feasible</option>
-                          <option value="Insufficient Grade A supply">Insufficient Grade A supply</option>
-                          <option value="Other">Other logistical constraint</option>
-                        </select>
-                      </div>
+                          <div className="flex items-center gap-2">
+                            <span className="material-symbols-outlined text-[18px]">cached</span>
+                            <span>Back Offer</span>
+                          </div>
+                          <span className="text-[10px] font-mono font-normal opacity-90">Counter Terms</span>
+                        </button>
 
-                      {/* Notes */}
-                      <div>
-                        <label className="block text-[11px] font-semibold text-[#353535] mb-1 font-mono uppercase">
-                          Optional Reason Details
-                        </label>
-                        <input
-                          type="text"
-                          value={resp.notes}
-                          onChange={(e) => handleUpdateResponse(item.itemId, 'notes', e.target.value)}
-                          placeholder="e.g. Current harvest intake committed to prior long-term orders."
-                          className="w-full text-xs px-3.5 py-2.5 bg-[#ffffff] border border-rose-200 rounded-[100px] focus:outline-none focus:ring-1 focus:ring-rose-500 text-[#212529]"
-                        />
+                        {/* 3. Decline */}
+                        <button
+                          type="button"
+                          onClick={() => handleSwitchType(item, 'DECLINE')}
+                          className={`py-3 px-4 rounded-[16px] text-xs font-bold transition flex items-center justify-between border cursor-pointer ${
+                            isDecline
+                              ? 'bg-rose-700 text-[#ffffff] border-rose-700 shadow-xs'
+                              : 'bg-[#ffffff] text-rose-700 border-[#c3cda7] hover:bg-rose-50'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2">
+                            <span className="material-symbols-outlined text-[18px]">cancel</span>
+                            <span>Decline Item</span>
+                          </div>
+                          <span className="text-[10px] font-mono font-normal opacity-90">Unavailable</span>
+                        </button>
                       </div>
                     </div>
-                  </div>
+
+                    {/* Active Response Form Box */}
+                    {isAccept && (
+                      <div className="bg-[#e6ecd5]/40 rounded-[20px] p-5 border border-[#1b6e53]/30 space-y-4 animate-in fade-in">
+                        <div className="flex items-center justify-between border-b border-[#c3cda7]/50 pb-2">
+                          <span className="text-xs font-mono font-bold text-[#1b6e53] uppercase flex items-center gap-1.5">
+                            <span className="material-symbols-outlined text-[16px]">verified</span>
+                            Offer Accepted Terms for {item.crop}
+                          </span>
+                          <span className="text-[10px] font-mono text-[#6d6d6d]">
+                            Committed directly from cluster inventory
+                          </span>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                          {/* Available Qty */}
+                          <div>
+                            <label className="block text-[11px] font-semibold text-[#353535] mb-1 font-mono uppercase">
+                              Available Quantity (kg) <span className="text-rose-600">*</span>
+                            </label>
+                            <input
+                              type="number"
+                              required
+                              value={resp.availableQty}
+                              onChange={(e) => handleUpdateResponse(item.itemId, 'availableQty', e.target.value)}
+                              className="w-full text-xs px-3.5 py-2.5 bg-[#ffffff] border border-[#c3cda7] rounded-[100px] focus:outline-none focus:ring-1 focus:ring-[#1b6e53] font-mono text-[#212529]"
+                            />
+                          </div>
+
+                          {/* Offered Price */}
+                          <div>
+                            <label className="block text-[11px] font-semibold text-[#353535] mb-1 font-mono uppercase">
+                              Offered Rate (₹ / kg) <span className="text-rose-600">*</span>
+                            </label>
+                            <input
+                              type="number"
+                              step="0.1"
+                              required
+                              value={resp.offeredPrice}
+                              onChange={(e) => handleUpdateResponse(item.itemId, 'offeredPrice', e.target.value)}
+                              className="w-full text-xs px-3.5 py-2.5 bg-[#ffffff] border border-[#c3cda7] rounded-[100px] focus:outline-none focus:ring-1 focus:ring-[#1b6e53] font-mono text-[#212529]"
+                            />
+                          </div>
+
+                          {/* Delivery Date */}
+                          <div>
+                            <label className="block text-[11px] font-semibold text-[#353535] mb-1 font-mono uppercase">
+                              Expected Delivery Date <span className="text-rose-600">*</span>
+                            </label>
+                            <input
+                              type="date"
+                              required
+                              value={resp.deliveryDate}
+                              onChange={(e) => handleUpdateResponse(item.itemId, 'deliveryDate', e.target.value)}
+                              className="w-full text-xs px-3.5 py-2.5 bg-[#ffffff] border border-[#c3cda7] rounded-[100px] focus:outline-none focus:ring-1 focus:ring-[#1b6e53] font-mono text-[#212529]"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Notes */}
+                        <div>
+                          <label className="block text-[11px] font-semibold text-[#353535] mb-1 font-mono uppercase">
+                            Dispatch Notes &amp; Cluster Packaging Confirmation
+                          </label>
+                          <input
+                            type="text"
+                            value={resp.notes}
+                            onChange={(e) => handleUpdateResponse(item.itemId, 'notes', e.target.value)}
+                            placeholder="e.g. Full Grade A volume allocated. Packed in 20kg crates."
+                            className="w-full text-xs px-3.5 py-2.5 bg-[#ffffff] border border-[#c3cda7] rounded-[100px] focus:outline-none focus:ring-1 focus:ring-[#1b6e53] text-[#212529]"
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {isBackOffer && (
+                      <div className="bg-[#fceace]/50 rounded-[20px] p-5 border border-[#683600]/40 space-y-4 animate-in fade-in">
+                        <div className="flex items-center justify-between border-b border-[#c3cda7]/50 pb-2">
+                          <span className="text-xs font-mono font-bold text-[#683600] uppercase flex items-center gap-1.5">
+                            <span className="material-symbols-outlined text-[16px]">change_circle</span>
+                            Commercial Back Offer Specification for {item.crop}
+                          </span>
+                          <span className="text-[10px] font-mono font-bold bg-[#fceace] text-[#683600] px-2 py-0.5 rounded-[100px] border border-[#c3cda7]">
+                            Back Offer (Requires Buyer Acceptance)
+                          </span>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                          {/* Available Qty */}
+                          <div>
+                            <label className="block text-[11px] font-semibold text-[#353535] mb-1 font-mono uppercase">
+                              Offered Qty (kg) <span className="text-rose-600">*</span>
+                            </label>
+                            <input
+                              type="number"
+                              required
+                              value={resp.availableQty}
+                              onChange={(e) => handleUpdateResponse(item.itemId, 'availableQty', e.target.value)}
+                              placeholder="e.g. 400"
+                              className="w-full text-xs px-3.5 py-2.5 bg-[#ffffff] border border-[#c3cda7] rounded-[100px] focus:outline-none focus:ring-1 focus:ring-[#683600] font-mono text-[#212529]"
+                            />
+                          </div>
+
+                          {/* Counter Rate */}
+                          <div>
+                            <label className="block text-[11px] font-semibold text-[#353535] mb-1 font-mono uppercase">
+                              Counter Rate (₹ / kg) <span className="text-rose-600">*</span>
+                            </label>
+                            <input
+                              type="number"
+                              step="0.5"
+                              required
+                              value={resp.offeredPrice}
+                              onChange={(e) => handleUpdateResponse(item.itemId, 'offeredPrice', e.target.value)}
+                              placeholder="e.g. 25"
+                              className="w-full text-xs px-3.5 py-2.5 bg-[#ffffff] border border-[#c3cda7] rounded-[100px] focus:outline-none focus:ring-1 focus:ring-[#683600] font-mono text-[#212529]"
+                            />
+                          </div>
+
+                          {/* Offered Grade */}
+                          <div>
+                            <label className="block text-[11px] font-semibold text-[#353535] mb-1 font-mono uppercase">
+                              Offered Grade <span className="text-rose-600">*</span>
+                            </label>
+                            <select
+                              value={resp.offeredGrade || 'Grade A'}
+                              onChange={(e) => handleUpdateResponse(item.itemId, 'offeredGrade', e.target.value)}
+                              className="w-full text-xs px-3.5 py-2.5 bg-[#ffffff] border border-[#c3cda7] rounded-[100px] focus:outline-none focus:ring-1 focus:ring-[#683600] text-[#212529]"
+                            >
+                              <option value="Grade A">Grade A (Premium)</option>
+                              <option value="Grade B">Grade B (Standard Commercial)</option>
+                              <option value="Export Grade">Export Grade</option>
+                              <option value="Processing Grade">Processing Grade</option>
+                            </select>
+                          </div>
+
+                          {/* Delivery Date */}
+                          <div>
+                            <label className="block text-[11px] font-semibold text-[#353535] mb-1 font-mono uppercase">
+                              Counter Delivery Date <span className="text-rose-600">*</span>
+                            </label>
+                            <input
+                              type="date"
+                              required
+                              value={resp.deliveryDate}
+                              onChange={(e) => handleUpdateResponse(item.itemId, 'deliveryDate', e.target.value)}
+                              className="w-full text-xs px-3.5 py-2.5 bg-[#ffffff] border border-[#c3cda7] rounded-[100px] focus:outline-none focus:ring-1 focus:ring-[#683600] font-mono text-[#212529]"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Counter Rationale */}
+                        <div>
+                          <label className="block text-[11px] font-semibold text-[#353535] mb-1 font-mono uppercase">
+                            Commercial Rationale / Staging Explanation <span className="text-rose-600">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            required
+                            value={resp.notes}
+                            onChange={(e) => handleUpdateResponse(item.itemId, 'notes', e.target.value)}
+                            placeholder="e.g. Proposing 400 kg at ₹25/kg due to peak cold storage staging. Delivery shifted by +1 day."
+                            className="w-full text-xs px-3.5 py-2.5 bg-[#ffffff] border border-[#c3cda7] rounded-[100px] focus:outline-none focus:ring-1 focus:ring-[#683600] text-[#212529]"
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {isDecline && (
+                      <div className="bg-rose-50/60 rounded-[20px] p-5 border border-rose-200 space-y-4 animate-in fade-in">
+                        <div className="flex items-center justify-between border-b border-rose-200 pb-2">
+                          <span className="text-xs font-mono font-bold text-rose-700 uppercase flex items-center gap-1.5">
+                            <span className="material-symbols-outlined text-[16px]">do_not_disturb_on</span>
+                            Decline Specification for {item.crop}
+                          </span>
+                          <span className="text-[10px] font-mono text-rose-600">
+                            Will be marked as unavailable to buyer
+                          </span>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          {/* Reason */}
+                          <div>
+                            <label className="block text-[11px] font-semibold text-[#353535] mb-1 font-mono uppercase">
+                              Decline Reason <span className="text-rose-600">*</span>
+                            </label>
+                            <select
+                              value={resp.declineReason || 'Insufficient quantity'}
+                              onChange={(e) => handleUpdateResponse(item.itemId, 'declineReason', e.target.value)}
+                              className="w-full text-xs px-3.5 py-2.5 bg-[#ffffff] border border-rose-200 rounded-[100px] focus:outline-none focus:ring-1 focus:ring-rose-500 text-rose-800"
+                            >
+                              <option value="Insufficient quantity">Insufficient quantity</option>
+                              <option value="Grade unavailable">Grade unavailable / Quality mismatch</option>
+                              <option value="Delivery unavailable">Delivery timeline / logistics unavailable</option>
+                              <option value="Price not feasible">Price not feasible</option>
+                              <option value="Insufficient Grade A supply">Insufficient Grade A supply</option>
+                              <option value="Other">Other logistical constraint</option>
+                            </select>
+                          </div>
+
+                          {/* Notes */}
+                          <div>
+                            <label className="block text-[11px] font-semibold text-[#353535] mb-1 font-mono uppercase">
+                              Optional Reason Details
+                            </label>
+                            <input
+                              type="text"
+                              value={resp.notes}
+                              onChange={(e) => handleUpdateResponse(item.itemId, 'notes', e.target.value)}
+                              placeholder="e.g. Current harvest intake committed to prior long-term orders."
+                              className="w-full text-xs px-3.5 py-2.5 bg-[#ffffff] border border-rose-200 rounded-[100px] focus:outline-none focus:ring-1 focus:ring-rose-500 text-[#212529]"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             )
@@ -637,6 +694,36 @@ export default function FPORequestDetail() {
           {/* Item-by-Item Status Preview */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs font-sans">
             {items.map((item, idx) => {
+              const isItemConfirmed = Boolean(
+                item.isConfirmed ||
+                item.confirmedOfferId ||
+                item.status === 'ORDER CONFIRMED' ||
+                item.status === 'Confirmed'
+              )
+
+              if (isItemConfirmed) {
+                return (
+                  <div
+                    key={item.itemId || idx}
+                    className="p-4 rounded-[18px] border bg-rose-50/70 border-rose-200 space-y-1.5"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-[#00372a] font-editorial text-lg">
+                        {item.crop}
+                      </span>
+                      <span className="text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-[100px] bg-rose-700 text-[#ffffff]">
+                        ORDER CONFIRMED
+                      </span>
+                    </div>
+                    <div className="text-[11px] font-mono text-rose-700 space-y-0.5">
+                      <div>Volume: <strong>{item.quantity}</strong></div>
+                      <div>Grade: <strong>{item.grade}</strong></div>
+                      <div>Status: <strong>ORDER CONFIRMED</strong></div>
+                    </div>
+                  </div>
+                )
+              }
+
               const resp = itemResponses[item.itemId] || { type: 'ACCEPT' }
               const isAccept = resp.type === 'ACCEPT'
               const isBackOffer = resp.type === 'BACK_OFFER'
@@ -703,13 +790,24 @@ export default function FPORequestDetail() {
               Submitting registers your commercial terms on the buyer ledger. This is a binding FPO proposal.
             </p>
 
-            <button
-              type="submit"
-              className="w-full sm:w-auto py-3.5 px-8 rounded-[100px] bg-[#1b6e53] hover:bg-[#00372a] text-[#ffffff] text-xs font-bold uppercase tracking-wider transition shadow-sm flex items-center justify-center gap-2 cursor-pointer shrink-0 active:scale-[0.99]"
-            >
-              <span className="material-symbols-outlined text-[18px]">send</span>
-              <span>Submit Response ({items.length} Items) →</span>
-            </button>
+            {items.every((it) => it.isConfirmed || it.confirmedOfferId || it.status === 'ORDER CONFIRMED') ? (
+              <button
+                type="button"
+                disabled
+                className="w-full sm:w-auto py-3.5 px-8 rounded-[100px] bg-rose-700/60 cursor-not-allowed text-[#ffffff] text-xs font-bold uppercase tracking-wider shadow-sm flex items-center justify-center gap-2"
+              >
+                <span className="material-symbols-outlined text-[18px]">lock</span>
+                <span>All Items Confirmed (Closed)</span>
+              </button>
+            ) : (
+              <button
+                type="submit"
+                className="w-full sm:w-auto py-3.5 px-8 rounded-[100px] bg-[#1b6e53] hover:bg-[#00372a] text-[#ffffff] text-xs font-bold uppercase tracking-wider transition shadow-sm flex items-center justify-center gap-2 cursor-pointer shrink-0 active:scale-[0.99]"
+              >
+                <span className="material-symbols-outlined text-[18px]">send</span>
+                <span>Submit Response ({items.filter((it) => !it.isConfirmed && !it.confirmedOfferId && it.status !== 'ORDER CONFIRMED').length} Pending Items) →</span>
+              </button>
+            )}
           </div>
         </section>
       </form>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router'
-import { getDemandById, updateItemOfferSelection } from '../../data/buyerData'
+import { getDemandById, updateItemOfferSelection, confirmProcurementOrder } from '../../data/buyerData'
 
 export default function RequestDetail() {
   const { id } = useParams()
@@ -8,7 +8,8 @@ export default function RequestDetail() {
   const [demand, setDemand] = useState(() => getDemandById(id))
 
   useEffect(() => {
-    setDemand(getDemandById(id))
+    const current = getDemandById(id)
+    setDemand(current)
   }, [id])
 
   const [activeOfferModal, setActiveOfferModal] = useState(null)
@@ -21,11 +22,15 @@ export default function RequestDetail() {
     if (demand?.items) {
       const initialMap = {}
       demand.items.forEach((item) => {
-        if (item.selectedFpoOfferId) {
+        if (item.confirmedOfferId) {
+          initialMap[item.itemId] = item.confirmedOfferId
+        } else if (item.selectedFpoOfferId) {
           initialMap[item.itemId] = item.selectedFpoOfferId
         } else {
           // Preselect first accepted offer if present for convenient demo
-          const accepted = (item.responses || []).find((r) => r.status === 'ACCEPTED')
+          const accepted = (item.responses || []).find(
+            (r) => r.status === 'ACCEPTED' || r.status === 'ORDER_CONFIRMED'
+          )
           if (accepted) {
             initialMap[item.itemId] = accepted.id
           }
@@ -36,6 +41,10 @@ export default function RequestDetail() {
   }, [demand])
 
   const handleToggleSelectOffer = (itemId, offerId) => {
+    // Prevent changing selection if item is already confirmed
+    const item = (demand?.items || []).find((i) => i.itemId === itemId)
+    if (item?.isConfirmed) return
+
     setSelectedOfferPerItem((prev) => ({
       ...prev,
       [itemId]: prev[itemId] === offerId ? null : offerId
@@ -58,14 +67,19 @@ export default function RequestDetail() {
   ]
 
   const totalItemsCount = items.length
+  const confirmedItemsCount = items.filter((it) => it.isConfirmed).length
+  const pendingSelectedCount = items.filter(
+    (it) => !it.isConfirmed && selectedOfferPerItem[it.itemId]
+  ).length
   const selectedItemsCount = Object.values(selectedOfferPerItem).filter(Boolean).length
 
   const handleConfirmOrder = () => {
     setActiveOfferModal(null)
+    const updated = confirmProcurementOrder(demand.id, selectedOfferPerItem)
+    if (updated) {
+      setDemand(updated)
+    }
     setOrderConfirmed(true)
-    setTimeout(() => {
-      navigate('/buyer/orders')
-    }, 2000)
   }
 
   return (
@@ -216,26 +230,51 @@ export default function RequestDetail() {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-mono font-bold text-[#1b6e53] bg-[#e6ecd5] px-3 py-1 rounded-[100px] border border-[#c3cda7]">
-                    {(item.responses || []).length} FPO Responses
-                  </span>
+                  {Boolean(item.isConfirmed || item.confirmedOfferId || item.status === 'ORDER CONFIRMED') ? (
+                    <span className="px-3.5 py-1 rounded-[100px] text-xs font-mono font-bold tracking-wider uppercase bg-rose-50 text-rose-700 border border-rose-300 flex items-center gap-1.5 shadow-2xs">
+                      <span className="w-2 h-2 rounded-full bg-rose-600 animate-pulse"></span>
+                      <span>ORDER CONFIRMED</span>
+                    </span>
+                  ) : (
+                    <span className="text-xs font-mono font-bold text-[#1b6e53] bg-[#e6ecd5] px-3 py-1 rounded-[100px] border border-[#c3cda7]">
+                      {(item.responses || []).length} FPO Responses
+                    </span>
+                  )}
                 </div>
               </div>
 
               {/* FPO Responses for this item */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {(item.responses || []).map((resp) => {
+                  const isItemConfirmed = Boolean(
+                    item.isConfirmed ||
+                    item.confirmedOfferId ||
+                    item.status === 'ORDER CONFIRMED' ||
+                    item.status === 'Confirmed'
+                  )
+                  const confirmedOfferId = item.confirmedOfferId || (item.isConfirmed ? item.selectedFpoOfferId : null)
+                  const isOrderConfirmed = isItemConfirmed
+                    ? (confirmedOfferId ? resp.id === confirmedOfferId : Boolean(resp.isAwarded || resp.status === 'ORDER_CONFIRMED'))
+                    : false
+                  const isUnavailable = isItemConfirmed
+                    ? !isOrderConfirmed
+                    : (resp.status === 'UNAVAILABLE' || resp.statusLabel === 'UNAVAILABLE' || resp.statusLabel === 'Unavailable')
+
                   const isAccepted = resp.status === 'ACCEPTED'
                   const isBackOffer = resp.status === 'BACK_OFFER'
                   const isDeclined = resp.status === 'DECLINED' || resp.status === 'Declined'
                   const isNoResponse = resp.status === 'NO_RESPONSE' || resp.status === 'Pending'
-                  const isThisOfferSelected = selectedOfferId === resp.id
+                  const isThisOfferSelected = selectedOfferId === resp.id || isOrderConfirmed
 
                   return (
                     <div
                       key={resp.id}
                       className={`rounded-[20px] p-5 border shadow-xs flex flex-col justify-between space-y-4 transition ${
-                        isThisOfferSelected
+                        isOrderConfirmed
+                          ? 'bg-rose-50/60 border-rose-300 ring-2 ring-rose-500'
+                          : isUnavailable
+                          ? 'bg-[#f1efdf]/60 border-[#c3cda7] opacity-85'
+                          : isThisOfferSelected
                           ? 'bg-[#e6ecd5]/80 border-[#1b6e53] ring-2 ring-[#1b6e53]'
                           : isAccepted
                           ? 'bg-[#ffffff] border-[#c3cda7] hover:border-[#1b6e53]'
@@ -260,7 +299,11 @@ export default function RequestDetail() {
 
                           <span
                             className={`px-2.5 py-0.5 rounded-[100px] text-[10px] font-mono font-bold tracking-wider uppercase shrink-0 ${
-                              isAccepted
+                              isOrderConfirmed
+                                ? 'bg-rose-100 text-rose-800 border border-rose-300 font-bold'
+                                : isUnavailable
+                                ? 'bg-[#f1efdf] text-[#6d6d6d] border border-[#c3cda7]'
+                                : isAccepted
                                 ? 'bg-[#e6ecd5] text-[#1b6e53] border border-[#c3cda7]'
                                 : isBackOffer
                                 ? 'bg-[#fceace] text-[#683600] border border-[#c3cda7]'
@@ -269,12 +312,53 @@ export default function RequestDetail() {
                                 : 'bg-[#f1efdf] text-[#6d6d6d] border border-[#c3cda7]'
                             }`}
                           >
-                            {resp.statusLabel || (isDeclined ? 'DECLINED' : resp.status)}
+                            {isOrderConfirmed
+                              ? 'ORDER CONFIRMED'
+                              : isUnavailable
+                              ? 'UNAVAILABLE'
+                              : resp.statusLabel || (isDeclined ? 'DECLINED' : resp.status)}
                           </span>
                         </div>
 
                         {/* Specs */}
-                        {isAccepted && (
+                        {isUnavailable && (
+                          <div className="space-y-2 text-xs font-sans">
+                            <div className="p-2.5 bg-[#f1efdf] rounded-[14px] border border-[#c3cda7]/60 text-[11px] font-sans text-[#6d6d6d] flex items-center gap-1.5">
+                              <span className="material-symbols-outlined text-[16px] text-[#6d6d6d]">info</span>
+                              <span>Another FPO was selected for this item.</span>
+                            </div>
+
+                            {/* Original response specifications remain visible */}
+                            {(resp.offeredPrice || resp.counterPrice) && (
+                              <div className="bg-[#ffffff]/80 rounded-[14px] p-3 space-y-1 border border-[#c3cda7]/50 text-xs">
+                                <div className="flex justify-between">
+                                  <span className="text-[#6d6d6d]">Quoted Rate:</span>
+                                  <span className="font-bold text-[#6d6d6d] font-mono text-sm">
+                                    {resp.offeredPrice || resp.counterPrice}
+                                  </span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-[#6d6d6d]">Proposed Volume:</span>
+                                  <span className="font-mono text-[#6d6d6d]">{resp.offeredQty || item.quantity}</span>
+                                </div>
+                                {resp.deliveryDate && (
+                                  <div className="flex justify-between">
+                                    <span className="text-[#6d6d6d]">Delivery Date:</span>
+                                    <span className="font-mono text-[#6d6d6d]">{resp.deliveryDate}</span>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+
+                            {resp.notes && (
+                              <p className="text-[11px] text-[#6d6d6d] italic leading-tight">
+                                "{resp.notes}"
+                              </p>
+                            )}
+                          </div>
+                        )}
+
+                        {!isUnavailable && (isAccepted || isOrderConfirmed) && (
                           <div className="space-y-2 text-xs font-sans">
                             <div className="bg-[#e6ecd5]/50 rounded-[14px] p-3 space-y-1 border border-[#c3cda7]/50">
                               <div className="flex justify-between">
@@ -296,7 +380,7 @@ export default function RequestDetail() {
                           </div>
                         )}
 
-                        {isBackOffer && (
+                        {!isUnavailable && isBackOffer && (
                           <div className="space-y-2 text-xs font-sans">
                             <div className="bg-[#fceace]/60 rounded-[14px] p-3 space-y-1 border border-[#c3cda7]/50">
                               <div className="flex justify-between">
@@ -318,7 +402,7 @@ export default function RequestDetail() {
                           </div>
                         )}
 
-                        {isDeclined && (
+                        {!isUnavailable && isDeclined && (
                           <div className="space-y-2 text-xs font-sans">
                             <div className="bg-rose-50 rounded-[14px] p-3 space-y-1 border border-rose-200">
                               <div className="flex justify-between">
@@ -336,7 +420,7 @@ export default function RequestDetail() {
                           </div>
                         )}
 
-                        {isNoResponse && (
+                        {!isUnavailable && isNoResponse && (
                           <div className="space-y-2 py-3 text-xs font-sans text-center">
                             <span className="material-symbols-outlined text-[20px] text-[#6d6d6d]">hourglass_empty</span>
                             <p className="font-semibold text-[#212529] text-[11px]">Awaiting FPO Response</p>
@@ -347,11 +431,23 @@ export default function RequestDetail() {
 
                       {/* Action buttons */}
                       <div className="pt-2.5 border-t border-[#c3cda7]/40 flex gap-2">
-                        {(isAccepted || isBackOffer) && (
+                        {isOrderConfirmed ? (
+                          <div className="w-full py-2 rounded-[100px] bg-rose-700 text-[#ffffff] text-xs font-bold text-center flex items-center justify-center gap-1 shadow-xs">
+                            <span className="material-symbols-outlined text-[16px]">verified</span>
+                            <span>ORDER CONFIRMED</span>
+                          </div>
+                        ) : isUnavailable ? (
+                          <button
+                            disabled
+                            className="w-full py-2 rounded-[100px] bg-[#f1efdf] text-[#6d6d6d] border border-[#c3cda7] text-xs font-mono font-bold cursor-not-allowed text-center opacity-80"
+                          >
+                            Unavailable
+                          </button>
+                        ) : (isAccepted || isBackOffer) ? (
                           <>
                             <button
                               type="button"
-                              onClick={() => setActiveOfferModal({ ...resp, itemCrop: item.crop, itemGrade: item.grade, itemId: item.itemId })}
+                              onClick={() => setActiveOfferModal({ ...resp, itemCrop: item.crop, itemGrade: item.grade, itemId: item.itemId, isItemConfirmed })}
                               className="flex-1 py-2 rounded-[100px] border border-[#c3cda7] text-xs font-semibold text-[#353535] bg-[#ffffff] hover:bg-[#f1efdf] transition cursor-pointer text-center"
                             >
                               Review
@@ -359,6 +455,7 @@ export default function RequestDetail() {
 
                             <button
                               type="button"
+                              disabled={isItemConfirmed}
                               onClick={() => handleToggleSelectOffer(item.itemId, resp.id)}
                               className={`flex-1 py-2 rounded-[100px] text-xs font-bold transition flex items-center justify-center gap-1 cursor-pointer ${
                                 isThisOfferSelected
@@ -375,18 +472,14 @@ export default function RequestDetail() {
                               )}
                             </button>
                           </>
-                        )}
-
-                        {isDeclined && (
+                        ) : isDeclined ? (
                           <button
                             disabled
                             className="w-full py-2 rounded-[100px] bg-rose-50 text-rose-700 border border-rose-200 text-[11px] font-mono cursor-not-allowed opacity-80"
                           >
                             Declined by FPO
                           </button>
-                        )}
-
-                        {isNoResponse && (
+                        ) : (
                           <button
                             disabled
                             className="w-full py-2 rounded-[100px] bg-[#ffffff] text-[#6d6d6d] border border-[#c3cda7] text-[11px] font-mono opacity-80 cursor-not-allowed"
@@ -404,31 +497,98 @@ export default function RequestDetail() {
         })}
       </section>
 
-      {/* 4. Global Multi-FPO Order Execution Bar */}
-      <section className="bg-[#ffffff] border-2 border-[#1b6e53] rounded-[24px] p-6 lg:p-7 shadow-lg space-y-4">
+      {/* 4. Global Multi-FPO Order Execution Bar & Order Summary */}
+      <section className="bg-[#ffffff] border-2 border-[#1b6e53] rounded-[24px] p-6 lg:p-7 shadow-lg space-y-5">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="space-y-1 text-center sm:text-left">
             <div className="flex items-center gap-2 justify-center sm:justify-start">
-              <span className="w-3 h-3 rounded-full bg-[#1b6e53] animate-ping"></span>
+              <span className={`w-3 h-3 rounded-full ${confirmedItemsCount > 0 ? 'bg-rose-600 animate-pulse' : 'bg-[#1b6e53] animate-ping'}`}></span>
               <h3 className="font-editorial text-2xl font-bold text-[#00372a]">
-                Award Multi-FPO Procurement Order
+                {confirmedItemsCount === totalItemsCount
+                  ? 'Confirmed Procurement Allocation'
+                  : 'Award Multi-FPO Procurement Order'}
               </h3>
             </div>
             <p className="text-xs text-[#6d6d6d] font-sans">
-              <strong className="text-[#1b6e53] font-bold font-mono text-sm">{selectedItemsCount} of {totalItemsCount}</strong> items selected. Each commodity is contracted directly to its designated FPO partner.
+              <strong className={`${confirmedItemsCount > 0 ? 'text-rose-700' : 'text-[#1b6e53]'} font-bold font-mono text-sm`}>
+                {confirmedItemsCount > 0
+                  ? `${confirmedItemsCount} of ${totalItemsCount} items confirmed`
+                  : `${selectedItemsCount} of ${totalItemsCount} items selected`}
+              </strong>
+              . Each commodity is contracted directly to its designated FPO partner.
             </p>
           </div>
 
           <button
             type="button"
-            disabled={selectedItemsCount === 0}
+            disabled={pendingSelectedCount === 0 && confirmedItemsCount > 0}
             onClick={handleConfirmOrder}
-            className="w-full sm:w-auto py-3.5 px-8 rounded-[100px] bg-[#1b6e53] hover:bg-[#00372a] disabled:opacity-50 disabled:cursor-not-allowed text-[#ffffff] text-xs font-bold uppercase tracking-wider transition shadow-sm flex items-center justify-center gap-2 cursor-pointer shrink-0 active:scale-[0.99]"
+            className={`w-full sm:w-auto py-3.5 px-8 rounded-[100px] ${
+              confirmedItemsCount === totalItemsCount
+                ? 'bg-rose-700 text-[#ffffff]'
+                : 'bg-[#1b6e53] hover:bg-[#00372a] text-[#ffffff]'
+            } disabled:opacity-50 disabled:cursor-not-allowed text-xs font-bold uppercase tracking-wider transition shadow-sm flex items-center justify-center gap-2 cursor-pointer shrink-0 active:scale-[0.99]`}
           >
             <span className="material-symbols-outlined text-[18px]">verified</span>
-            <span>Confirm Order ({selectedItemsCount} Items Selected) →</span>
+            <span>
+              {confirmedItemsCount === totalItemsCount
+                ? 'Order Confirmed ✓'
+                : pendingSelectedCount > 0
+                ? `Confirm Order (${pendingSelectedCount} Items Selected) →`
+                : 'Confirm Order →'}
+            </span>
           </button>
         </div>
+
+        {/* Confirmed Order Summary */}
+        {confirmedItemsCount > 0 && (
+          <div className="pt-4 border-t border-[#c3cda7]/60 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="text-[10px] font-mono uppercase tracking-widest text-rose-700 font-bold flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-rose-600 animate-pulse"></span>
+                <span>ORDER SUMMARY // CONFIRMED SUPPLIERS</span>
+              </div>
+              <span className="px-2.5 py-0.5 rounded-[100px] text-[10px] font-mono font-bold uppercase bg-rose-50 text-rose-700 border border-rose-300">
+                ORDER CONFIRMED
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {items
+                .filter((item) => item.isConfirmed || item.confirmedOfferId || item.status === 'ORDER CONFIRMED')
+                .map((item, idx) => {
+                  const confirmedOfferId = item.confirmedOfferId || item.selectedFpoOfferId
+                  const confirmedResp = (item.responses || []).find((r) => r.id === confirmedOfferId || r.isAwarded)
+                  const supplierName = confirmedResp?.fpoName || item.confirmedFpoName || 'Selected FPO'
+                  const price = confirmedResp?.offeredPrice || confirmedResp?.counterPrice || item.targetPrice
+                  const qty = confirmedResp?.offeredQty || item.quantity
+
+                  return (
+                    <div key={item.itemId || idx} className="p-3.5 bg-rose-50/40 rounded-[16px] border border-rose-200 text-xs font-sans space-y-1.5">
+                      <div className="flex items-center justify-between pb-1 border-b border-rose-200/60">
+                        <span className="font-bold text-[#00372a] font-editorial text-sm">{item.crop}</span>
+                        <span className="font-mono text-[10px] text-rose-700 font-bold bg-rose-100 px-2 py-0.5 rounded-[100px]">
+                          ORDER CONFIRMED
+                        </span>
+                      </div>
+                      <div className="flex justify-between text-[11px]">
+                        <span className="text-[#6d6d6d]">Supplier:</span>
+                        <span className="font-bold text-[#00372a] font-mono">{supplierName}</span>
+                      </div>
+                      <div className="flex justify-between text-[11px]">
+                        <span className="text-[#6d6d6d]">Volume:</span>
+                        <span className="font-mono font-semibold text-[#212529]">{qty}</span>
+                      </div>
+                      <div className="flex justify-between text-[11px]">
+                        <span className="text-[#6d6d6d]">Rate:</span>
+                        <span className="font-mono font-bold text-rose-700">{price}</span>
+                      </div>
+                    </div>
+                  )
+                })}
+            </div>
+          </div>
+        )}
       </section>
 
       {/* Offer Review / Back Offer Dialog */}
@@ -501,16 +661,18 @@ export default function RequestDetail() {
               >
                 Close
               </button>
-              <button
-                type="button"
-                onClick={() => {
-                  handleToggleSelectOffer(activeOfferModal.itemId, activeOfferModal.id)
-                  setActiveOfferModal(null)
-                }}
-                className="flex-1 py-3 rounded-[100px] bg-[#1b6e53] hover:bg-[#00372a] text-[#ffffff] text-xs font-bold transition shadow-sm cursor-pointer flex items-center justify-center gap-1.5"
-              >
-                <span>Select this FPO for {activeOfferModal.itemCrop}</span>
-              </button>
+              {!activeOfferModal.isItemConfirmed && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleToggleSelectOffer(activeOfferModal.itemId, activeOfferModal.id)
+                    setActiveOfferModal(null)
+                  }}
+                  className="flex-1 py-3 rounded-[100px] bg-[#1b6e53] hover:bg-[#00372a] text-[#ffffff] text-xs font-bold transition shadow-sm cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  <span>Select this FPO for {activeOfferModal.itemCrop}</span>
+                </button>
+              )}
             </div>
           </div>
         </div>

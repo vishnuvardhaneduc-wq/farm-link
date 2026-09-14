@@ -94,15 +94,50 @@ export default function Demands() {
                         <span className="font-bold text-[#00372a] block font-editorial text-base leading-tight">
                           {itemsList.length} {itemsList.length === 1 ? 'Item' : 'Items'}: {itemsNames}
                         </span>
-                        <div className="flex flex-wrap gap-1 pt-0.5">
-                          {itemsList.map((item, idx) => (
-                            <span
-                              key={idx}
-                              className="text-[10px] font-mono bg-[#f1efdf] text-[#353535] px-1.5 py-0.5 rounded border border-[#c3cda7]/40"
-                            >
-                              {item.crop} ({item.quantity})
-                            </span>
-                          ))}
+                        <div className="flex flex-col gap-1.5 pt-0.5">
+                          {itemsList.map((item, idx) => {
+                            const isConfirmed = Boolean(
+                              item.isConfirmed ||
+                              item.confirmedOfferId ||
+                              item.status === 'ORDER CONFIRMED' ||
+                              item.status === 'Confirmed'
+                            )
+                            if (isConfirmed) {
+                              const confirmedOfferId = item.confirmedOfferId || item.selectedFpoOfferId
+                              const confirmedResp = (item.responses || []).find(
+                                (r) => r.id === confirmedOfferId || r.isAwarded
+                              )
+                              const selectedFpoName = confirmedResp?.fpoName || item.confirmedFpoName
+
+                              return (
+                                <div key={idx} className="space-y-0.5">
+                                  <div className="text-[11px] font-mono font-bold text-rose-700 flex items-center gap-1">
+                                    <span>🔴</span>
+                                    <span>{item.crop} — {item.quantity}</span>
+                                  </div>
+                                  {selectedFpoName && (
+                                    <div className="text-[10px] font-mono text-[#353535] pl-4">
+                                      <span className="text-[#6d6d6d]">Selected FPO: </span>
+                                      <strong className="text-[#00372a] font-semibold">{selectedFpoName}</strong>
+                                    </div>
+                                  )}
+                                  <div className="text-[10px] font-mono font-bold text-rose-700 pl-4 uppercase tracking-wider">
+                                    ORDER CONFIRMED
+                                  </div>
+                                </div>
+                              )
+                            }
+                            return (
+                              <div key={idx} className="space-y-0.5">
+                                <div className="text-[11px] font-mono text-[#353535]">
+                                  {item.crop} — {item.quantity}
+                                </div>
+                                <div className="text-[10px] font-mono text-[#6d6d6d]">
+                                  {item.status || 'Awaiting Response'}
+                                </div>
+                              </div>
+                            )
+                          })}
                         </div>
                       </div>
                     </td>
@@ -120,7 +155,11 @@ export default function Demands() {
                     <td className="py-4 px-3 text-center whitespace-nowrap">
                       <span
                         className={`inline-block px-2.5 py-0.5 rounded-[100px] text-[10px] font-mono font-semibold ${
-                          req.status === 'Receiving Offers' || req.status === 'Awaiting Responses' || req.status === 'Partially Responded'
+                          req.status === 'Order Confirmed' || req.status === 'ORDER CONFIRMED'
+                            ? 'bg-rose-50 text-rose-700 border border-rose-300 font-bold'
+                            : req.status === 'Partially Confirmed'
+                            ? 'bg-rose-50 text-rose-700 border border-rose-300 font-bold'
+                            : req.status === 'Receiving Offers' || req.status === 'Awaiting Responses' || req.status === 'Partially Responded'
                             ? 'bg-[#fceace] text-[#683600]'
                             : req.status === 'Draft'
                             ? 'bg-[#f1efdf] text-[#6d6d6d] border border-[#c3cda7]'

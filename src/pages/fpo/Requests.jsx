@@ -12,13 +12,29 @@ export default function Requests() {
 
   // Derive FPO status for each demand
   const getFpoStatusInfo = (req) => {
+    const items = req.items || []
+    const allConfirmed = items.length > 0 && items.every((item) => item.isConfirmed || item.confirmedOfferId || item.status === 'ORDER CONFIRMED')
+    const anyConfirmed = items.some((item) => item.isConfirmed || item.confirmedOfferId || item.status === 'ORDER CONFIRMED')
+
+    if (allConfirmed || req.status === 'Order Confirmed' || req.status === 'ORDER CONFIRMED') {
+      return {
+        label: 'Order Confirmed',
+        style: 'bg-rose-50 text-rose-700 border border-rose-300 font-bold'
+      }
+    }
+    if (anyConfirmed || req.status === 'Partially Confirmed') {
+      return {
+        label: 'Partially Confirmed',
+        style: 'bg-rose-50 text-rose-700 border border-rose-300 font-bold'
+      }
+    }
     if (req.fpoResponded) {
       return {
         label: 'Responded',
         style: 'bg-[#e6ecd5] text-[#1b6e53] border border-[#c3cda7]'
       }
     }
-    if (req.id === 'REQ-1027') {
+    if (req.id === 'REQ-1027' || req.id === 'REQ-1030' || req.id === 'REQ-1031' || req.id === 'REQ-1032' || req.id === 'REQ-1033') {
       return {
         label: 'New Request',
         style: 'bg-[#b2cee7] text-[#00372a] border border-[#b2cee7]'
@@ -204,15 +220,38 @@ export default function Requests() {
                         <span className="font-bold text-[#212529] block font-mono text-[11px]">
                           {itemsList.length} {itemsList.length === 1 ? 'Item' : 'Items'}: {itemsNames}
                         </span>
-                        <div className="flex flex-wrap gap-1">
-                          {itemsList.map((item, idx) => (
-                            <span
-                              key={idx}
-                              className="text-[10px] font-mono bg-[#f1efdf] text-[#353535] px-2 py-0.5 rounded border border-[#c3cda7]/40"
-                            >
-                              {item.crop} ({item.quantity} • {item.grade})
-                            </span>
-                          ))}
+                        <div className="flex flex-col gap-1.5 pt-0.5">
+                          {itemsList.map((item, idx) => {
+                            const isConfirmed = Boolean(
+                              item.isConfirmed ||
+                              item.confirmedOfferId ||
+                              item.status === 'ORDER CONFIRMED' ||
+                              item.status === 'Confirmed'
+                            )
+                            if (isConfirmed) {
+                              return (
+                                <div key={idx} className="space-y-0.5">
+                                  <div className="text-[11px] font-mono font-bold text-rose-700 flex items-center gap-1">
+                                    <span>🔴</span>
+                                    <span>{item.crop} — {item.quantity}</span>
+                                  </div>
+                                  <div className="text-[10px] font-mono font-bold text-rose-700 pl-4 uppercase tracking-wider">
+                                    ORDER CONFIRMED
+                                  </div>
+                                </div>
+                              )
+                            }
+                            return (
+                              <div key={idx} className="space-y-0.5">
+                                <div className="text-[11px] font-mono text-[#353535]">
+                                  {item.crop} — {item.quantity}
+                                </div>
+                                <div className="text-[10px] font-mono text-[#6d6d6d]">
+                                  {item.status || 'Pending'}
+                                </div>
+                              </div>
+                            )
+                          })}
                         </div>
                       </div>
                     </td>

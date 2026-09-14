@@ -181,10 +181,28 @@ export default function CreateDemand() {
             timestamp: 'Just now',
             contact: 'Hub Procurement Desk'
           }
-        } else if (fpoIdx === 1 && itemIdx % 2 === 0) {
-          // Back offer response
+        } else if (fpoIdx === 1) {
+          // Accepted response for 2nd FPO
           return {
             id: `resp-${newReqId}-${itemIdx + 1}-2`,
+            fpoId: fpo.id,
+            fpoName: fpo.name,
+            location: fpo.location,
+            status: 'ACCEPTED',
+            statusLabel: 'ACCEPTED',
+            statusStyle: 'bg-[#e6ecd5] text-[#1b6e53] border border-[#c3cda7]',
+            offeredQty: `${Number(item.quantity).toLocaleString()} kg`,
+            offeredPrice: `₹${targetRateNum.toFixed(2)} / kg`,
+            deliveryDate: commonDetails.deliveryDate,
+            hub: `${fpo.name.split(' ')[0]} Aggregation Hub`,
+            notes: `Full volume allocated. Grade A lot ready for direct dock dispatch on ${commonDetails.deliveryDate}.`,
+            timestamp: 'Just now',
+            contact: 'Dispatch Desk'
+          }
+        } else if (fpoIdx === 2) {
+          // Back offer response for 3rd FPO
+          return {
+            id: `resp-${newReqId}-${itemIdx + 1}-3`,
             fpoId: fpo.id,
             fpoName: fpo.name,
             location: fpo.location,
@@ -205,19 +223,22 @@ export default function CreateDemand() {
             contact: 'Dispatch Coordinator'
           }
         } else {
-          // No response yet
+          // Additional FPO responses
           return {
-            id: `resp-${newReqId}-${itemIdx + 1}-3`,
+            id: `resp-${newReqId}-${itemIdx + 1}-${fpoIdx + 1}`,
             fpoId: fpo.id,
             fpoName: fpo.name,
             location: fpo.location,
-            status: 'NO_RESPONSE',
-            statusLabel: 'NO RESPONSE',
-            statusStyle: 'bg-[#f1efdf] text-[#6d6d6d] border border-[#c3cda7]',
-            requestSentDate: 'Today',
-            notes: 'Request dispatched to FPO collection center. Waiting for member farmer harvest check-in.',
+            status: 'ACCEPTED',
+            statusLabel: 'ACCEPTED',
+            statusStyle: 'bg-[#e6ecd5] text-[#1b6e53] border border-[#c3cda7]',
+            offeredQty: `${Number(item.quantity).toLocaleString()} kg`,
+            offeredPrice: `₹${targetRateNum.toFixed(2)} / kg`,
+            deliveryDate: commonDetails.deliveryDate,
+            hub: `${fpo.name.split(' ')[0]} Hub`,
+            notes: `Volume confirmed for ${commonDetails.deliveryDate}.`,
             timestamp: 'Just now',
-            contact: 'Intake Bay Officer'
+            contact: 'Hub Officer'
           }
         }
       })
