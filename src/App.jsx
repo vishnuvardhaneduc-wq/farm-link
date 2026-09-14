@@ -53,6 +53,8 @@ import HubDashboard from './pages/hub/Dashboard'
 import HubCollection from './pages/hub/Collection'
 import HubWeighing from './pages/hub/Weighing'
 import HubQuality from './pages/hub/Quality'
+import HubAggregation from './pages/hub/Aggregation'
+import HubDispatch from './pages/hub/Dispatch'
 import HubDelivery from './pages/hub/Delivery'
 
 function App() {
@@ -117,7 +119,9 @@ function App() {
         <Route path="collection" element={<HubCollection />} />
         <Route path="weighing" element={<HubWeighing />} />
         <Route path="quality" element={<HubQuality />} />
-        <Route path="delivery" element={<HubDelivery />} />
+        <Route path="aggregation" element={<HubAggregation />} />
+        <Route path="dispatch" element={<HubDispatch />} />
+        <Route path="delivery" element={<HubDispatch />} />
       </Route>
 
       {/* Fallback */}

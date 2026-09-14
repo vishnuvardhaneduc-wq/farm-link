@@ -1,44 +1,36 @@
 import React, { useState } from 'react'
 import { Outlet } from 'react-router'
-import Sidebar from '../components/navigation/Sidebar'
-import Topbar from '../components/navigation/Topbar'
-
-const hubNavItems = [
-  { to: '/hub/dashboard', label: 'Dashboard', icon: '📊' },
-  { to: '/hub/collection', label: 'Intake & Collection', icon: '📥' },
-  { to: '/hub/weighing', label: 'Weighing Station', icon: '⚖️' },
-  { to: '/hub/quality', label: 'Quality Assessment', icon: '🔍' },
-  { to: '/hub/delivery', label: 'Outbound Dispatch', icon: '🚚' },
-]
+import HubMarquee from '../components/hub/HubMarquee'
+import HubSidebar from '../components/hub/HubSidebar'
+import HubHeader from '../components/hub/HubHeader'
+import HubFooter from '../components/hub/HubFooter'
 
 export default function HubLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   return (
-    <div className="flex min-h-screen bg-slate-50 text-slate-900">
-      <Sidebar
-        brandTitle="FarmLink"
-        brandSubtitle="Hub Station Ops"
-        badge="Hub"
-        badgeColor="bg-amber-100 text-amber-800"
-        navItems={hubNavItems}
-        isOpen={sidebarOpen}
-        onClose={() => setSidebarOpen(false)}
-      />
+    <div className="min-h-screen flex flex-col bg-[#f1efdf] text-[#212529] font-sans antialiased selection:bg-[#e8fe85] selection:text-[#1b6e53]">
+      {/* 0. Top Operational Marquee Strip */}
+      <HubMarquee />
 
-      <div className="flex flex-1 flex-col overflow-hidden">
-        <Topbar
-          portalName="Hub Portal"
-          title="Field Aggregation Hub"
-          user={{ name: 'Kheda Central Hub', role: 'Station Supervisor' }}
-          onMenuClick={() => setSidebarOpen(true)}
-        />
+      {/* Full Layout Shell */}
+      <div className="flex-1 flex flex-col lg:flex-row">
+        {/* Left Editorial Sidebar */}
+        <HubSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
-          <div className="mx-auto max-w-7xl">
+        {/* Main Content Column */}
+        <div className="flex-1 flex flex-col min-w-0">
+          {/* Top Editorial Header Bar */}
+          <HubHeader onMenuClick={() => setSidebarOpen(true)} />
+
+          {/* Main Workspace on Warm Bone Canvas */}
+          <main className="p-6 lg:p-10 space-y-8 flex-1">
             <Outlet />
-          </div>
-        </main>
+          </main>
+
+          {/* Footer */}
+          <HubFooter />
+        </div>
       </div>
     </div>
   )

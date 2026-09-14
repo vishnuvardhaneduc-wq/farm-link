@@ -156,33 +156,53 @@ export default function FPOOrders() {
                     </td>
 
                     <td className="py-4 px-3 text-center whitespace-nowrap">
-                      <span
-                        className={`inline-block px-3 py-1 rounded-[100px] text-[10px] font-mono font-bold uppercase tracking-wider ${
-                          isPlanned
-                            ? 'bg-[#e8fe85] text-[#1b6e53] border border-[#1b6e53]'
-                            : isConfirmed
-                            ? 'bg-rose-50 text-rose-700 border border-rose-300'
-                            : order.statusStyle || 'bg-[#e6ecd5] text-[#1b6e53]'
-                        }`}
-                      >
-                        {order.status}
-                      </span>
+                      <div className="space-y-1">
+                        <span
+                          className={`inline-block px-3 py-1 rounded-[100px] text-[10px] font-mono font-bold uppercase tracking-wider ${
+                            order.status === 'Dispatched'
+                              ? 'bg-[#b2cee7] text-[#00372a] border border-[#00372a]/30'
+                              : isPlanned || order.status === 'Ready for Dispatch'
+                              ? 'bg-[#e8fe85] text-[#1b6e53] border border-[#1b6e53]'
+                              : isConfirmed
+                              ? 'bg-rose-50 text-rose-700 border border-rose-300'
+                              : order.statusStyle || 'bg-[#e6ecd5] text-[#1b6e53]'
+                          }`}
+                        >
+                          {order.status}
+                        </span>
+                        {order.fulfillmentStage && order.fulfillmentStage !== order.status && (
+                          <span className="text-[10px] font-mono text-[#6d6d6d] block">
+                            Stage: {order.fulfillmentStage}
+                          </span>
+                        )}
+                      </div>
                     </td>
 
                     <td className="py-4 px-4 text-right whitespace-nowrap">
-                      <Link
-                        to={`/fpo/orders/${order.orderId}/fulfillment`}
-                        className={`py-1.5 px-4 rounded-[100px] text-xs font-bold transition shadow-2xs inline-flex items-center gap-1.5 cursor-pointer ${
-                          isConfirmed
-                            ? 'bg-[#1b6e53] hover:bg-[#00372a] text-[#ffffff]'
-                            : 'bg-[#e6ecd5] hover:bg-[#c3cda7]/60 text-[#1b6e53] border border-[#c3cda7]'
-                        }`}
-                      >
-                        <span>{isConfirmed ? 'Plan Fulfillment' : 'View Plan'}</span>
-                        <span className="material-symbols-outlined text-[14px]">
-                          {isConfirmed ? 'alt_route' : 'arrow_forward'}
-                        </span>
-                      </Link>
+                      <div className="flex items-center justify-end gap-2">
+                        {order.orderId === 'ORD-1031' && (order.status === 'Fulfillment Planned' || order.status === 'Ready for Dispatch' || order.status === 'Dispatched') && (
+                          <Link
+                            to="/hub/dashboard"
+                            className="py-1.5 px-3 rounded-[100px] bg-[#f1efdf] hover:bg-[#e6ecd5] text-[#1b6e53] border border-[#c3cda7] text-xs font-bold transition inline-flex items-center gap-1"
+                          >
+                            <span>Hub Ops</span>
+                            <span className="material-symbols-outlined text-[13px]">warehouse</span>
+                          </Link>
+                        )}
+                        <Link
+                          to={`/fpo/orders/${order.orderId}/fulfillment`}
+                          className={`py-1.5 px-4 rounded-[100px] text-xs font-bold transition shadow-2xs inline-flex items-center gap-1.5 cursor-pointer ${
+                            isConfirmed
+                              ? 'bg-[#1b6e53] hover:bg-[#00372a] text-[#ffffff]'
+                              : 'bg-[#e6ecd5] hover:bg-[#c3cda7]/60 text-[#1b6e53] border border-[#c3cda7]'
+                          }`}
+                        >
+                          <span>{isConfirmed ? 'Plan Fulfillment' : 'View Plan'}</span>
+                          <span className="material-symbols-outlined text-[14px]">
+                            {isConfirmed ? 'alt_route' : 'arrow_forward'}
+                          </span>
+                        </Link>
+                      </div>
                     </td>
                   </tr>
                 )
