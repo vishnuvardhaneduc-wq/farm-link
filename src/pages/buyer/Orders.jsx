@@ -1,9 +1,16 @@
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router'
-import { getStoredHubOperations } from '../../data/hubOperationsData'
+import {
+  getStoredHubOperations,
+  buyerAcceptPartialQuantity,
+  buyerRequestFullQuantity,
+  buyerRejectPartialFulfillment,
+  calculateHubKPIs,
+} from '../../data/hubOperationsData'
 
 export default function BuyerOrders() {
   const [hubState, setHubState] = useState(getStoredHubOperations())
+  const [toastMsg, setToastMsg] = useState('')
 
   useEffect(() => {
     const handleStorage = () => setHubState(getStoredHubOperations())
@@ -12,9 +19,36 @@ export default function BuyerOrders() {
     return () => window.removeEventListener('storage', handleStorage)
   }, [])
 
+  const kpis = calculateHubKPIs(hubState)
   const activeHubOrder = hubState.activeOrder
+  const shortfallState = activeHubOrder?.shortfallState || {}
+  const isBuyerReviewRequired = activeHubOrder.status === 'Buyer Review Required'
+  const isPartialApproved = activeHubOrder.status === 'Ready for Partial Dispatch' || shortfallState.buyerDecision === 'Accepted'
+  const isAdditionalRequested = activeHubOrder.status === 'Additional Supply Required' || shortfallState.buyerDecision === 'FullQuantityRequested'
+  const isPartialRejected = activeHubOrder.status === 'Partial Fulfillment Rejected' || shortfallState.buyerDecision === 'Rejected'
+  const isPartiallyDispatched = activeHubOrder.status === 'Partially Dispatched'
   const isDispatched = activeHubOrder.status === 'Dispatched'
-  const isReady = activeHubOrder.status === 'Ready for Dispatch'
+
+  const handleAcceptPartial = () => {
+    buyerAcceptPartialQuantity(activeHubOrder.orderId)
+    setHubState(getStoredHubOperations())
+    setToastMsg(`Partial consignment of ${kpis.totalAccepted} kg accepted. Hub authorized to create partial dispatch.`)
+    setTimeout(() => setToastMsg(''), 4500)
+  }
+
+  const handleRequestFull = () => {
+    buyerRequestFullQuantity(activeHubOrder.orderId)
+    setHubState(getStoredHubOperations())
+    setToastMsg(`Requested full ${kpis.requiredTarget} kg. FPO notified to source additional quota.`)
+    setTimeout(() => setToastMsg(''), 4500)
+  }
+
+  const handleRejectPartial = () => {
+    buyerRejectPartialFulfillment(activeHubOrder.orderId)
+    setHubState(getStoredHubOperations())
+    setToastMsg(`Partial fulfillment declined. FPO notified for order recovery.`)
+    setTimeout(() => setToastMsg(''), 4500)
+  }
 
   const baseOrders = [
     {
@@ -22,20 +56,44 @@ export default function BuyerOrders() {
       fpo: 'Godavari Farmers Producer Org',
       hub: activeHubOrder.hubName,
       crop: `${activeHubOrder.crop} (${activeHubOrder.requiredGrade})`,
-      quantity: `${activeHubOrder.totalRequiredQty.toLocaleString()} kg`,
+      quantity: `${activeHubOrder.hubAllocatedQty.toLocaleString()} kg`,
       rate: '₹27.50 / kg',
-      totalValue: '₹27,500',
+      totalValue: '₹18,837 (Adjusted for accepted kg)',
       dispatchDate: activeHubOrder.deliveryDate,
-      deliveryStage: isDispatched
+      deliveryStage: isPartiallyDispatched
+        ? `Partially Dispatched: ${kpis.totalAccepted} kg en route via Reefer ${activeHubOrder.dispatchDetails?.vehicleNo || 'AP-39-TX-8841'}`
+        : isDispatched
         ? `In Transit via Reefer ${activeHubOrder.dispatchDetails?.vehicleNo || 'AP-39-TX-8841'}`
-        : isReady
-        ? 'Consolidated & Cleared for Carrier Pickup'
-        : 'Physical Inward Intake & Lab Assay Active',
-      status: isDispatched ? 'In Transit' : isReady ? 'Ready for Dispatch' : 'Fulfillment Planned',
-      statusStyle: isDispatched
+        : isPartialApproved
+        ? `Partial fulfillment approved (${kpis.totalAccepted} kg ready for dispatch)`
+        : isAdditionalRequested
+        ? 'Additional supply requested by buyer'
+        : isPartialRejected
+        ? 'Partial fulfillment rejected by buyer'
+        : isBuyerReviewRequired
+        ? `Partial fulfillment review (${kpis.totalAccepted} kg available; ${kpis.shortfall} kg shortfall)`
+        : 'Quality Assay & Aggregation Active',
+      status: isPartiallyDispatched
+        ? 'Partially Dispatched'
+        : isDispatched
+        ? 'In Transit'
+        : isPartialApproved
+        ? 'Partial Fulfillment Approved'
+        : isAdditionalRequested
+        ? 'Additional Supply Required'
+        : isPartialRejected
+        ? 'Partial Fulfillment Rejected'
+        : isBuyerReviewRequired
+        ? 'Buyer Review Required'
+        : 'Processing',
+      statusStyle: isPartiallyDispatched || isDispatched
         ? 'bg-[#b2cee7] text-[#00372a] border border-[#00372a]/30'
-        : isReady
+        : isPartialApproved
         ? 'bg-[#e8fe85] text-[#1b6e53] border border-[#1b6e53]'
+        : isBuyerReviewRequired
+        ? 'bg-[#fceace] text-[#683600] border border-[#683600]/40'
+        : isAdditionalRequested || isPartialRejected
+        ? 'bg-rose-50 text-rose-800 border border-rose-300'
         : 'bg-[#e6ecd5] text-[#1b6e53] border border-[#c3cda7]',
     },
     {
@@ -91,15 +149,101 @@ export default function BuyerOrders() {
             Orders &amp; <span className="italic font-normal">Executed Sourcing Shipments</span>
           </h1>
           <p className="text-xs sm:text-sm text-[#6d6d6d] mt-1 font-sans">
-            Track dispatches, certified lot receipts, carrier vehicles, and digital escrow delivery milestones.
+            Track dispatches, review partial fulfillment options, and monitor carrier delivery milestones.
           </p>
         </div>
 
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-[100px] bg-[#ffffff] border border-[#c3cda7] text-xs font-mono text-[#00372a]">
           <span className="w-1.5 h-1.5 rounded-full bg-[#1b6e53] animate-pulse"></span>
-          <span>{baseOrders.length} Active Contracts En Route</span>
+          <span>{baseOrders.length} Active Contracts</span>
         </div>
       </div>
+
+      {/* Toast Notification */}
+      {toastMsg && (
+        <div className="p-3.5 bg-[#e8fe85] border border-[#1b6e53] text-[#1b6e53] text-xs font-bold rounded-[18px] flex items-center justify-between shadow-sm animate-in fade-in">
+          <div className="flex items-center gap-2">
+            <span className="material-symbols-outlined text-[18px]">verified</span>
+            <span>{toastMsg}</span>
+          </div>
+        </div>
+      )}
+
+      {/* PARTIAL FULFILLMENT BUYER DECISION BANNER (SECTION 4 & 5) */}
+      {isBuyerReviewRequired && (
+        <section className="p-6 rounded-[24px] bg-[#ffffff] border-2 border-[#683600] shadow-md space-y-4 animate-in fade-in">
+          <div className="flex items-start justify-between gap-3 pb-3 border-b border-[#c3cda7]/50">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-[14px] bg-[#fceace] text-[#683600] flex items-center justify-center font-bold text-xl shrink-0">
+                ⚠️
+              </div>
+              <div>
+                <span className="text-[10px] font-mono text-[#683600] uppercase font-bold tracking-wider">
+                  ACTION REQUIRED // ORDER {activeHubOrder.orderId}
+                </span>
+                <h2 className="font-editorial text-2xl font-bold text-[#00372a]">
+                  Partial Fulfillment Available
+                </h2>
+                <p className="text-xs text-[#353535] mt-0.5 font-sans">
+                  Your order requested <strong>{kpis.requiredTarget} kg</strong> of {activeHubOrder.crop}. The FPO can currently fulfill <strong>{kpis.totalAccepted} kg</strong> (Shortfall: <strong>{kpis.shortfall} kg</strong>).
+                </p>
+              </div>
+            </div>
+
+            <span className="px-3 py-1 rounded-[100px] bg-[#fceace] text-[#683600] font-mono text-xs font-bold border border-[#c3cda7]">
+              Decision Required
+            </span>
+          </div>
+
+          {/* Quantities Display */}
+          <div className="grid grid-cols-3 gap-3 font-mono text-xs">
+            <div className="p-3.5 rounded-[16px] bg-[#f1efdf] border border-[#c3cda7] space-y-0.5">
+              <span className="text-[#6d6d6d] block text-[10px] uppercase">Ordered Quantity</span>
+              <strong className="text-base text-[#00372a]">{kpis.requiredTarget} kg</strong>
+            </div>
+
+            <div className="p-3.5 rounded-[16px] bg-[#e6ecd5] border border-[#c3cda7] space-y-0.5">
+              <span className="text-[#1b6e53] block text-[10px] uppercase">Available (Accepted)</span>
+              <strong className="text-base text-[#1b6e53]">{kpis.totalAccepted} kg</strong>
+            </div>
+
+            <div className="p-3.5 rounded-[16px] bg-[#fceace] border border-[#c3cda7] space-y-0.5">
+              <span className="text-[#683600] block text-[10px] uppercase">Shortfall</span>
+              <strong className="text-base text-[#683600]">{kpis.shortfall} kg</strong>
+            </div>
+          </div>
+
+          {/* 3 Buyer Action Buttons */}
+          <div className="pt-2 flex flex-col sm:flex-row items-center gap-3">
+            <button
+              type="button"
+              onClick={handleAcceptPartial}
+              className="w-full sm:flex-1 py-3 px-5 rounded-[100px] bg-[#1b6e53] hover:bg-[#00372a] text-[#ffffff] text-xs font-bold transition shadow-xs flex items-center justify-center gap-1.5 cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-[16px]">check_circle</span>
+              <span>Accept {kpis.totalAccepted} kg</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleRequestFull}
+              className="w-full sm:flex-1 py-3 px-5 rounded-[100px] bg-[#ffffff] hover:bg-[#f1efdf] text-[#353535] border border-[#c3cda7] text-xs font-semibold transition flex items-center justify-center gap-1.5 cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-[16px]">production_quantity_limits</span>
+              <span>Request Full Quantity</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleRejectPartial}
+              className="w-full sm:w-auto py-3 px-5 rounded-[100px] bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-300 text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-[16px]">cancel</span>
+              <span>Reject Partial Fulfillment</span>
+            </button>
+          </div>
+        </section>
+      )}
 
       {/* Orders Table */}
       <section className="rounded-[24px] bg-[#ffffff] border border-[#c3cda7] overflow-hidden shadow-xs">

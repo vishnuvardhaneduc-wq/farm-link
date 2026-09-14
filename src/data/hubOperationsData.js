@@ -3,10 +3,14 @@
  * Manages physical hub fulfillment workflow:
  * Collection -> Weighing -> Quality Inspection -> Aggregation -> Dispatch
  * 
+ * Includes Partial Fulfillment & Shortfall Communication Workflow:
+ * HUB -> FPO -> BUYER -> BUYER DECISION -> HUB DISPATCH
+ * 
  * Strict rule: Keep these three values separate:
- * 1. Allocated Quantity (planned by FPO)
- * 2. Actual Collected Quantity / Weighed Quantity (gate intake / scale)
- * 3. Accepted Quantity (after quality grading)
+ * 1. Ordered / Allocated Quantity (planned by FPO e.g. 700 kg)
+ * 2. Actual Collected / Weighed Quantity (gate intake / scale)
+ * 3. Accepted Quantity (after quality grading e.g. 685 kg)
+ * 4. Shortfall Quantity (e.g. 15 kg)
  */
 
 export const HUB_OPS_STORAGE_KEY = 'farmlink_hub_operations_state_v1'
@@ -19,16 +23,61 @@ export const initialHubOperationsState = {
     variety: 'Hybrid Roma',
     requiredGrade: 'Grade A',
     totalRequiredQty: 1000,
-    hubAllocatedQty: 700, // Rajahmundry Central Hub share
+    hubAllocatedQty: 700, // Rajahmundry Central Hub target requirement (700 kg)
     hubName: 'Rajahmundry Central Hub',
     hubId: 'HUB-A',
     destination: 'Vijayawada Processing Hub',
     deliveryDate: '29 Sep 2026',
-    status: 'Collection Active', // 'Fulfillment Planned' | 'Collection Active' | 'Aggregation Active' | 'Ready for Dispatch' | 'Dispatched'
-    dispatchDetails: null, // { vehicleNo, driverName, carrier, dispatchDate, notes, dispatchedAt }
+    
+    // Core fulfillment & shortage state:
+    // 'Aggregation In Progress' | 'Partial Fulfillment Available' | 'Buyer Review Required' | 
+    // 'Partial Fulfillment Approved' | 'Additional Supply Required' | 'Partial Fulfillment Rejected' | 
+    // 'Ready for Dispatch' | 'Ready for Partial Dispatch' | 'Partially Dispatched' | 'Dispatched'
+    status: 'Partial Fulfillment Available',
+    
+    // Shortfall communication metadata
+    shortfallState: {
+      hasShortfall: true,
+      orderedQty: 700,
+      acceptedQty: 685,
+      shortfallQty: 15,
+      hubNotifiedFpo: false,
+      hubNotifiedAt: null,
+      fpoNotifiedBuyer: false,
+      fpoNotifiedAt: null,
+      buyerDecision: null, // 'Accepted' | 'FullQuantityRequested' | 'Rejected'
+      buyerDecisionAt: null,
+      notes: '15 kg shortfall detected during quality assay.',
+    },
+    
+    // Multi-item order items support
+    items: [
+      {
+        itemId: 'item-1031-tomato',
+        crop: 'Tomato',
+        variety: 'Hybrid Roma',
+        grade: 'Grade A',
+        orderedQty: 700,
+        acceptedQty: 685,
+        shortfallQty: 15,
+        status: 'Partial Fulfillment Available', // per-item status
+      },
+      {
+        itemId: 'item-1031-onion',
+        crop: 'Onion',
+        variety: 'Nasik Red',
+        grade: 'Grade A',
+        orderedQty: 500,
+        acceptedQty: 500,
+        shortfallQty: 0,
+        status: 'Ready for Dispatch', // complete item
+      },
+    ],
+
+    dispatchDetails: null, // { vehicleNo, driverName, carrier, dispatchDate, notes, dispatchedAt, dispatchedQty, isPartial }
   },
   
-  // Farmer collection lots for Rajahmundry Central Hub (ORD-1031 Tomato Grade A)
+  // Farmer collection lots for Rajahmundry Central Hub (ORD-1031 Tomato Grade A: 685 kg accepted total)
   farmerLots: [
     {
       id: 'LOT-1031-01',
@@ -38,27 +87,23 @@ export const initialHubOperationsState = {
       crop: 'Tomato',
       requiredGrade: 'Grade A',
       
-      // Quantities - Strictly separated!
-      allocatedQty: 70, // 70 kg allocated by FPO
-      actualCollectedQty: null, // to be recorded (e.g. 66.5 kg)
-      weighedQty: null, // weighed at precision scale (e.g. 66.5 kg)
-      acceptedQty: null, // accepted after QA (e.g. 64 kg)
-      rejectedQty: null, // e.g. 2.5 kg
+      allocatedQty: 70, // 70 kg allocated
+      actualCollectedQty: 66.5,
+      weighedQty: 66.5,
+      acceptedQty: 64, // 64 kg accepted
+      rejectedQty: 2.5,
       
-      // Workflow status: 'Pending' | 'Collected' | 'Weighed' | 'Passed' | 'Rejected'
-      status: 'Pending',
-      
-      // Timestamps and QA metadata
-      collectionTime: null,
-      collectionNotes: '',
-      weighingTime: null,
-      weighingNotes: '',
-      qaGrade: null, // 'Grade A' | 'Grade B' | 'Grade C'
-      qaResult: null, // 'Pass' | 'Fail'
-      qaMoisture: null, // e.g. '88%'
-      qaNotes: '',
-      qaPhotoUrl: null,
-      qaTime: null,
+      status: 'Passed',
+      collectionTime: '2026-09-14 07:05 AM',
+      collectionNotes: 'Gate intake verified at Bay 1',
+      weighingTime: '2026-09-14 07:12 AM',
+      weighingNotes: 'Gross 70.5 kg, Tare 4.0 kg, Net 66.5 kg',
+      qaGrade: 'Grade A',
+      qaResult: 'Pass',
+      qaMoisture: '88.0%',
+      qaNotes: '64 kg Grade A accepted; 2.5 kg sorting deduction',
+      qaPhotoUrl: 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=400&auto=format&fit=crop&q=80',
+      qaTime: '2026-09-14 07:25 AM',
     },
     {
       id: 'LOT-1031-02',
@@ -71,12 +116,12 @@ export const initialHubOperationsState = {
       allocatedQty: 140,
       actualCollectedQty: 135,
       weighedQty: 135,
-      acceptedQty: 135,
+      acceptedQty: 135, // 135 kg accepted
       rejectedQty: 0,
       
       status: 'Passed',
       collectionTime: '2026-09-14 07:15 AM',
-      collectionNotes: 'Delivered in standard ventilated crates #CR-12 to #CR-18',
+      collectionNotes: 'Delivered in standard ventilated crates',
       weighingTime: '2026-09-14 07:22 AM',
       weighingNotes: 'Gross: 142.5 kg, Tare: 7.5 kg, Net: 135 kg',
       qaGrade: 'Grade A',
@@ -97,7 +142,7 @@ export const initialHubOperationsState = {
       allocatedQty: 210,
       actualCollectedQty: 200,
       weighedQty: 200,
-      acceptedQty: 198,
+      acceptedQty: 198, // 198 kg accepted
       rejectedQty: 2,
       
       status: 'Passed',
@@ -121,22 +166,22 @@ export const initialHubOperationsState = {
       requiredGrade: 'Grade A',
       
       allocatedQty: 280,
-      actualCollectedQty: null,
-      weighedQty: null,
-      acceptedQty: null,
-      rejectedQty: null,
+      actualCollectedQty: 290,
+      weighedQty: 290,
+      acceptedQty: 288, // 288 kg accepted
+      rejectedQty: 2,
       
-      status: 'Pending',
-      collectionTime: null,
-      collectionNotes: '',
-      weighingTime: null,
-      weighingNotes: '',
-      qaGrade: null,
-      qaResult: null,
-      qaMoisture: null,
-      qaNotes: '',
-      qaPhotoUrl: null,
-      qaTime: null,
+      status: 'Passed',
+      collectionTime: '2026-09-14 08:15 AM',
+      collectionNotes: 'Crate intake logged at Bay 1',
+      weighingTime: '2026-09-14 08:20 AM',
+      weighingNotes: 'Net certified 290 kg',
+      qaGrade: 'Grade A',
+      qaResult: 'Pass',
+      qaMoisture: '87.8%',
+      qaNotes: '288 kg Grade A accepted (Total: 64 + 135 + 198 + 288 = 685 kg; 15 kg shortfall)',
+      qaPhotoUrl: 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=400&auto=format&fit=crop&q=80',
+      qaTime: '2026-09-14 08:30 AM',
     },
   ],
 }
@@ -152,7 +197,15 @@ export function getStoredHubOperations() {
       localStorage.setItem(HUB_OPS_STORAGE_KEY, JSON.stringify(initialHubOperationsState))
       return initialHubOperationsState
     }
-    return JSON.parse(raw)
+    const parsed = JSON.parse(raw)
+    // Ensure shortfallState exists
+    if (!parsed.activeOrder.shortfallState) {
+      parsed.activeOrder.shortfallState = initialHubOperationsState.activeOrder.shortfallState
+    }
+    if (!parsed.activeOrder.items) {
+      parsed.activeOrder.items = initialHubOperationsState.activeOrder.items
+    }
+    return parsed
   } catch (e) {
     console.error('Error reading hub ops data', e)
     return initialHubOperationsState
@@ -203,7 +256,7 @@ export function recordFarmerCollection(farmerId, actualCollectedQty, notes = '',
   lot.actualCollectedQty = qty
   lot.status = 'Collected'
   lot.collectionTime = `${today} ${now}`
-  lot.collectionNotes = notes || 'Gate inward recorded by Station Supervisor'
+  lot.collectionNotes = notes || 'Gate inward recorded by Hub Operator'
 
   saveHubOperationsState(state)
   return true
@@ -267,15 +320,176 @@ export function recordQualityInspection(
   lot.qaTime = `${today} ${now}`
   lot.status = isPass ? 'Passed' : 'Rejected'
 
-  // Update order status if aggregation ready
-  checkAndUpdateOrderStatus(state)
+  // Recompute shortfall and status
+  recomputeOrderAggregationState(state)
 
   saveHubOperationsState(state)
   return true
 }
 
 /**
- * 4. Create Outbound Dispatch Manifest
+ * Recomputes aggregation totals, shortfall, and status
+ */
+export function recomputeOrderAggregationState(state) {
+  const lots = state.farmerLots || []
+  const order = state.activeOrder
+  const targetRequired = order.hubAllocatedQty || 700
+  const totalAccepted = lots.reduce((acc, l) => acc + (l.acceptedQty || 0), 0)
+  const shortfall = Math.max(0, targetRequired - totalAccepted)
+
+  if (!order.shortfallState) {
+    order.shortfallState = {}
+  }
+
+  order.shortfallState.orderedQty = targetRequired
+  order.shortfallState.acceptedQty = totalAccepted
+  order.shortfallState.shortfallQty = shortfall
+  order.shortfallState.hasShortfall = shortfall > 0
+
+  // If already dispatched, do not alter status
+  if (order.status === 'Dispatched' || order.status === 'Partially Dispatched') return
+
+  if (totalAccepted >= targetRequired) {
+    order.status = 'Ready for Dispatch'
+    order.shortfallState.hasShortfall = false
+  } else if (order.shortfallState.buyerDecision === 'Accepted') {
+    order.status = 'Ready for Partial Dispatch'
+  } else if (order.shortfallState.buyerDecision === 'FullQuantityRequested') {
+    order.status = 'Additional Supply Required'
+  } else if (order.shortfallState.buyerDecision === 'Rejected') {
+    order.status = 'Partial Fulfillment Rejected'
+  } else if (order.shortfallState.fpoNotifiedBuyer) {
+    order.status = 'Buyer Review Required'
+  } else if (order.shortfallState.hubNotifiedFpo) {
+    order.status = 'Buyer Review Required'
+  } else if (totalAccepted > 0 && shortfall > 0) {
+    order.status = 'Partial Fulfillment Available'
+  } else if (totalAccepted > 0) {
+    order.status = 'Aggregation In Progress'
+  }
+
+  // Update item level status
+  if (order.items && order.items.length > 0) {
+    order.items[0].acceptedQty = totalAccepted
+    order.items[0].shortfallQty = shortfall
+    order.items[0].status = order.status
+  }
+}
+
+/**
+ * 4. HUB ACTION: Notify FPO of Shortfall
+ * Hub operator notifies FPO that only partial quantity is available.
+ */
+export function notifyFpoOfShortfall(orderId = 'ORD-1031', customNotes = '') {
+  const state = getStoredHubOperations()
+  const order = state.activeOrder
+  const kpis = calculateHubKPIs(state)
+
+  const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+  const today = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+
+  order.shortfallState.hubNotifiedFpo = true
+  order.shortfallState.hubNotifiedAt = `${today} ${now}`
+  order.shortfallState.notes = customNotes || `${kpis.shortfall} kg shortfall detected. Notify FPO for buyer review.`
+  
+  // Update status to Buyer Review Required
+  order.status = 'Buyer Review Required'
+
+  if (order.items && order.items.length > 0) {
+    order.items[0].status = 'Buyer Review Required'
+  }
+
+  saveHubOperationsState(state)
+  return true
+}
+
+/**
+ * 5. FPO ACTION: Notify Buyer of Shortfall
+ * FPO informs Buyer of the available partial quantity.
+ */
+export function fpoNotifyBuyerOfShortfall(orderId = 'ORD-1031') {
+  const state = getStoredHubOperations()
+  const order = state.activeOrder
+
+  const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+  const today = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+
+  order.shortfallState.fpoNotifiedBuyer = true
+  order.shortfallState.fpoNotifiedAt = `${today} ${now}`
+  order.status = 'Buyer Review Required'
+
+  saveHubOperationsState(state)
+  return true
+}
+
+/**
+ * 6. BUYER DECISION: Accept Partial Quantity
+ */
+export function buyerAcceptPartialQuantity(orderId = 'ORD-1031') {
+  const state = getStoredHubOperations()
+  const order = state.activeOrder
+
+  const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+  const today = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+
+  order.shortfallState.buyerDecision = 'Accepted'
+  order.shortfallState.buyerDecisionAt = `${today} ${now}`
+  order.status = 'Ready for Partial Dispatch'
+
+  if (order.items && order.items.length > 0) {
+    order.items[0].status = 'Partial Fulfillment Approved'
+  }
+
+  saveHubOperationsState(state)
+  return true
+}
+
+/**
+ * 7. BUYER DECISION: Request Full Quantity
+ */
+export function buyerRequestFullQuantity(orderId = 'ORD-1031') {
+  const state = getStoredHubOperations()
+  const order = state.activeOrder
+
+  const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+  const today = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+
+  order.shortfallState.buyerDecision = 'FullQuantityRequested'
+  order.shortfallState.buyerDecisionAt = `${today} ${now}`
+  order.status = 'Additional Supply Required'
+
+  if (order.items && order.items.length > 0) {
+    order.items[0].status = 'Additional Supply Required'
+  }
+
+  saveHubOperationsState(state)
+  return true
+}
+
+/**
+ * 8. BUYER DECISION: Reject Partial Fulfillment
+ */
+export function buyerRejectPartialFulfillment(orderId = 'ORD-1031') {
+  const state = getStoredHubOperations()
+  const order = state.activeOrder
+
+  const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+  const today = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+
+  order.shortfallState.buyerDecision = 'Rejected'
+  order.shortfallState.buyerDecisionAt = `${today} ${now}`
+  order.status = 'Partial Fulfillment Rejected'
+
+  if (order.items && order.items.length > 0) {
+    order.items[0].status = 'Partial Fulfillment Rejected'
+  }
+
+  saveHubOperationsState(state)
+  return true
+}
+
+/**
+ * 9. Create Outbound Dispatch Manifest (Supports full and partial dispatch)
  */
 export function createHubDispatch({
   orderId = 'ORD-1031',
@@ -284,12 +498,18 @@ export function createHubDispatch({
   carrier = 'Delta Cold-Chain Logistics',
   dispatchDate = '2026-09-14',
   notes = 'Sealed crates loaded at Rajahmundry Bay 1. Temperature maintained at 12°C.',
+  isPartial = false,
+  dispatchedQty = null,
 }) {
   const state = getStoredHubOperations()
+  const kpis = calculateHubKPIs(state)
   const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
   const today = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
 
-  state.activeOrder.status = 'Dispatched'
+  const actualDispatched = dispatchedQty || kpis.totalAccepted
+  const isPartialDispatch = isPartial || actualDispatched < state.activeOrder.hubAllocatedQty
+
+  state.activeOrder.status = isPartialDispatch ? 'Partially Dispatched' : 'Dispatched'
   state.activeOrder.dispatchDetails = {
     vehicleNo,
     driverName,
@@ -297,6 +517,10 @@ export function createHubDispatch({
     dispatchDate,
     notes,
     dispatchedAt: `${today} ${now}`,
+    dispatchedQty: actualDispatched,
+    orderedQty: state.activeOrder.hubAllocatedQty,
+    shortfallQty: Math.max(0, state.activeOrder.hubAllocatedQty - actualDispatched),
+    isPartial: isPartialDispatch,
     manifestRef: `MNF-DSP-${Math.floor(1000 + Math.random() * 9000)}`,
   }
 
@@ -311,10 +535,8 @@ export function calculateHubKPIs(state = getStoredHubOperations()) {
   const lots = state.farmerLots || []
   const activeOrder = state.activeOrder || {}
 
-  // Expected Collection: sum of allocated quantities
   const expectedCollection = lots.reduce((acc, l) => acc + (l.allocatedQty || 0), 0)
   
-  // Collected: sum of actual collected quantities for farmers with status != 'Pending'
   const collected = lots.reduce((acc, l) => {
     if (l.status !== 'Pending') {
       return acc + (l.actualCollectedQty || l.weighedQty || l.allocatedQty || 0)
@@ -322,7 +544,6 @@ export function calculateHubKPIs(state = getStoredHubOperations()) {
     return acc
   }, 0)
 
-  // Pending: sum of allocated quantities for pending farmers
   const pending = lots.reduce((acc, l) => {
     if (l.status === 'Pending') {
       return acc + (l.allocatedQty || 0)
@@ -330,7 +551,6 @@ export function calculateHubKPIs(state = getStoredHubOperations()) {
     return acc
   }, 0)
 
-  // Quality Pending: lots that are Collected or Weighed but not yet QA graded
   const qualityPending = lots.reduce((acc, l) => {
     if (l.status === 'Collected' || l.status === 'Weighed') {
       return acc + (l.weighedQty || l.actualCollectedQty || l.allocatedQty || 0)
@@ -338,17 +558,21 @@ export function calculateHubKPIs(state = getStoredHubOperations()) {
     return acc
   }, 0)
 
-  // Accepted Total: sum of accepted quantities
   const totalAccepted = lots.reduce((acc, l) => acc + (l.acceptedQty || 0), 0)
+  const requiredTarget = activeOrder.hubAllocatedQty || 700
+  const shortfall = Math.max(0, requiredTarget - totalAccepted)
+  const isTargetReached = totalAccepted >= requiredTarget
+  const hasShortfall = shortfall > 0
 
-  // Farmers count
   const expectedFarmers = lots.length
   const farmersReported = lots.filter((l) => l.status !== 'Pending').length
   const qualityCheckedLots = lots.filter((l) => l.status === 'Passed' || l.status === 'Rejected').length
 
-  // Required target for hub (700 kg)
-  const requiredTarget = activeOrder.hubAllocatedQty || 700
-  const isTargetReached = totalAccepted >= requiredTarget
+  const shortfallState = activeOrder.shortfallState || {}
+  const buyerDecision = shortfallState.buyerDecision
+  const isPartialApproved = buyerDecision === 'Accepted'
+  const isPartialRejected = buyerDecision === 'Rejected'
+  const isFullRequested = buyerDecision === 'FullQuantityRequested'
 
   return {
     expectedCollection,
@@ -360,24 +584,14 @@ export function calculateHubKPIs(state = getStoredHubOperations()) {
     farmersReported,
     qualityCheckedLots,
     requiredTarget,
+    shortfall,
+    hasShortfall,
     isTargetReached,
+    isPartialApproved,
+    isPartialRejected,
+    isFullRequested,
     orderStatus: activeOrder.status,
-  }
-}
-
-/**
- * Helper to update order status based on stage
- */
-function checkAndUpdateOrderStatus(state) {
-  const kpis = calculateHubKPIs(state)
-  if (state.activeOrder.status === 'Dispatched') return
-
-  if (kpis.isTargetReached) {
-    state.activeOrder.status = 'Ready for Dispatch'
-  } else if (kpis.totalAccepted > 0) {
-    state.activeOrder.status = 'Aggregation Active'
-  } else if (kpis.farmersReported > 0) {
-    state.activeOrder.status = 'Collection Active'
+    shortfallState,
   }
 }
 
@@ -389,6 +603,8 @@ function syncHubToOtherPortals(hubState) {
   try {
     const kpis = calculateHubKPIs(hubState)
     const orderId = hubState.activeOrder.orderId
+    const order = hubState.activeOrder
+    const shortfallState = order.shortfallState || {}
 
     // 1. Sync FPO Orders
     const rawFpo = localStorage.getItem('farmlink_fpo_orders_v1')
@@ -396,41 +612,46 @@ function syncHubToOtherPortals(hubState) {
       const fpoOrders = JSON.parse(rawFpo)
       const updatedFpo = fpoOrders.map((o) => {
         if (o.orderId === orderId) {
-          let stageText = 'Collection Active'
-          let progressPct = Math.round((kpis.collected / kpis.expectedCollection) * 100)
-          
-          if (hubState.activeOrder.status === 'Dispatched') {
-            stageText = 'Dispatched'
-            return {
-              ...o,
-              status: 'Dispatched',
-              fulfillmentStage: 'Delivery',
-              statusStyle: 'bg-[#b2cee7] text-[#212529] border border-[#212529]/30 font-bold',
-              hubTelemetry: {
-                collectedPct: 100,
-                qualityPct: 100,
-                acceptedQty: kpis.totalAccepted,
-                dispatched: true,
-                dispatchDetails: hubState.activeOrder.dispatchDetails,
-              },
-            }
-          }
+          let stageText = order.status
+          let statusStyle = 'bg-[#e6ecd5] text-[#1b6e53] border border-[#c3cda7] font-bold'
 
-          if (kpis.isTargetReached) {
+          if (order.status === 'Dispatched' || order.status === 'Partially Dispatched') {
+            stageText = order.status === 'Partially Dispatched' ? 'Partially Dispatched' : 'Dispatched'
+            statusStyle = 'bg-[#b2cee7] text-[#212529] border border-[#212529]/30 font-bold'
+          } else if (order.status === 'Buyer Review Required') {
+            stageText = 'Buyer Review Required'
+            statusStyle = 'bg-[#fceace] text-[#683600] border border-[#683600]/40 font-bold'
+          } else if (order.status === 'Ready for Partial Dispatch') {
+            stageText = 'Buyer Approved Partial Fulfillment'
+            statusStyle = 'bg-[#e8fe85] text-[#1b6e53] border border-[#1b6e53] font-bold'
+          } else if (order.status === 'Additional Supply Required') {
+            stageText = 'Additional Supply Required'
+            statusStyle = 'bg-rose-50 text-rose-700 border border-rose-300 font-bold'
+          } else if (order.status === 'Partial Fulfillment Rejected') {
+            stageText = 'Partial Fulfillment Rejected'
+            statusStyle = 'bg-rose-50 text-rose-700 border border-rose-300 font-bold'
+          } else if (order.status === 'Partial Fulfillment Available') {
+            stageText = 'Partial Fulfillment Available'
+            statusStyle = 'bg-[#fceace] text-[#683600] border border-[#c3cda7] font-bold'
+          } else if (kpis.isTargetReached) {
             stageText = 'Ready for Dispatch'
-          } else if (kpis.totalAccepted > 0) {
-            stageText = `Aggregation ${Math.round((kpis.totalAccepted / kpis.requiredTarget) * 100)}%`
-          } else if (kpis.farmersReported > 0) {
-            stageText = `Collection ${progressPct}%`
+            statusStyle = 'bg-[#e8fe85] text-[#1b6e53] border border-[#1b6e53] font-bold'
           }
 
           return {
             ...o,
-            status: kpis.isTargetReached ? 'Ready for Dispatch' : 'Fulfillment Planned',
+            status: order.status,
             fulfillmentStage: stageText,
-            statusStyle: kpis.isTargetReached
-              ? 'bg-[#e8fe85] text-[#1b6e53] border border-[#1b6e53] font-bold'
-              : 'bg-[#e6ecd5] text-[#1b6e53] border border-[#c3cda7] font-bold',
+            statusStyle,
+            shortfallData: {
+              orderedQty: kpis.requiredTarget,
+              acceptedQty: kpis.totalAccepted,
+              shortfallQty: kpis.shortfall,
+              hasShortfall: kpis.hasShortfall,
+              hubNotifiedFpo: shortfallState.hubNotifiedFpo,
+              fpoNotifiedBuyer: shortfallState.fpoNotifiedBuyer,
+              buyerDecision: shortfallState.buyerDecision,
+            },
             hubTelemetry: {
               collectedQty: kpis.collected,
               expectedQty: kpis.expectedCollection,
@@ -452,19 +673,44 @@ function syncHubToOtherPortals(hubState) {
       const buyerOrders = JSON.parse(rawBuyer)
       const updatedBuyer = buyerOrders.map((bo) => {
         if (bo.id === orderId || bo.orderId === orderId) {
-          if (hubState.activeOrder.status === 'Dispatched') {
+          if (order.status === 'Dispatched' || order.status === 'Partially Dispatched') {
             return {
               ...bo,
-              status: 'In Transit',
-              deliveryStage: `En Route via ${hubState.activeOrder.dispatchDetails?.vehicleNo || 'Carrier'}`,
-              statusStyle: 'bg-[#fceace] text-[#683600] border border-[#683600]/30 font-bold',
+              status: order.status === 'Partially Dispatched' ? 'Partially Dispatched' : 'In Transit',
+              deliveryStage: `En Route via ${order.dispatchDetails?.vehicleNo || 'Carrier'} (${kpis.totalAccepted} kg)`,
+              statusStyle: 'bg-[#b2cee7] text-[#00372a] border border-[#00372a]/30 font-bold',
             }
           }
-          if (kpis.isTargetReached) {
+          if (order.status === 'Ready for Partial Dispatch') {
             return {
               ...bo,
-              status: 'Processing',
-              deliveryStage: 'Consolidated & Ready for Carrier Pickup',
+              status: 'Partial Fulfillment Approved',
+              deliveryStage: `Approved for ${kpis.totalAccepted} kg dispatch`,
+              statusStyle: 'bg-[#e8fe85] text-[#1b6e53] border border-[#1b6e53] font-bold',
+            }
+          }
+          if (order.status === 'Buyer Review Required' || order.status === 'Partial Fulfillment Available') {
+            return {
+              ...bo,
+              status: 'Buyer Review Required',
+              deliveryStage: `${kpis.totalAccepted} kg available (${kpis.shortfall} kg shortfall)`,
+              statusStyle: 'bg-[#fceace] text-[#683600] border border-[#683600]/40 font-bold',
+            }
+          }
+          if (order.status === 'Additional Supply Required') {
+            return {
+              ...bo,
+              status: 'Additional Supply Required',
+              deliveryStage: 'Awaiting FPO additional quota sourcing',
+              statusStyle: 'bg-rose-50 text-rose-700 border border-rose-300 font-bold',
+            }
+          }
+          if (order.status === 'Partial Fulfillment Rejected') {
+            return {
+              ...bo,
+              status: 'Partial Fulfillment Rejected',
+              deliveryStage: 'Partial consignment rejected by buyer',
+              statusStyle: 'bg-rose-50 text-rose-700 border border-rose-300 font-bold',
             }
           }
           return bo

@@ -50,11 +50,10 @@ export default function HubAggregation() {
         <div className="flex items-center gap-2.5">
           <Link
             to="/hub/dispatch"
-            className={`py-2 px-5 rounded-[100px] text-xs font-bold transition shadow-xs flex items-center gap-1.5 cursor-pointer ${
-              isTargetMet || activeOrder.status === 'Dispatched'
+            className={`py-2 px-5 rounded-[100px] text-xs font-bold transition shadow-xs flex items-center gap-1.5 cursor-pointer ${isTargetMet || activeOrder.status === 'Dispatched'
                 ? 'bg-[#1b6e53] hover:bg-[#00372a] text-[#ffffff]'
                 : 'bg-[#f1efdf] text-[#6d6d6d] border border-[#c3cda7]'
-            }`}
+              }`}
           >
             <span>Proceed to Dispatch</span>
             <span className="material-symbols-outlined text-[16px]">local_shipping</span>
@@ -89,11 +88,10 @@ export default function HubAggregation() {
 
           <div className="flex items-center gap-3 font-mono">
             <span
-              className={`px-3.5 py-1.5 rounded-[100px] text-xs font-bold uppercase tracking-wider ${
-                isTargetMet
+              className={`px-3.5 py-1.5 rounded-[100px] text-xs font-bold uppercase tracking-wider ${isTargetMet
                   ? 'bg-[#e8fe85] text-[#1b6e53] border border-[#1b6e53]'
                   : 'bg-[#fceace] text-[#683600] border border-[#c3cda7]'
-              }`}
+                }`}
             >
               {isTargetMet ? 'Ready for Dispatch' : `Progress: ${currentAccepted} / ${targetRequired} kg`}
             </span>
@@ -112,9 +110,8 @@ export default function HubAggregation() {
           </div>
           <div className="w-full bg-[#f1efdf] h-4 rounded-full overflow-hidden border border-[#c3cda7]">
             <div
-              className={`h-full transition-all duration-500 ${
-                isTargetMet ? 'bg-[#1b6e53]' : 'bg-[#e8fe85] border-r-2 border-[#1b6e53]'
-              }`}
+              className={`h-full transition-all duration-500 ${isTargetMet ? 'bg-[#1b6e53]' : 'bg-[#e8fe85] border-r-2 border-[#1b6e53]'
+                }`}
               style={{ width: `${progressPct}%` }}
             ></div>
           </div>
@@ -189,11 +186,10 @@ export default function HubAggregation() {
 
           <Link
             to="/hub/dispatch"
-            className={`py-2 px-5 rounded-[100px] text-xs font-bold transition shadow-xs flex items-center gap-1.5 cursor-pointer ${
-              isTargetMet
+            className={`py-2 px-5 rounded-[100px] text-xs font-bold transition shadow-xs flex items-center gap-1.5 cursor-pointer ${isTargetMet
                 ? 'bg-[#1b6e53] hover:bg-[#00372a] text-[#ffffff]'
                 : 'bg-[#ffffff] text-[#6d6d6d] border border-[#c3cda7] pointer-events-none opacity-60'
-            }`}
+              }`}
           >
             <span>Create Dispatch →</span>
           </Link>

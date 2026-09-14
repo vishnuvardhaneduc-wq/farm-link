@@ -71,13 +71,12 @@ export default function HubDispatch() {
 
         <div className="flex items-center gap-2.5">
           <span
-            className={`px-3.5 py-1.5 rounded-[100px] text-xs font-mono font-bold uppercase tracking-wider ${
-              isDispatched
+            className={`px-3.5 py-1.5 rounded-[100px] text-xs font-mono font-bold uppercase tracking-wider ${isDispatched
                 ? 'bg-[#b2cee7] text-[#00372a] border border-[#00372a]/30'
                 : isReadyForDispatch
-                ? 'bg-[#e8fe85] text-[#1b6e53] border border-[#1b6e53]'
-                : 'bg-[#fceace] text-[#683600] border border-[#c3cda7]'
-            }`}
+                  ? 'bg-[#e8fe85] text-[#1b6e53] border border-[#1b6e53]'
+                  : 'bg-[#fceace] text-[#683600] border border-[#c3cda7]'
+              }`}
           >
             {isDispatched ? 'Dispatch Complete' : isReadyForDispatch ? 'Ready for Dispatch' : 'Awaiting Aggregation'}
           </span>
