@@ -18,7 +18,7 @@ export const buyerDashboardKPIs = [
     value: '4',
     change: '2 receiving offers',
     trend: 'up',
-    icon: '📋',
+    icon: 'receipt_long',
     badge: 'Live RFQs',
     color: 'emerald'
   },
@@ -28,7 +28,7 @@ export const buyerDashboardKPIs = [
     value: '18',
     change: '6 new offers today',
     trend: 'up',
-    icon: '📩',
+    icon: 'local_offer',
     badge: 'Action Needed',
     color: 'blue'
   },
@@ -38,7 +38,7 @@ export const buyerDashboardKPIs = [
     value: '3',
     change: '2 en route from hubs',
     trend: 'neutral',
-    icon: '🚚',
+    icon: 'local_shipping',
     badge: 'In Transit',
     color: 'amber'
   },
@@ -48,7 +48,7 @@ export const buyerDashboardKPIs = [
     value: '24',
     change: '99.2% on-time fulfillment',
     trend: 'up',
-    icon: '✅',
+    icon: 'task_alt',
     badge: 'All-Time',
     color: 'slate'
   }
@@ -56,280 +56,390 @@ export const buyerDashboardKPIs = [
 
 export const initialProcurementRequests = [
   {
-    id: 'REQ-1026',
-    crop: 'Tomato',
-    variety: 'Hybrid Roma',
-    grade: 'Grade A',
-    quantity: '5,000 kg',
-    targetPrice: '₹28 / kg',
+    id: 'REQ-1027',
+    buyer: 'AgroFresh Enterprise',
     deliveryDate: '25 Sep 2026',
     deliveryLocation: 'Vijayawada Processing Hub Dock',
-    qualitySpecs: 'Optical grading Grade A required, max 5% moisture tolerance.',
-    packaging: 'Ventilated 20kg crates',
-    selectedFposCount: '3 FPOs selected',
-    responseSummary: '2 responses received',
-    status: 'Awaiting Responses',
+    notes: 'All items to be received before 10:00 AM at Bay 03. Optical grading report mandatory.',
+    status: 'Partially Responded',
     statusVariant: 'warning',
     createdDate: '14 Sep 2026, 09:00 AM',
-    responses: [
+    items: [
       {
-        id: 'resp-1026-1',
-        fpoId: 'fpo-godavari',
-        fpoName: 'Godavari Farmers FPO',
-        location: 'Rajamahendravaram, East Godavari',
-        status: 'ACCEPTED',
-        statusLabel: 'ACCEPTED',
-        statusStyle: 'bg-[#e6ecd5] text-[#1b6e53] border border-[#c3cda7]',
-        offeredQty: '5,000 kg',
-        offeredPrice: '₹27.50 / kg',
-        deliveryDate: '25 Sep 2026',
-        hub: 'Rajahmundry Central Hub #01',
-        notes: 'Full volume committed across 18 member farmer clusters. 100% optical sorted Grade A, crates packed, ready for scheduled 25 Sep dock dispatch.',
-        timestamp: '14 Sep 2026, 10:30 AM',
-        contact: 'K. Venkateswara Rao (+91 883 245 8901)'
+        itemId: 'item-1',
+        crop: 'Tomato',
+        variety: 'Hybrid Roma',
+        quantity: '1,000 kg',
+        quantityVal: 1000,
+        unit: 'kg',
+        grade: 'Grade A',
+        targetPrice: '₹28 / kg',
+        qualitySpecs: 'Optical grading Grade A required, max 5% moisture tolerance.',
+        packaging: 'Ventilated 20kg crates',
+        selectedFposCount: '2 FPOs requested',
+        selectedFpoOfferId: null,
+        responses: [
+          {
+            id: 'resp-1027-1-1',
+            fpoId: 'fpo-godavari',
+            fpoName: 'Godavari Farmers FPO',
+            location: 'Rajamahendravaram, East Godavari',
+            status: 'ACCEPTED',
+            statusLabel: 'ACCEPTED',
+            statusStyle: 'bg-[#e6ecd5] text-[#1b6e53] border border-[#c3cda7]',
+            offeredQty: '1,000 kg',
+            offeredPrice: '₹27.50 / kg',
+            deliveryDate: '25 Sep 2026',
+            hub: 'Rajahmundry Central Hub #01',
+            notes: 'Full 1,000 kg Grade A Roma tomatoes allocated across member farmer clusters. Crates loaded on reefer van for 25 Sep morning dispatch.',
+            timestamp: '14 Sep 2026, 10:15 AM',
+            contact: 'K. Venkateswara Rao (+91 883 245 8901)'
+          },
+          {
+            id: 'resp-1027-1-2',
+            fpoId: 'fpo-green-valley',
+            fpoName: 'Green Valley FPO',
+            location: 'West Godavari (Tadepalligudem)',
+            status: 'BACK_OFFER',
+            statusLabel: 'BACK OFFER',
+            statusStyle: 'bg-[#fceace] text-[#683600] border border-[#c3cda7]',
+            requestedQty: '1,000 kg',
+            offeredQty: '1,000 kg',
+            counterPrice: '₹29.00 / kg',
+            deliveryDate: '26 Sep 2026',
+            hub: 'Tadepalligudem Horti Hub',
+            notes: 'Proposes counter rate of ₹29/kg (+₹1/kg over target) due to peak cold storage staging. Delivery shifted by +1 day (26 Sep).',
+            counterReasons: [
+              'Rate adjusted to ₹29/kg due to specialized cold staging',
+              'Delivery shifted by +1 day (26 Sep) for optimal field cooling'
+            ],
+            timestamp: '14 Sep 2026, 10:45 AM',
+            contact: 'B. Lakshmi Narayana (+91 8818 224 510)'
+          }
+        ]
       },
       {
-        id: 'resp-1026-2',
-        fpoId: 'fpo-delta-agro',
-        fpoName: 'Delta Agro FPO',
-        location: 'East Godavari (Mandapeta Hub)',
-        status: 'BACK_OFFER',
-        statusLabel: 'BACK OFFER',
-        statusStyle: 'bg-[#fceace] text-[#683600] border border-[#c3cda7]',
-        requestedQty: '5,000 kg',
-        offeredQty: '5,000 kg',
-        counterPrice: '₹29.00 / kg',
-        deliveryDate: '26 Sep 2026',
-        hub: 'Mandapeta Agro Dock',
-        notes: 'Proposes counter rate of ₹29/kg (+₹1/kg over target) due to peak refrigerated transport logistics. Delivery shifted by +1 day (26 Sep).',
-        counterReasons: [
-          'Price adjusted to ₹29/kg due to peak refrigerated reefer logistics',
-          'Delivery date shifted to 26 Sep for optimal harvest batch precooling'
-        ],
-        timestamp: '14 Sep 2026, 11:15 AM',
-        contact: 'S. Ramakrishna Raju (+91 884 238 7765)'
+        itemId: 'item-2',
+        crop: 'Onion',
+        variety: 'Nasik Red',
+        quantity: '500 kg',
+        quantityVal: 500,
+        unit: 'kg',
+        grade: 'Grade A',
+        targetPrice: '₹24 / kg',
+        qualitySpecs: 'Dry cured, sorted, 45-55mm uniform diameter.',
+        packaging: 'Mesh bags 25kg',
+        selectedFposCount: '1 FPO requested',
+        selectedFpoOfferId: null,
+        responses: [
+          {
+            id: 'resp-1027-2-1',
+            fpoId: 'fpo-delta-agro',
+            fpoName: 'Delta Agro FPO',
+            location: 'East Godavari (Mandapeta Hub)',
+            status: 'ACCEPTED',
+            statusLabel: 'ACCEPTED',
+            statusStyle: 'bg-[#e6ecd5] text-[#1b6e53] border border-[#c3cda7]',
+            offeredQty: '500 kg',
+            offeredPrice: '₹23.50 / kg',
+            deliveryDate: '25 Sep 2026',
+            hub: 'Mandapeta Agro Dock',
+            notes: 'Cured red onions Grade A available at Mandapeta depot. Rate ₹23.50/kg accepted.',
+            timestamp: '14 Sep 2026, 11:00 AM',
+            contact: 'S. Ramakrishna Raju (+91 884 238 7765)'
+          }
+        ]
       },
       {
-        id: 'resp-1026-3',
-        fpoId: 'fpo-green-valley',
-        fpoName: 'Green Valley FPO',
-        location: 'West Godavari (Tadepalligudem)',
-        status: 'NO_RESPONSE',
-        statusLabel: 'NO RESPONSE',
-        statusStyle: 'bg-[#f1efdf] text-[#6d6d6d] border border-[#c3cda7]',
-        requestSentDate: '14 Sep 2026',
-        notes: 'Request dispatched to hub intake manager. Waiting for member farmer cluster intake aggregation.',
-        timestamp: '14 Sep 2026, 09:00 AM',
-        contact: 'B. Lakshmi Narayana (+91 8818 224 510)'
+        itemId: 'item-3',
+        crop: 'Green Chilli',
+        variety: 'G4 Hot',
+        quantity: '200 kg',
+        quantityVal: 200,
+        unit: 'kg',
+        grade: 'Grade A',
+        targetPrice: '₹45 / kg',
+        qualitySpecs: 'Dark green, fresh harvested, uniform length.',
+        packaging: '5kg corrugated boxes',
+        selectedFposCount: '2 FPOs requested',
+        selectedFpoOfferId: null,
+        responses: [
+          {
+            id: 'resp-1027-3-1',
+            fpoId: 'fpo-godavari',
+            fpoName: 'Godavari Farmers FPO',
+            location: 'Rajamahendravaram, East Godavari',
+            status: 'NO_RESPONSE',
+            statusLabel: 'NO RESPONSE',
+            statusStyle: 'bg-[#f1efdf] text-[#6d6d6d] border border-[#c3cda7]',
+            requestSentDate: '14 Sep 2026',
+            notes: 'Dispatched to Korukonda chilli cluster manager. Waiting for morning harvest count.',
+            timestamp: '14 Sep 2026, 09:00 AM',
+            contact: 'K. Venkateswara Rao (+91 883 245 8901)'
+          },
+          {
+            id: 'resp-1027-3-2',
+            fpoId: 'fpo-krishna-valley',
+            fpoName: 'Krishna Valley Agro FPO',
+            location: 'Krishna District (Gudivada Hub)',
+            status: 'BACK_OFFER',
+            statusLabel: 'BACK OFFER',
+            statusStyle: 'bg-[#fceace] text-[#683600] border border-[#c3cda7]',
+            requestedQty: '200 kg',
+            offeredQty: '200 kg',
+            counterPrice: '₹47.00 / kg',
+            deliveryDate: '25 Sep 2026',
+            hub: 'Gudivada Main Depot',
+            notes: 'Counter price ₹47/kg for export optical graded G4 Chilli. Same-day 25 Sep dispatch guaranteed.',
+            counterReasons: [
+              'Premium export selection surcharge (+₹2/kg)',
+              'Guaranteed same-day 25 Sep morning dispatch'
+            ],
+            timestamp: '14 Sep 2026, 11:30 AM',
+            contact: 'P. Sambasiva Rao (+91 866 284 3190)'
+          }
+        ]
       }
     ]
   },
   {
     id: 'REQ-1024',
-    crop: 'Tomato',
-    variety: 'Hybrid Roma / Himsona',
-    grade: 'Grade A',
-    quantity: '1,000 kg',
-    targetPrice: '₹28 / kg',
+    buyer: 'AgroFresh Enterprise',
     deliveryDate: '18 Sep 2026',
     deliveryLocation: 'Vijayawada Central Processing Hub',
-    qualitySpecs: 'Standard optical sorting required.',
-    packaging: '20kg Crates',
-    selectedFposCount: '3 FPOs selected',
-    responseSummary: '3 responses received',
+    notes: 'Urgent weekend supply batch.',
     status: 'Receiving Offers',
     statusVariant: 'warning',
     createdDate: '14 Sep 2026, 09:15 AM',
-    responses: [
+    items: [
       {
-        id: 'resp-1024-1',
-        fpoId: 'fpo-godavari',
-        fpoName: 'Godavari Farmers FPO',
-        location: 'Rajamahendravaram, East Godavari',
-        status: 'ACCEPTED',
-        statusLabel: 'ACCEPTED',
-        statusStyle: 'bg-[#e6ecd5] text-[#1b6e53] border border-[#c3cda7]',
-        offeredQty: '1,000 kg',
-        offeredPrice: '₹28.00 / kg',
-        deliveryDate: '18 Sep 2026',
-        hub: 'Rajahmundry Central Hub',
-        notes: 'Allocated from Kadiyam cluster. Delivery guaranteed by 08:00 AM.',
-        timestamp: '14 Sep 2026, 09:45 AM',
-        contact: 'K. Venkateswara Rao'
-      },
-      {
-        id: 'resp-1024-2',
-        fpoId: 'fpo-delta-agro',
-        fpoName: 'Delta Agro FPO',
-        location: 'East Godavari',
-        status: 'ACCEPTED',
-        statusLabel: 'ACCEPTED',
-        statusStyle: 'bg-[#e6ecd5] text-[#1b6e53] border border-[#c3cda7]',
-        offeredQty: '1,000 kg',
-        offeredPrice: '₹27.00 / kg',
-        deliveryDate: '18 Sep 2026',
-        hub: 'Mandapeta Agro Dock',
-        notes: 'Most competitive price offer with direct dock transport.',
-        timestamp: '14 Sep 2026, 10:10 AM',
-        contact: 'S. Ramakrishna Raju'
-      },
-      {
-        id: 'resp-1024-3',
-        fpoId: 'fpo-green-valley',
-        fpoName: 'Green Valley FPO',
-        location: 'West Godavari',
-        status: 'BACK_OFFER',
-        statusLabel: 'BACK OFFER',
-        statusStyle: 'bg-[#fceace] text-[#683600] border border-[#c3cda7]',
-        requestedQty: '1,000 kg',
-        offeredQty: '900 kg',
-        counterPrice: '₹29.00 / kg',
-        deliveryDate: '18 Sep 2026',
-        hub: 'Tadepalligudem Horti Hub',
-        notes: 'Maximum available capacity is 900 kg for 18 Sep. Zero pesticide residue certified.',
-        counterReasons: ['Partial volume available (900 kg of requested 1,000 kg)'],
-        timestamp: '14 Sep 2026, 10:20 AM',
-        contact: 'B. Lakshmi Narayana'
+        itemId: 'item-1024-1',
+        crop: 'Tomato',
+        variety: 'Hybrid Roma / Himsona',
+        quantity: '1,000 kg',
+        quantityVal: 1000,
+        unit: 'kg',
+        grade: 'Grade A',
+        targetPrice: '₹28 / kg',
+        qualitySpecs: 'Standard optical sorting required.',
+        packaging: '20kg Crates',
+        selectedFposCount: '3 FPOs requested',
+        responses: [
+          {
+            id: 'resp-1024-1',
+            fpoId: 'fpo-godavari',
+            fpoName: 'Godavari Farmers FPO',
+            location: 'Rajamahendravaram, East Godavari',
+            status: 'ACCEPTED',
+            statusLabel: 'ACCEPTED',
+            statusStyle: 'bg-[#e6ecd5] text-[#1b6e53] border border-[#c3cda7]',
+            offeredQty: '1,000 kg',
+            offeredPrice: '₹28.00 / kg',
+            deliveryDate: '18 Sep 2026',
+            hub: 'Rajahmundry Central Hub',
+            notes: 'Allocated from Kadiyam cluster. Delivery guaranteed by 08:00 AM.',
+            timestamp: '14 Sep 2026, 09:45 AM',
+            contact: 'K. Venkateswara Rao'
+          },
+          {
+            id: 'resp-1024-2',
+            fpoId: 'fpo-delta-agro',
+            fpoName: 'Delta Agro FPO',
+            location: 'East Godavari',
+            status: 'ACCEPTED',
+            statusLabel: 'ACCEPTED',
+            statusStyle: 'bg-[#e6ecd5] text-[#1b6e53] border border-[#c3cda7]',
+            offeredQty: '1,000 kg',
+            offeredPrice: '₹27.00 / kg',
+            deliveryDate: '18 Sep 2026',
+            hub: 'Mandapeta Agro Dock',
+            notes: 'Most competitive price offer with direct dock transport.',
+            timestamp: '14 Sep 2026, 10:10 AM',
+            contact: 'S. Ramakrishna Raju'
+          },
+          {
+            id: 'resp-1024-3',
+            fpoId: 'fpo-green-valley',
+            fpoName: 'Green Valley FPO',
+            location: 'West Godavari',
+            status: 'BACK_OFFER',
+            statusLabel: 'BACK OFFER',
+            statusStyle: 'bg-[#fceace] text-[#683600] border border-[#c3cda7]',
+            requestedQty: '1,000 kg',
+            offeredQty: '900 kg',
+            counterPrice: '₹29.00 / kg',
+            deliveryDate: '18 Sep 2026',
+            hub: 'Tadepalligudem Horti Hub',
+            notes: 'Maximum available capacity is 900 kg for 18 Sep. Zero pesticide residue certified.',
+            counterReasons: ['Partial volume available (900 kg of requested 1,000 kg)'],
+            timestamp: '14 Sep 2026, 10:20 AM',
+            contact: 'B. Lakshmi Narayana'
+          }
+        ]
       }
     ]
   },
   {
     id: 'REQ-1025',
-    crop: 'Onion',
-    variety: 'Nasik Red / Garwa',
-    grade: 'Grade A (45-55mm)',
-    quantity: '800 kg',
-    targetPrice: '₹24 / kg',
+    buyer: 'AgroFresh Enterprise',
     deliveryDate: '22 Sep 2026',
     deliveryLocation: 'Visakhapatnam Warehouse #2',
-    qualitySpecs: 'Dry cured, sorted and graded.',
-    packaging: 'Mesh Bags 40kg',
-    selectedFposCount: '2 FPOs selected',
-    responseSummary: '0 responses',
+    notes: 'Cold storage buffer supply.',
     status: 'Draft',
     statusVariant: 'default',
     createdDate: '13 Sep 2026',
-    responses: [
+    items: [
       {
-        id: 'resp-1025-1',
-        fpoId: 'fpo-godavari',
-        fpoName: 'Godavari Farmers FPO',
-        location: 'Rajamahendravaram',
-        status: 'NO_RESPONSE',
-        statusLabel: 'NO RESPONSE',
-        statusStyle: 'bg-[#f1efdf] text-[#6d6d6d] border border-[#c3cda7]',
-        requestSentDate: '13 Sep 2026',
-        notes: 'Waiting for onion harvest intake schedule.',
-        timestamp: '13 Sep 2026',
-        contact: 'K. Venkateswara Rao'
-      },
-      {
-        id: 'resp-1025-2',
-        fpoId: 'fpo-sahyadri',
-        fpoName: 'Sahyadri Agro Federation',
-        location: 'Nashik Belt',
-        status: 'NO_RESPONSE',
-        statusLabel: 'NO RESPONSE',
-        statusStyle: 'bg-[#f1efdf] text-[#6d6d6d] border border-[#c3cda7]',
-        requestSentDate: '13 Sep 2026',
-        notes: 'Waiting for Maharashtra inter-state transport consolidation.',
-        timestamp: '13 Sep 2026',
-        contact: 'Vilas Shinde'
+        itemId: 'item-1025-1',
+        crop: 'Onion',
+        variety: 'Nasik Red / Garwa',
+        quantity: '800 kg',
+        quantityVal: 800,
+        unit: 'kg',
+        grade: 'Grade A (45-55mm)',
+        targetPrice: '₹24 / kg',
+        qualitySpecs: 'Dry cured, sorted and graded.',
+        packaging: 'Mesh Bags 40kg',
+        selectedFposCount: '2 FPOs requested',
+        responses: [
+          {
+            id: 'resp-1025-1',
+            fpoId: 'fpo-godavari',
+            fpoName: 'Godavari Farmers FPO',
+            location: 'Rajamahendravaram',
+            status: 'NO_RESPONSE',
+            statusLabel: 'NO RESPONSE',
+            statusStyle: 'bg-[#f1efdf] text-[#6d6d6d] border border-[#c3cda7]',
+            requestSentDate: '13 Sep 2026',
+            notes: 'Waiting for onion harvest intake schedule.',
+            timestamp: '13 Sep 2026',
+            contact: 'K. Venkateswara Rao'
+          },
+          {
+            id: 'resp-1025-2',
+            fpoId: 'fpo-sahyadri',
+            fpoName: 'Sahyadri Agro Federation',
+            location: 'Nashik Belt',
+            status: 'NO_RESPONSE',
+            statusLabel: 'NO RESPONSE',
+            statusStyle: 'bg-[#f1efdf] text-[#6d6d6d] border border-[#c3cda7]',
+            requestSentDate: '13 Sep 2026',
+            notes: 'Waiting for Maharashtra inter-state transport consolidation.',
+            timestamp: '13 Sep 2026',
+            contact: 'Vilas Shinde'
+          }
+        ]
       }
     ]
   },
   {
     id: 'REQ-1022',
-    crop: 'Green Chilli',
-    variety: 'G4 Hot Export',
-    grade: 'Grade A',
-    quantity: '500 kg',
-    targetPrice: '₹45 / kg',
+    buyer: 'AgroFresh Enterprise',
     deliveryDate: '20 Sep 2026',
     deliveryLocation: 'Vijayawada Central Processing Hub',
-    qualitySpecs: 'Dark green, uniform length, export grade.',
-    packaging: '5kg corrugated boxes',
-    selectedFposCount: '3 FPOs selected',
-    responseSummary: '3 responses received',
+    notes: 'Export standard packhouse required.',
     status: 'Offers Under Review',
     statusVariant: 'info',
     createdDate: '12 Sep 2026',
-    responses: [
+    items: [
       {
-        id: 'resp-1022-1',
-        fpoId: 'fpo-green-valley',
-        fpoName: 'Green Valley FPO',
-        location: 'West Godavari',
-        status: 'ACCEPTED',
-        statusLabel: 'ACCEPTED',
-        statusStyle: 'bg-[#e6ecd5] text-[#1b6e53] border border-[#c3cda7]',
-        offeredQty: '500 kg',
-        offeredPrice: '₹44.00 / kg',
-        deliveryDate: '20 Sep 2026',
-        hub: 'Tadepalligudem Horti Hub',
-        notes: 'Fresh morning harvest lot ready for immediate cooling and dispatch.',
-        timestamp: '12 Sep 2026',
-        contact: 'B. Lakshmi Narayana'
-      },
-      {
-        id: 'resp-1022-2',
-        fpoId: 'fpo-godavari',
-        fpoName: 'Godavari Farmers FPO',
-        location: 'Rajamahendravaram',
-        status: 'BACK_OFFER',
-        statusLabel: 'BACK OFFER',
-        statusStyle: 'bg-[#fceace] text-[#683600] border border-[#c3cda7]',
-        requestedQty: '500 kg',
-        offeredQty: '400 kg',
-        counterPrice: '₹46.00 / kg',
-        deliveryDate: '20 Sep 2026',
-        hub: 'Rajahmundry Central Hub',
-        notes: 'Price adjustment to ₹46/kg for Grade A G4 Export selection.',
-        counterReasons: ['Price adjusted to ₹46/kg for export optical selection', 'Capacity limited to 400 kg'],
-        timestamp: '12 Sep 2026',
-        contact: 'K. Venkateswara Rao'
+        itemId: 'item-1022-1',
+        crop: 'Green Chilli',
+        variety: 'G4 Hot Export',
+        quantity: '500 kg',
+        quantityVal: 500,
+        unit: 'kg',
+        grade: 'Grade A',
+        targetPrice: '₹45 / kg',
+        qualitySpecs: 'Dark green, uniform length, export grade.',
+        packaging: '5kg corrugated boxes',
+        selectedFposCount: '2 FPOs requested',
+        responses: [
+          {
+            id: 'resp-1022-1',
+            fpoId: 'fpo-green-valley',
+            fpoName: 'Green Valley FPO',
+            location: 'West Godavari',
+            status: 'ACCEPTED',
+            statusLabel: 'ACCEPTED',
+            statusStyle: 'bg-[#e6ecd5] text-[#1b6e53] border border-[#c3cda7]',
+            offeredQty: '500 kg',
+            offeredPrice: '₹44.00 / kg',
+            deliveryDate: '20 Sep 2026',
+            hub: 'Tadepalligudem Horti Hub',
+            notes: 'Fresh morning harvest lot ready for immediate cooling and dispatch.',
+            timestamp: '12 Sep 2026',
+            contact: 'B. Lakshmi Narayana'
+          },
+          {
+            id: 'resp-1022-2',
+            fpoId: 'fpo-godavari',
+            fpoName: 'Godavari Farmers FPO',
+            location: 'Rajamahendravaram',
+            status: 'BACK_OFFER',
+            statusLabel: 'BACK OFFER',
+            statusStyle: 'bg-[#fceace] text-[#683600] border border-[#c3cda7]',
+            requestedQty: '500 kg',
+            offeredQty: '400 kg',
+            counterPrice: '₹46.00 / kg',
+            deliveryDate: '20 Sep 2026',
+            hub: 'Rajahmundry Central Hub',
+            notes: 'Price adjustment to ₹46/kg for Grade A G4 Export selection.',
+            counterReasons: ['Price adjusted to ₹46/kg for export optical selection', 'Capacity limited to 400 kg'],
+            timestamp: '12 Sep 2026',
+            contact: 'K. Venkateswara Rao'
+          }
+        ]
       }
     ]
   },
   {
     id: 'REQ-1019',
-    crop: 'Basmati Rice',
-    variety: 'Pusa 1121 Raw',
-    grade: 'Export Grade',
-    quantity: '5,000 kg',
-    targetPrice: '₹42 / kg',
+    buyer: 'AgroFresh Enterprise',
     deliveryDate: '15 Sep 2026',
     deliveryLocation: 'Guntur Aggregation Dock',
-    qualitySpecs: 'Aged 12 months, <12% moisture.',
-    packaging: '50kg gunny bags',
-    selectedFposCount: '2 FPOs selected',
-    responseSummary: 'Awarded to Krishna Valley FPO',
+    notes: 'Converted to contract.',
     status: 'Converted to Order',
     statusVariant: 'success',
     createdDate: '08 Sep 2026',
-    responses: [
+    items: [
       {
-        id: 'resp-1019-1',
-        fpoId: 'fpo-krishna-valley',
-        fpoName: 'Krishna Valley Agro FPO',
-        location: 'Krishna District',
-        status: 'ACCEPTED',
-        statusLabel: 'ORDER AWARDED',
-        statusStyle: 'bg-[#e6ecd5] text-[#1b6e53] border border-[#c3cda7]',
-        offeredQty: '5,000 kg',
-        offeredPrice: '₹41.50 / kg',
-        deliveryDate: '15 Sep 2026',
-        hub: 'Gudivada Main Depot',
-        notes: 'Contract executed. Order #ORD-8821 generated and en route.',
-        timestamp: '09 Sep 2026',
-        contact: 'P. Sambasiva Rao'
+        itemId: 'item-1019-1',
+        crop: 'Basmati Rice',
+        variety: 'Pusa 1121 Raw',
+        quantity: '5,000 kg',
+        quantityVal: 500,
+        unit: 'kg',
+        grade: 'Export Grade',
+        targetPrice: '₹42 / kg',
+        qualitySpecs: 'Aged 12 months, <12% moisture.',
+        packaging: '50kg gunny bags',
+        selectedFposCount: '1 FPO requested',
+        responses: [
+          {
+            id: 'resp-1019-1',
+            fpoId: 'fpo-krishna-valley',
+            fpoName: 'Krishna Valley Agro FPO',
+            location: 'Krishna District',
+            status: 'ACCEPTED',
+            statusLabel: 'ORDER AWARDED',
+            statusStyle: 'bg-[#e6ecd5] text-[#1b6e53] border border-[#c3cda7]',
+            offeredQty: '5,000 kg',
+            offeredPrice: '₹41.50 / kg',
+            deliveryDate: '15 Sep 2026',
+            hub: 'Gudivada Main Depot',
+            notes: 'Contract executed. Order #ORD-8821 generated and en route.',
+            timestamp: '09 Sep 2026',
+            contact: 'P. Sambasiva Rao'
+          }
+        ]
       }
     ]
   }
 ]
 
 // Storage helpers for state persistence across the demo
-const STORAGE_KEY = 'farmlink_buyer_demands_v1'
+const STORAGE_KEY = 'farmlink_buyer_demands_v2'
 
 export function getStoredDemands() {
   if (typeof window === 'undefined') return initialProcurementRequests
@@ -360,6 +470,69 @@ export function saveNewDemand(demand) {
 export function getDemandById(id) {
   const demands = getStoredDemands()
   return demands.find((d) => d.id === id) || demands[0]
+}
+
+export function updateItemOfferSelection(demandId, itemId, offerId) {
+  if (typeof window === 'undefined') return
+  try {
+    const demands = getStoredDemands()
+    const updated = demands.map((d) => {
+      if (d.id !== demandId) return d
+      const updatedItems = (d.items || []).map((item) => {
+        if (item.itemId !== itemId) return item
+        return {
+          ...item,
+          selectedFpoOfferId: item.selectedFpoOfferId === offerId ? null : offerId
+        }
+      })
+      return {
+        ...d,
+        items: updatedItems
+      }
+    })
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
+  } catch (e) {
+    console.error(e)
+  }
+}
+
+// Function to find matching FPOs for a specific item
+export function findMatchingFposForItem(crop = '', grade = 'Grade A') {
+  const cropLower = crop.toLowerCase()
+  return mockFPOs.filter((fpo) => {
+    return fpo.products.some((p) => p.toLowerCase().includes(cropLower) || cropLower.includes(p.toLowerCase())) || true
+  }).map((fpo) => {
+    let price = fpo.tomatoPrice || '₹28 / kg'
+    let cap = fpo.tomatoCapacity || '5,000 kg'
+
+    if (cropLower.includes('onion')) {
+      price = fpo.onionPrice || '₹24 / kg'
+      cap = fpo.onionCapacity || '4,000 kg'
+    } else if (cropLower.includes('chilli')) {
+      price = fpo.chilliPrice || '₹44 / kg'
+      cap = fpo.chilliCapacity || '800 kg'
+    } else if (cropLower.includes('rice') || cropLower.includes('paddy')) {
+      price = '₹42 / kg'
+      cap = '25,000 kg'
+    } else if (cropLower.includes('potato')) {
+      price = '₹20 / kg'
+      cap = '10,000 kg'
+    }
+
+    return {
+      id: fpo.id,
+      name: fpo.name,
+      location: `${fpo.location}, ${fpo.district}`,
+      cropAvailability: 'Available',
+      gradeOffered: grade || 'Grade A',
+      capacity: cap,
+      estPrice: price,
+      deliveryCapability: 'Available (Cold Chain Transport)',
+      reliability: fpo.reliabilityScore,
+      rating: fpo.rating,
+      hubsCount: fpo.hubsCount
+    }
+  })
 }
 
 export const recentProcurementRequests = initialProcurementRequests
@@ -508,13 +681,13 @@ export const mockFPOs = [
     state: 'Andhra Pradesh',
     pincode: '533308',
     estYear: 2019,
-    products: ['Tomato', 'Banana (G9)', 'Potato', 'Paddy', 'Sweet Lime'],
+    products: ['Tomato', 'Banana (G9)', 'Potato', 'Paddy', 'Sweet Lime', 'Onion'],
     capacity: '2,200 kg Tomato active • 65 MT/month total',
     approxCapacityVal: '65 MT / month',
     tomatoCapacity: '6,000 kg',
     tomatoGrade: 'Grade A',
     tomatoPrice: '₹28 / kg',
-    onionCapacity: '1,500 kg',
+    onionCapacity: '4,000 kg',
     onionPrice: '₹23.50 / kg',
     chilliCapacity: '1,200 kg',
     chilliPrice: '₹43 / kg',
@@ -578,7 +751,7 @@ export const mockFPOs = [
     state: 'Andhra Pradesh',
     pincode: '521301',
     estYear: 2020,
-    products: ['Tomato', 'Rice (BPT 5204)', 'Onion', 'Mango', 'Turmeric'],
+    products: ['Tomato', 'Rice (BPT 5204)', 'Onion', 'Mango', 'Turmeric', 'Green Chilli'],
     capacity: '3,500 kg Tomato active • 80 MT/month total',
     approxCapacityVal: '80 MT / month',
     tomatoCapacity: '10,000 kg',
@@ -587,7 +760,7 @@ export const mockFPOs = [
     onionCapacity: '3,000 kg',
     onionPrice: '₹23 / kg',
     chilliCapacity: '950 kg',
-    chilliPrice: '₹42.50 / kg',
+    chilliPrice: '₹42.50 – ₹47 / kg',
     hubsCount: 5,
     hubNames: ['Gudivada Main Depot', 'Nuzvid Fruit & Veg Staging', 'Kanchikacherla Aggregation', 'Vuyyuru CC', 'Gannavaram Hub'],
     farmerMembers: 2800,
@@ -619,7 +792,7 @@ export const mockFPOs = [
     tomatoCapacity: '12,000 kg',
     tomatoGrade: 'Grade A (Export)',
     tomatoPrice: '₹27.50 / kg',
-    onionCapacity: '8,000 kg',
+    onionCapacity: '10,000 kg',
     onionPrice: '₹22 / kg',
     chilliCapacity: '1,500 kg',
     chilliPrice: '₹41 / kg',
@@ -676,88 +849,62 @@ export const mockFPOs = [
 ]
 
 export const productSearchResultsMock = {
-  searchedProduct: {
-    name: 'Tomato',
-    variety: 'Hybrid Roma / Himsona',
-    grade: 'Grade A',
-    requestedQuantity: '1,000 kg',
-    requiredDelivery: '18 Sep 2026',
-    deliveryLocation: 'Vijayawada Processing Facility',
-    category: 'Vegetables',
-    unit: 'kg'
-  },
   fpoResults: [
     {
       id: 'fpo-godavari',
       fpoName: 'Godavari Farmers FPO',
-      legalName: 'Godavari Valley Agro Producer Co. Ltd.',
-      location: 'Rajamahendravaram, East Godavari, AP',
-      product: 'Tomato (Hybrid Roma)',
-      availableCapacity: '1,500 kg',
-      grade: 'Grade A',
-      indicativePrice: '₹28 / kg',
-      deliveryCapability: 'Refrigerated van • 24h dock dispatch',
-      reliability: '98.4% Fulfillment Rate',
+      location: 'Rajamahendravaram, East Godavari',
       rating: 4.9,
       reviewsCount: 38,
-      hubsCount: 4,
-      verified: true,
-      tag: 'Best Match for Delivery SLA',
-      dispatchWindow: 'Ready for 18 Sep Dispatch'
+      tag: 'Top Reliability SLA',
+      product: 'Tomato (Hybrid Roma)',
+      availableCapacity: '8,000 kg',
+      indicativePrice: '₹27 – ₹29 / kg',
+      grade: 'Grade A',
+      deliveryCapability: 'Cold chain transit to Vijayawada in 4 hours',
+      reliability: '98.4%'
     },
     {
       id: 'fpo-delta-agro',
       fpoName: 'Delta Agro FPO',
-      legalName: 'Delta Fertile Plains Producer Co-op',
-      location: 'East Godavari (Mandapeta Hub), AP',
-      product: 'Tomato (Himsona Grade A)',
-      availableCapacity: '2,200 kg',
-      grade: 'Grade A',
-      indicativePrice: '₹27 / kg',
-      deliveryCapability: 'Direct Regional Dock Delivery',
-      reliability: '97.6% Fulfillment Rate',
+      location: 'East Godavari (Mandapeta Hub)',
       rating: 4.8,
       reviewsCount: 52,
-      hubsCount: 6,
-      verified: true,
-      tag: 'Most Competitive Indicative Rate',
-      dispatchWindow: 'Ready for 18 Sep Dispatch'
+      tag: 'High Capacity Aggregator',
+      product: 'Tomato (Himsona / Roma)',
+      availableCapacity: '6,000 kg',
+      indicativePrice: '₹28 / kg',
+      grade: 'Grade A',
+      deliveryCapability: 'Direct dock transport • Reefer fleet',
+      reliability: '97.6%'
     },
     {
       id: 'fpo-green-valley',
       fpoName: 'Green Valley FPO',
-      legalName: 'Green Valley Agri Producers',
-      location: 'West Godavari (Tadepalligudem), AP',
-      product: 'Tomato (Grade A Selected)',
-      availableCapacity: '900 kg',
-      grade: 'Grade A',
-      indicativePrice: '₹29 / kg',
-      deliveryCapability: 'Cold Storage Staged • Insulated Transit',
-      reliability: '99.1% Fulfillment Rate',
+      location: 'West Godavari (Tadepalligudem)',
       rating: 4.9,
       reviewsCount: 29,
-      hubsCount: 3,
-      verified: true,
-      tag: 'Highest Quality Audit Score',
-      dispatchWindow: 'Ready for 18 Sep Dispatch'
+      tag: 'Zero Quality Rejection',
+      product: 'Tomato (Grade A Optical Sorted)',
+      availableCapacity: '4,500 kg',
+      indicativePrice: '₹29 / kg',
+      grade: 'Grade A',
+      deliveryCapability: 'Cold storage staging + Next-day transit',
+      reliability: '99.1%'
     },
     {
       id: 'fpo-krishna-valley',
       fpoName: 'Krishna Valley Agro FPO',
-      legalName: 'Krishna River Basin Farmers Producer Co.',
-      location: 'Krishna District (Gudivada Hub), AP',
-      product: 'Tomato (Local Farm Fresh Hybrid)',
-      availableCapacity: '3,500 kg',
-      grade: 'Grade A',
-      indicativePrice: '₹26.50 / kg',
-      deliveryCapability: 'Multi-axle Hub Transport • Daily Run',
-      reliability: '96.8% Fulfillment Rate',
+      location: 'Krishna District (Gudivada Hub)',
       rating: 4.7,
       reviewsCount: 44,
-      hubsCount: 5,
-      verified: true,
-      tag: 'High Volume Supplier',
-      dispatchWindow: 'Ready for 18 Sep Dispatch'
+      tag: 'Bulk Logistics Partner',
+      product: 'Tomato (Roma / Local Fresh)',
+      availableCapacity: '10,000 kg',
+      indicativePrice: '₹26.50 – ₹28 / kg',
+      grade: 'Grade A',
+      deliveryCapability: 'Daily scheduled dispatches',
+      reliability: '96.8%'
     }
   ]
 }

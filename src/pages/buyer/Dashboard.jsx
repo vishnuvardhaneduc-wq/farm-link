@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import ProcurementRequestModal from '../../components/buyer/ProcurementRequestModal'
 import {
-  recentProcurementRequests,
+  getStoredDemands,
   mockFPOs,
   recentSearches,
   quickCategories
@@ -13,6 +13,7 @@ export default function BuyerDashboard() {
   const [searchQuery, setSearchQuery] = useState('')
   const [modalOpen, setModalOpen] = useState(false)
   const [selectedFpoForRequest, setSelectedFpoForRequest] = useState(null)
+  const [demands, setDemands] = useState(() => getStoredDemands())
 
   const handleQuickSearch = (e) => {
     e.preventDefault()
@@ -312,74 +313,87 @@ export default function BuyerDashboard() {
 
         {/* Grid of Request Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {recentProcurementRequests.map((req) => (
-            <div
-              key={req.id}
-              className="rounded-[20px] bg-[#f1efdf] border border-[#c3cda7]/80 p-5 flex flex-col justify-between hover:shadow-md hover:border-[#1b6e53] transition"
-            >
-              <div>
-                {/* Header */}
-                <div className="flex items-start justify-between gap-2 mb-3">
-                  <div>
-                    <span className="text-[10px] font-mono text-[#6d6d6d] uppercase block">
-                      {req.id}
+          {demands.slice(0, 4).map((req) => {
+            const items = req.items || [
+              { crop: req.crop || 'Produce', quantity: req.quantity || '1,000 kg', grade: req.grade || 'Grade A', targetPrice: req.targetPrice || '₹28 / kg' }
+            ]
+            const itemsTitle = items.length === 1 ? items[0].crop : `${items.length} Items (${items.map((i) => i.crop).join(', ')})`
+            const totalVol = items.reduce((acc, curr) => {
+              const num = parseInt(String(curr.quantity || '0').replace(/[^0-9]/g, '')) || 0
+              return acc + num
+            }, 0)
+            const allResponses = items.flatMap((i) => i.responses || [])
+            const receivedCount = allResponses.filter((r) => r.status !== 'NO_RESPONSE').length
+
+            return (
+              <div
+                key={req.id}
+                className="rounded-[20px] bg-[#f1efdf] border border-[#c3cda7]/80 p-5 flex flex-col justify-between hover:shadow-md hover:border-[#1b6e53] transition"
+              >
+                <div>
+                  {/* Header */}
+                  <div className="flex items-start justify-between gap-2 mb-3">
+                    <div>
+                      <span className="text-[10px] font-mono text-[#6d6d6d] uppercase block">
+                        {req.id}
+                      </span>
+                      <h3 className="font-editorial text-lg font-bold text-[#212529] leading-snug line-clamp-1">
+                        {itemsTitle}
+                      </h3>
+                    </div>
+                    <span
+                      className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold font-mono whitespace-nowrap ${
+                        req.status === 'Receiving Offers' || req.status === 'Awaiting Responses' || req.status === 'Partially Responded'
+                          ? 'bg-[#fceace] text-[#683600]'
+                          : req.status === 'Draft'
+                          ? 'bg-[#ffffff] text-[#6d6d6d] border border-[#c3cda7]'
+                          : 'bg-[#e6ecd5] text-[#1b6e53]'
+                      }`}
+                    >
+                      {req.status}
                     </span>
-                    <h3 className="font-editorial text-xl font-bold text-[#212529] leading-snug">
-                      {req.crop}
-                    </h3>
                   </div>
-                  <span
-                    className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold font-mono ${
-                      req.status === 'Receiving Offers'
-                        ? 'bg-[#fceace] text-[#683600]'
-                        : req.status === 'Draft'
-                        ? 'bg-[#ffffff] text-[#6d6d6d] border border-[#c3cda7]'
-                        : 'bg-[#e6ecd5] text-[#1b6e53]'
-                    }`}
+
+                  {/* Details */}
+                  <div className="space-y-2 text-xs py-3 border-y border-[#c3cda7]/50">
+                    <div className="flex justify-between items-baseline">
+                      <span className="text-[#6d6d6d]">Total Volume:</span>
+                      <span className="font-bold text-[#1b6e53] font-mono text-sm">
+                        {totalVol > 0 ? `${totalVol.toLocaleString()} kg` : req.quantity || '1,000 kg'}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-baseline">
+                      <span className="text-[#6d6d6d]">Scope:</span>
+                      <span className="font-semibold text-[#212529] font-mono text-[11px]">
+                        {items.length} {items.length === 1 ? 'Commodity' : 'Commodities'}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-baseline">
+                      <span className="text-[#6d6d6d]">Responses:</span>
+                      <span className="font-bold text-[#1b6e53] font-mono text-[11px]">
+                        {receivedCount > 0 ? `${receivedCount} Offers Received` : 'Awaiting FPOs'}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-baseline">
+                      <span className="text-[#6d6d6d]">Delivery:</span>
+                      <span className="font-mono text-[#212529] text-[11px]">{req.deliveryDate}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Action */}
+                <div className="pt-4">
+                  <Link
+                    to={`/buyer/requests/${req.id}`}
+                    className="w-full py-2.5 px-4 rounded-[100px] bg-[#1b6e53] text-[#ffffff] text-xs font-bold hover:bg-[#00372a] transition flex items-center justify-center gap-1.5 shadow-xs"
                   >
-                    {req.status}
-                  </span>
-                </div>
-
-                {/* Details */}
-                <div className="space-y-2 text-xs py-3 border-y border-[#c3cda7]/50">
-                  <div className="flex justify-between items-baseline">
-                    <span className="text-[#6d6d6d]">Quantity:</span>
-                    <span className="font-bold text-[#1b6e53] font-mono text-sm">{req.quantity}</span>
-                  </div>
-                  <div className="flex justify-between items-baseline">
-                    <span className="text-[#6d6d6d]">Grade Spec:</span>
-                    <span className="font-semibold text-[#212529]">{req.grade}</span>
-                  </div>
-                  <div className="flex justify-between items-baseline">
-                    <span className="text-[#6d6d6d]">Target Rate:</span>
-                    <span className="font-semibold text-[#683600] font-mono">{req.targetPrice}</span>
-                  </div>
-                  <div className="flex justify-between items-baseline">
-                    <span className="text-[#6d6d6d]">Offers:</span>
-                    <span className="font-bold text-[#1b6e53] font-mono">
-                      {req.offersCount > 0 ? `${req.offersCount} Bids Received` : 'Awaiting Hub Intake'}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-baseline">
-                    <span className="text-[#6d6d6d]">Delivery Date:</span>
-                    <span className="font-mono text-[#212529] text-[11px]">{req.deliveryDate}</span>
-                  </div>
+                    <span>{receivedCount > 0 ? `Review ${receivedCount} Offers` : 'View Request'}</span>
+                    <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
+                  </Link>
                 </div>
               </div>
-
-              {/* Action */}
-              <div className="pt-4">
-                <Link
-                  to="/buyer/demands"
-                  className="w-full py-2.5 px-4 rounded-[100px] bg-[#1b6e53] text-[#ffffff] text-xs font-bold hover:bg-[#00372a] transition flex items-center justify-center gap-1.5 shadow-xs"
-                >
-                  <span>{req.offersCount > 0 ? `Compare ${req.offersCount} Offers` : 'Review Request'}</span>
-                  <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
-                </Link>
-              </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       </section>
 

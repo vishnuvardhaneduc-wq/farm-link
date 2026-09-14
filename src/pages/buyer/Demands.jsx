@@ -21,7 +21,7 @@ export default function Demands() {
             My <span className="italic font-normal">Procurement Demands</span>
           </h1>
           <p className="text-xs sm:text-sm text-[#6d6d6d] mt-1 font-sans">
-            Forward contracts and RFQs published to regional FPO federations with multi-hub response tracking.
+            Forward contracts and multi-item RFQs published to regional FPO federations with item-level response tracking.
           </p>
         </div>
 
@@ -30,7 +30,7 @@ export default function Demands() {
           className="py-2.5 px-6 rounded-[100px] bg-[#1b6e53] hover:bg-[#00372a] text-[#ffffff] text-xs font-bold uppercase tracking-wider flex items-center gap-2 transition shadow-sm"
         >
           <span className="material-symbols-outlined text-[18px]">add_circle</span>
-          <span>+ Post Demand (RFQ)</span>
+          <span>+ Post Multi-Item Demand</span>
         </Link>
       </div>
 
@@ -43,90 +43,105 @@ export default function Demands() {
             </div>
             <div>
               <h3 className="font-editorial text-2xl font-bold text-[#00372a] tracking-tight leading-none">
-                Active Procurement Requests
+                Active Multi-Item Tenders
               </h3>
               <p className="text-xs text-[#6d6d6d] mt-1 font-sans">
-                Track independent FPO offers, back-offers, and contract allocation status
+                Track independent FPO offers, commercial back-offers, and multi-FPO order awards
               </p>
             </div>
           </div>
           <span className="text-xs font-mono text-[#6d6d6d]">
-            {demands.length} Published Requests
+            {demands.length} Published Tenders
           </span>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs min-w-[720px]">
+          <table className="w-full text-left text-xs min-w-[760px]">
             <thead className="bg-[#f1efdf] text-[#353535] uppercase text-[10px] tracking-wider border-b border-[#c3cda7]/50 font-mono">
               <tr>
                 <th className="py-3 px-4">REQ Ref</th>
-                <th className="py-3 px-3">Crop &amp; Variety</th>
-                <th className="py-3 px-3">Grade</th>
-                <th className="py-3 px-3 text-right">Target Volume</th>
-                <th className="py-3 px-3 font-bold text-[#683600]">Target Rate</th>
-                <th className="py-3 px-3">Delivery Date</th>
-                <th className="py-3 px-3">Selected FPOs</th>
-                <th className="py-3 px-3">Response Summary</th>
+                <th className="py-3 px-3">Procurement Items</th>
+                <th className="py-3 px-3 text-right">Total Volume</th>
+                <th className="py-3 px-3">Delivery Schedule</th>
+                <th className="py-3 px-3">FPO Responses</th>
                 <th className="py-3 px-3 text-center">Overall Status</th>
                 <th className="py-3 px-4 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#c3cda7]/30 text-[#212529]">
-              {demands.map((req) => (
-                <tr key={req.id} className="hover:bg-[#faf9f0] transition">
-                  <td className="py-3.5 px-4 font-mono font-bold text-[#1b6e53] whitespace-nowrap">
-                    {req.id}
-                  </td>
-                  <td className="py-3.5 px-3 whitespace-nowrap">
-                    <span className="font-bold text-[#212529] block font-editorial text-base">{req.crop}</span>
-                    <span className="text-[10px] font-mono text-[#6d6d6d]">{req.variety || 'Standard'}</span>
-                  </td>
-                  <td className="py-3.5 px-3 whitespace-nowrap">
-                    <span className="text-[10px] font-mono font-bold bg-[#e6ecd5] text-[#1b6e53] px-2 py-0.5 rounded border border-[#c3cda7]">
-                      {req.grade}
-                    </span>
-                  </td>
-                  <td className="py-3.5 px-3 text-right font-bold text-[#1b6e53] font-mono whitespace-nowrap">
-                    {req.quantity}
-                  </td>
-                  <td className="py-3.5 px-3 font-extrabold text-[#683600] font-mono whitespace-nowrap">
-                    {req.targetPrice}
-                  </td>
-                  <td className="py-3.5 px-3 text-[#353535] font-mono whitespace-nowrap">
-                    {req.deliveryDate}
-                  </td>
-                  <td className="py-3.5 px-3 font-mono text-[11px] whitespace-nowrap text-[#00372a]">
-                    {req.selectedFposCount || `${req.responses?.length || 3} FPOs selected`}
-                  </td>
-                  <td className="py-3.5 px-3 whitespace-nowrap">
-                    <span className="text-[11px] font-mono font-medium text-[#1b6e53] bg-[#e6ecd5]/80 px-2 py-0.5 rounded border border-[#c3cda7]/60">
-                      {req.responseSummary || `${req.responses?.filter(r => r.status !== 'NO_RESPONSE').length || 2} responses`}
-                    </span>
-                  </td>
-                  <td className="py-3.5 px-3 text-center whitespace-nowrap">
-                    <span
-                      className={`inline-block px-2.5 py-0.5 rounded-[100px] text-[10px] font-mono font-semibold ${
-                        req.status === 'Receiving Offers' || req.status === 'Awaiting Responses'
-                          ? 'bg-[#fceace] text-[#683600]'
-                          : req.status === 'Draft'
-                          ? 'bg-[#f1efdf] text-[#6d6d6d] border border-[#c3cda7]'
-                          : 'bg-[#e6ecd5] text-[#1b6e53]'
-                      }`}
-                    >
-                      {req.status}
-                    </span>
-                  </td>
-                  <td className="py-3.5 px-4 text-right whitespace-nowrap">
-                    <Link
-                      to={`/buyer/requests/${req.id}`}
-                      className="py-1.5 px-3.5 rounded-[100px] bg-[#1b6e53] hover:bg-[#00372a] text-[#ffffff] text-xs font-bold transition shadow-2xs inline-flex items-center gap-1 cursor-pointer"
-                    >
-                      <span>View Responses</span>
-                      <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
-                    </Link>
-                  </td>
-                </tr>
-              ))}
+              {demands.map((req) => {
+                const itemsList = req.items || [
+                  { crop: req.crop, quantity: req.quantity, grade: req.grade }
+                ]
+                const itemsNames = itemsList.map((i) => i.crop).join(' • ')
+                const totalVol = itemsList.reduce((acc, curr) => {
+                  const num = parseInt(String(curr.quantity || '0').replace(/[^0-9]/g, '')) || 0
+                  return acc + num
+                }, 0)
+
+                // Calculate response counts across all items
+                const allResponses = itemsList.flatMap((i) => i.responses || [])
+                const receivedCount = allResponses.filter((r) => r.status !== 'NO_RESPONSE').length
+                const totalResponsesCount = allResponses.length
+
+                return (
+                  <tr key={req.id} className="hover:bg-[#faf9f0] transition">
+                    <td className="py-4 px-4 font-mono font-bold text-[#1b6e53] whitespace-nowrap">
+                      {req.id}
+                    </td>
+                    <td className="py-4 px-3">
+                      <div className="space-y-0.5">
+                        <span className="font-bold text-[#00372a] block font-editorial text-base leading-tight">
+                          {itemsList.length} {itemsList.length === 1 ? 'Item' : 'Items'}: {itemsNames}
+                        </span>
+                        <div className="flex flex-wrap gap-1 pt-0.5">
+                          {itemsList.map((item, idx) => (
+                            <span
+                              key={idx}
+                              className="text-[10px] font-mono bg-[#f1efdf] text-[#353535] px-1.5 py-0.5 rounded border border-[#c3cda7]/40"
+                            >
+                              {item.crop} ({item.quantity})
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="py-4 px-3 text-right font-bold text-[#1b6e53] font-mono whitespace-nowrap">
+                      {totalVol > 0 ? `${totalVol.toLocaleString()} kg` : req.quantity || '1,000 kg'}
+                    </td>
+                    <td className="py-4 px-3 text-[#353535] font-mono whitespace-nowrap">
+                      {req.deliveryDate}
+                    </td>
+                    <td className="py-4 px-3 whitespace-nowrap">
+                      <span className="text-[11px] font-mono font-medium text-[#1b6e53] bg-[#e6ecd5] px-2.5 py-1 rounded-[100px] border border-[#c3cda7]">
+                        {receivedCount > 0 ? `${receivedCount} responses received` : 'Awaiting FPO responses'}
+                      </span>
+                    </td>
+                    <td className="py-4 px-3 text-center whitespace-nowrap">
+                      <span
+                        className={`inline-block px-2.5 py-0.5 rounded-[100px] text-[10px] font-mono font-semibold ${
+                          req.status === 'Receiving Offers' || req.status === 'Awaiting Responses' || req.status === 'Partially Responded'
+                            ? 'bg-[#fceace] text-[#683600]'
+                            : req.status === 'Draft'
+                            ? 'bg-[#f1efdf] text-[#6d6d6d] border border-[#c3cda7]'
+                            : 'bg-[#e6ecd5] text-[#1b6e53]'
+                        }`}
+                      >
+                        {req.status}
+                      </span>
+                    </td>
+                    <td className="py-4 px-4 text-right whitespace-nowrap">
+                      <Link
+                        to={`/buyer/requests/${req.id}`}
+                        className="py-1.5 px-3.5 rounded-[100px] bg-[#1b6e53] hover:bg-[#00372a] text-[#ffffff] text-xs font-bold transition shadow-2xs inline-flex items-center gap-1 cursor-pointer"
+                      >
+                        <span>View Responses</span>
+                        <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
+                      </Link>
+                    </td>
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
         </div>
