@@ -1,8 +1,5 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router'
-import PageHeader from '../../components/ui/PageHeader'
-import Card from '../../components/ui/Card'
-import Button from '../../components/ui/Button'
 import ProcurementRequestModal from '../../components/buyer/ProcurementRequestModal'
 import { mockFPOs } from '../../data/buyerData'
 
@@ -50,34 +47,44 @@ export default function FPOSearch() {
   })
 
   return (
-    <div className="space-y-6 pb-12">
-      {/* Top Header */}
-      <PageHeader
-        title="Find FPO Suppliers"
-        description="Discover verified Farmer Producer Organizations with certified aggregation hubs, cold chain infrastructure, and smallholder farmer clusters."
-        actions={
-          <Link to="/buyer/products">
-            <Button variant="primary" size="sm" className="text-xs bg-emerald-600 hover:bg-emerald-700">
-              🔍 Search by Product
-            </Button>
-          </Link>
-        }
-      />
+    <div className="space-y-8">
+      {/* 1. Page Header */}
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-3 border-b border-[#c3cda7]/60">
+        <div>
+          <div className="text-[10px] uppercase font-mono tracking-widest text-[#1b6e53] font-bold bg-[#e6ecd5] px-3 py-1 rounded-[100px] border border-[#c3cda7] inline-block mb-1.5">
+            SUPPLIER DIRECTORY // FPO FEDERATIONS
+          </div>
+          <h1 className="font-editorial text-3xl sm:text-4xl font-light text-[#00372a] tracking-tight">
+            Find <span className="italic font-normal">FPO Suppliers</span>
+          </h1>
+          <p className="text-xs sm:text-sm text-[#6d6d6d] mt-1 font-sans">
+            Discover verified Farmer Producer Organizations with certified aggregation hubs and quality traceability.
+          </p>
+        </div>
 
-      {/* Filter & Search Bar */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs space-y-4">
+        <Link
+          to="/buyer/products"
+          className="py-2.5 px-5 rounded-[100px] bg-[#1b6e53] hover:bg-[#00372a] text-[#ffffff] text-xs font-bold uppercase tracking-wider flex items-center gap-2 transition shadow-sm"
+        >
+          <span className="material-symbols-outlined text-[18px]">search</span>
+          <span>Search by Crop</span>
+        </Link>
+      </div>
+
+      {/* 2. Filter & Search Matrix */}
+      <section className="rounded-[24px] bg-[#ffffff] border border-[#c3cda7] p-6 shadow-xs space-y-4">
         <div className="flex flex-col md:flex-row gap-3">
           {/* Main search bar */}
           <div className="relative flex-1">
-            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 text-sm">
-              🏢
-            </div>
+            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] text-[#6d6d6d]">
+              apartment
+            </span>
             <input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search FPO name, district, or produce (e.g. Godavari, Tomato, Nashik, Kheda)..."
-              className="w-full pl-10 pr-4 py-2.5 text-xs sm:text-sm bg-slate-50/70 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white transition-colors"
+              className="w-full pl-11 pr-4 py-2.5 text-xs sm:text-sm bg-[#f1efdf]/50 border border-[#c3cda7] rounded-[100px] text-[#212529] placeholder-[#6d6d6d] focus:outline-none focus:ring-2 focus:ring-[#1b6e53] focus:bg-[#ffffff] transition font-sans"
             />
           </div>
 
@@ -86,7 +93,7 @@ export default function FPOSearch() {
             <select
               value={selectedProduct}
               onChange={(e) => setSelectedProduct(e.target.value)}
-              className="w-full text-xs font-medium px-3 py-2.5 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500"
+              className="w-full text-xs font-medium px-3.5 py-2.5 bg-[#f1efdf]/40 border border-[#c3cda7] rounded-[100px] focus:outline-none focus:ring-1 focus:ring-[#1b6e53] text-[#212529]"
             >
               <option value="All">All Commodities</option>
               <option value="Tomato">Tomato</option>
@@ -103,7 +110,7 @@ export default function FPOSearch() {
             <select
               value={selectedLocation}
               onChange={(e) => setSelectedLocation(e.target.value)}
-              className="w-full text-xs font-medium px-3 py-2.5 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500"
+              className="w-full text-xs font-medium px-3.5 py-2.5 bg-[#f1efdf]/40 border border-[#c3cda7] rounded-[100px] focus:outline-none focus:ring-1 focus:ring-[#1b6e53] text-[#212529]"
             >
               <option value="All">All Regions</option>
               <option value="Godavari">Godavari Delta (AP)</option>
@@ -118,7 +125,7 @@ export default function FPOSearch() {
             <select
               value={selectedSort}
               onChange={(e) => setSelectedSort(e.target.value)}
-              className="w-full text-xs font-medium px-3 py-2.5 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500"
+              className="w-full text-xs font-medium px-3.5 py-2.5 bg-[#f1efdf]/40 border border-[#c3cda7] rounded-[100px] focus:outline-none focus:ring-1 focus:ring-[#1b6e53] text-[#212529]"
             >
               <option value="reliability">Sort: Highest Reliability</option>
               <option value="farmers">Sort: Farmer Base Size</option>
@@ -127,71 +134,69 @@ export default function FPOSearch() {
           </div>
         </div>
 
-        {/* Active Filters Summary */}
-        <div className="flex flex-wrap items-center justify-between text-xs text-slate-500 pt-1 border-t border-slate-100">
+        {/* Summary strip */}
+        <div className="flex flex-wrap items-center justify-between text-xs text-[#6d6d6d] pt-2 border-t border-[#c3cda7]/40 font-mono">
           <div>
-            Showing <strong className="text-slate-800 font-semibold">{filteredFPOs.length}</strong> verified FPO organizations
+            Showing <strong className="text-[#00372a] font-bold">{filteredFPOs.length}</strong> verified FPO federations
           </div>
           <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1 text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded font-medium">
-              ✓ 100% SFAC / NABARD Verified
-            </span>
-            <span className="inline-flex items-center gap-1 text-blue-700 bg-blue-50 px-2 py-0.5 rounded font-medium">
-              📦 Physical Collection Hubs
+            <span className="inline-flex items-center gap-1 text-[#1b6e53] bg-[#e6ecd5] px-2.5 py-0.5 rounded-[100px] font-bold border border-[#c3cda7]">
+              ✓ SFAC / NABARD Registered
             </span>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* FPO Results Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* 3. FPO Results Grid */}
+      <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {filteredFPOs.map((fpo) => (
           <div
             key={fpo.id}
-            className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs hover:border-emerald-300 hover:shadow-md transition-all flex flex-col justify-between space-y-4"
+            className="rounded-[24px] bg-[#ffffff] border border-[#c3cda7] p-6 shadow-xs hover:border-[#1b6e53] hover:shadow-md transition flex flex-col justify-between space-y-4"
           >
             {/* Header info */}
-            <div>
+            <div className="space-y-3">
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="text-base font-bold text-slate-900">{fpo.name}</h3>
-                    <span className="text-[10px] font-semibold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                    <h3 className="font-editorial text-2xl font-bold text-[#00372a]">
+                      {fpo.name}
+                    </h3>
+                    <span className="text-[10px] font-mono font-bold text-[#1b6e53] bg-[#e6ecd5] px-2.5 py-0.5 rounded-[100px] border border-[#c3cda7]">
                       ✓ {fpo.status}
                     </span>
                   </div>
-                  <p className="text-xs text-slate-500 mt-1 flex items-center gap-1">
-                    <span>📍</span> {fpo.location}, {fpo.district}, {fpo.state} ({fpo.pincode})
+                  <p className="text-xs text-[#6d6d6d] font-mono mt-0.5 flex items-center gap-1">
+                    <span className="material-symbols-outlined text-[14px] text-[#1b6e53]">location_on</span>
+                    {fpo.location}, {fpo.district}, {fpo.state} ({fpo.pincode})
                   </p>
-                  <p className="text-[11px] text-slate-400 font-mono mt-0.5">{fpo.regNumber}</p>
+                  <p className="text-[10px] text-[#6d6d6d] font-mono mt-0.5">{fpo.regNumber}</p>
                 </div>
-                <div className="text-right shrink-0">
-                  <span className="text-xs font-bold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200">
-                    ★ {fpo.rating} ({fpo.reviewsCount})
-                  </span>
-                </div>
+                <span className="px-2.5 py-1 rounded-full bg-[#f1efdf] border border-[#c3cda7] text-xs font-bold text-[#683600] font-mono shrink-0">
+                  ★ {fpo.rating} ({fpo.reviewsCount})
+                </span>
               </div>
 
               {/* Tag badge */}
-              <div className="mt-3">
-                <span className="text-[11px] font-semibold bg-emerald-50 text-emerald-800 px-2.5 py-1 rounded-md border border-emerald-100">
+              <div>
+                <span className="text-[10px] font-mono font-bold bg-[#e6ecd5] text-[#1b6e53] px-2.5 py-1 rounded-[100px] border border-[#c3cda7]">
                   ✨ {fpo.badge}
                 </span>
               </div>
 
               {/* Overview snippet */}
-              <p className="text-xs text-slate-600 mt-3 leading-relaxed line-clamp-2">
+              <p className="text-xs text-[#353535] leading-relaxed line-clamp-2 font-sans">
                 {fpo.overview}
               </p>
             </div>
 
             {/* Specifications Matrix */}
-            <div className="bg-slate-50/90 rounded-xl p-4 space-y-2.5 text-xs border border-slate-200/70">
+            <div className="bg-[#f1efdf] rounded-[18px] p-4 space-y-2.5 text-xs border border-[#c3cda7]/50 font-sans">
               <div className="flex justify-between items-center">
-                <span className="text-slate-500">Products Supplied:</span>
+                <span className="text-[#6d6d6d]">Products Supplied:</span>
                 <div className="flex flex-wrap gap-1 justify-end max-w-xs">
                   {fpo.products.map((p) => (
-                    <span key={p} className="bg-white border border-slate-200 text-slate-700 px-1.5 py-0.5 rounded text-[11px] font-medium">
+                    <span key={p} className="bg-[#ffffff] border border-[#c3cda7]/60 text-[#212529] px-2 py-0.5 rounded text-[11px] font-medium font-mono">
                       {p}
                     </span>
                   ))}
@@ -199,48 +204,47 @@ export default function FPOSearch() {
               </div>
 
               <div className="flex justify-between items-center">
-                <span className="text-slate-500">Total Aggregated Capacity:</span>
-                <span className="font-bold text-slate-800">{fpo.approxCapacityVal}</span>
+                <span className="text-[#6d6d6d]">Total Aggregated Capacity:</span>
+                <span className="font-bold text-[#1b6e53] font-mono">{fpo.approxCapacityVal}</span>
               </div>
 
               <div className="flex justify-between items-center">
-                <span className="text-slate-500">Collection & Weighing Hubs:</span>
-                <span className="font-semibold text-slate-800">{fpo.hubsCount} Active Hubs ({fpo.farmerMembers} Farmers)</span>
+                <span className="text-[#6d6d6d]">Collection &amp; Weighing Hubs:</span>
+                <span className="font-semibold text-[#00372a] font-mono">{fpo.hubsCount} Active Hubs ({fpo.farmerMembers} Farmers)</span>
               </div>
 
               <div className="flex justify-between items-center">
-                <span className="text-slate-500">Reliability & On-Time Rate:</span>
-                <span className="font-bold text-emerald-700 flex items-center gap-1">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                  {fpo.reliabilityScore} Fulfillment
+                <span className="text-[#6d6d6d]">Reliability SLA:</span>
+                <span className="font-bold text-[#1b6e53] font-mono flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#1b6e53]"></span>
+                  {fpo.reliabilityScore} On-Time Fulfillment
                 </span>
               </div>
 
               <div className="flex justify-between items-center">
-                <span className="text-slate-500">Logistics Capability:</span>
-                <span className="font-medium text-slate-700 text-right">{fpo.deliveryCapability}</span>
+                <span className="text-[#6d6d6d]">Logistics Capability:</span>
+                <span className="font-medium text-[#212529] text-right">{fpo.deliveryCapability}</span>
               </div>
             </div>
 
             {/* Actions */}
-            <div className="pt-2 border-t border-slate-100 flex items-center gap-3">
-              <Link to={`/buyer/fpos/${fpo.id}`} className="flex-1">
-                <Button variant="outline" size="sm" className="w-full text-xs font-semibold">
-                  View Profile & Hubs
-                </Button>
+            <div className="pt-2 border-t border-[#c3cda7]/40 flex items-center gap-3">
+              <Link
+                to={`/buyer/fpos/${fpo.id}`}
+                className="flex-1 py-2.5 rounded-[100px] bg-[#ffffff] border border-[#c3cda7] hover:bg-[#f1efdf] text-xs font-semibold text-[#353535] text-center transition"
+              >
+                View Profile &amp; Hubs
               </Link>
-              <Button
-                variant="primary"
-                size="sm"
-                className="flex-1 text-xs font-semibold bg-emerald-600 hover:bg-emerald-700"
+              <button
                 onClick={() => handleOpenRequest(fpo)}
+                className="flex-1 py-2.5 rounded-[100px] bg-[#1b6e53] hover:bg-[#00372a] text-[#ffffff] text-xs font-bold text-center transition shadow-xs cursor-pointer"
               >
                 Send Request →
-              </Button>
+              </button>
             </div>
           </div>
         ))}
-      </div>
+      </section>
 
       {/* Procurement Request Modal */}
       <ProcurementRequestModal

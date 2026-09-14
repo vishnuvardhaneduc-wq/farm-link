@@ -1,43 +1,36 @@
 import React, { useState } from 'react'
 import { Outlet } from 'react-router'
-import Sidebar from '../components/navigation/Sidebar'
-import Topbar from '../components/navigation/Topbar'
-
-const buyerNavItems = [
-  { to: '/buyer/dashboard', label: 'Dashboard', icon: '📊' },
-  { to: '/buyer/demands', label: 'My Demands', icon: '📋' },
-  { to: '/buyer/demands/new', label: 'Post Demand', icon: '➕' },
-  { to: '/buyer/orders', label: 'Orders & Contracts', icon: '📦' },
-]
+import BuyerMarquee from '../components/buyer/BuyerMarquee'
+import BuyerSidebar from '../components/buyer/BuyerSidebar'
+import BuyerHeader from '../components/buyer/BuyerHeader'
+import BuyerFooter from '../components/buyer/BuyerFooter'
 
 export default function BuyerLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   return (
-    <div className="flex min-h-screen bg-slate-50 text-slate-900">
-      <Sidebar
-        brandTitle="FarmLink"
-        brandSubtitle="Buyer Procurement"
-        badge="Buyer"
-        badgeColor="bg-blue-100 text-blue-800"
-        navItems={buyerNavItems}
-        isOpen={sidebarOpen}
-        onClose={() => setSidebarOpen(false)}
-      />
+    <div className="min-h-screen flex flex-col bg-[#f1efdf] text-[#212529] font-sans antialiased selection:bg-[#e8fe85] selection:text-[#1b6e53]">
+      {/* 0. Top Operational Marquee Strip */}
+      <BuyerMarquee />
 
-      <div className="flex flex-1 flex-col overflow-hidden">
-        <Topbar
-          portalName="Buyer Portal"
-          title="Procurement Workspace"
-          user={{ name: 'AgroFresh Enterprise', role: 'Procurement Officer' }}
-          onMenuClick={() => setSidebarOpen(true)}
-        />
+      {/* Full Layout Shell */}
+      <div className="flex-1 flex flex-col lg:flex-row">
+        {/* Left Editorial Sidebar */}
+        <BuyerSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
-          <div className="mx-auto max-w-7xl">
+        {/* Main Content Column */}
+        <div className="flex-1 flex flex-col min-w-0">
+          {/* Top Editorial Header Bar */}
+          <BuyerHeader onMenuClick={() => setSidebarOpen(true)} />
+
+          {/* Main Workspace on Warm Bone Canvas */}
+          <main className="p-6 lg:p-10 space-y-8 flex-1">
             <Outlet />
-          </div>
-        </main>
+          </main>
+
+          {/* Footer */}
+          <BuyerFooter />
+        </div>
       </div>
     </div>
   )

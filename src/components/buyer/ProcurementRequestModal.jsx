@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import Button from '../ui/Button'
 
 export default function ProcurementRequestModal({
   isOpen,
@@ -15,7 +14,7 @@ export default function ProcurementRequestModal({
     targetPrice: initialData.targetPrice || initialData.indicativePrice?.replace(/[^0-9.]/g, '') || '28',
     deliveryDate: initialData.deliveryDate || '2026-09-18',
     deliveryLocation: 'Vijayawada Central Processing Hub',
-    targetFpo: initialData.fpoName || initialData.name || 'All Matching Verified FPOs in Region',
+    targetFpo: initialData.fpoName || initialData.name || 'All Matching Regional FPOs',
     notes: 'Standard optical sorting required. Delivery before 09:00 AM in refrigerated crates.'
   })
 
@@ -40,125 +39,135 @@ export default function ProcurementRequestModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 overflow-y-auto">
-      <div className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 overflow-y-auto">
+      <div className="relative w-full max-w-lg bg-[#ffffff] rounded-[24px] border border-[#c3cda7] shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
         {/* Modal Header */}
-        <div className="px-6 py-4 bg-slate-900 text-white flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500 text-slate-950 font-bold text-sm">
-              📋
+        <div className="px-6 py-5 bg-[#1b6e53] text-[#ffffff] flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#e8fe85] text-[#1b6e53] font-bold text-sm">
+              <span className="material-symbols-outlined text-[18px]">receipt_long</span>
             </span>
             <div>
-              <h3 className="font-semibold text-base text-white">Send Procurement Request (RFQ)</h3>
-              <p className="text-xs text-slate-300">Forward request to verified FPO aggregation hubs</p>
+              <h3 className="font-editorial text-2xl font-bold text-[#ffffff] leading-none">
+                Send Procurement Request (RFQ)
+              </h3>
+              <p className="text-[11px] text-[#e6ecd5]/90 font-mono mt-0.5">
+                Forward tender to verified FPO aggregation hubs
+              </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors"
+            className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition cursor-pointer"
           >
             ✕
           </button>
         </div>
 
         {submitted ? (
-          <div className="p-6 text-center space-y-4">
-            <div className="mx-auto w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-2xl font-bold">
+          <div className="p-6 text-center space-y-4 bg-[#f1efdf]">
+            <div className="mx-auto w-12 h-12 bg-[#e8fe85] text-[#1b6e53] rounded-full flex items-center justify-center text-2xl font-bold border border-[#c3cda7]">
               ✓
             </div>
             <div>
-              <h4 className="text-lg font-bold text-slate-900">Procurement Request Published!</h4>
-              <p className="text-xs text-slate-500 mt-1">
-                Ref ID: <span className="font-mono font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">{generatedRef}</span>
+              <h4 className="font-editorial text-2xl font-bold text-[#00372a]">
+                Procurement Request Published!
+              </h4>
+              <p className="text-xs text-[#6d6d6d] mt-1 font-mono">
+                Ref ID: <span className="font-bold text-[#1b6e53] bg-[#ffffff] px-2.5 py-0.5 rounded-[100px] border border-[#c3cda7]">{generatedRef}</span>
               </p>
             </div>
-            <div className="bg-slate-50 rounded-xl p-4 text-left text-xs text-slate-600 space-y-2 border border-slate-200/80">
+            <div className="bg-[#ffffff] rounded-[18px] p-4 text-left text-xs text-[#212529] space-y-2 border border-[#c3cda7] font-sans">
               <div className="flex justify-between">
-                <span className="text-slate-400">Commodity:</span>
-                <span className="font-semibold text-slate-800">{formData.crop} ({formData.grade})</span>
+                <span className="text-[#6d6d6d]">Commodity:</span>
+                <span className="font-bold">{formData.crop} ({formData.grade})</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-400">Target Quantity:</span>
-                <span className="font-semibold text-slate-800">{formData.quantity} {formData.unit}</span>
+                <span className="text-[#6d6d6d]">Target Volume:</span>
+                <span className="font-bold text-[#1b6e53] font-mono">{formData.quantity} {formData.unit}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-400">Target Supplier:</span>
-                <span className="font-semibold text-slate-800">{formData.targetFpo}</span>
+                <span className="text-[#6d6d6d]">Target Supplier:</span>
+                <span className="font-bold font-mono text-[#00372a]">{formData.targetFpo}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-400">Required Delivery:</span>
-                <span className="font-semibold text-slate-800">{formData.deliveryDate}</span>
+                <span className="text-[#6d6d6d]">Required Delivery:</span>
+                <span className="font-mono">{formData.deliveryDate}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-400">Status:</span>
-                <span className="inline-flex items-center gap-1 font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
-                  Receiving Offers from FPO
+                <span className="text-[#6d6d6d]">Status:</span>
+                <span className="inline-flex items-center gap-1 font-mono font-bold text-[#683600] bg-[#fceace] px-2.5 py-0.5 rounded-[100px] border border-[#c3cda7]">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#683600] animate-pulse"></span>
+                  Receiving Offers from FPOs
                 </span>
               </div>
             </div>
 
-            <div className="p-3 bg-emerald-50/70 border border-emerald-200 rounded-xl text-left text-xs text-emerald-900">
-              <p className="font-semibold flex items-center gap-1.5">
+            <div className="p-3.5 bg-[#e6ecd5] border border-[#c3cda7] rounded-[16px] text-left text-xs text-[#1b6e53] space-y-1">
+              <p className="font-bold flex items-center gap-1.5 font-mono">
                 <span>🌾</span> Discovery Principle:
               </p>
-              <p className="text-[11px] text-emerald-800 mt-0.5">
-                The FPO manager and regional collection hubs have been notified. Once they aggregate supply across member farmers, binding quotes with exact hub batches will appear in your <strong>Offers</strong> section.
+              <p className="text-[11px] leading-relaxed">
+                The FPO manager and local collection hubs have been notified. Once member farmers check in at physical intake scales, binding offers will appear in your <strong>My Requests / Demands</strong> workspace.
               </p>
             </div>
 
             <div className="flex gap-3 pt-2">
-              <Button variant="secondary" className="flex-1" onClick={handleReset}>
+              <button
+                type="button"
+                className="flex-1 py-2.5 rounded-[100px] border border-[#c3cda7] text-xs font-semibold text-[#353535] bg-[#ffffff] hover:bg-[#f1efdf] transition cursor-pointer"
+                onClick={handleReset}
+              >
                 Close
-              </Button>
-              <Button
-                variant="primary"
-                className="flex-1"
+              </button>
+              <button
+                type="button"
+                className="flex-1 py-2.5 rounded-[100px] bg-[#1b6e53] text-[#ffffff] text-xs font-bold hover:bg-[#00372a] transition shadow-xs cursor-pointer"
                 onClick={() => {
                   handleReset()
                   window.location.href = '/buyer/demands'
                 }}
               >
                 View in My Requests →
-              </Button>
+              </button>
             </div>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="p-6 space-y-4">
-            {/* Target FPO Notification banner */}
-            <div className="bg-emerald-50 border border-emerald-200/80 rounded-xl p-3 flex items-start gap-2.5">
-              <span className="text-emerald-700 text-lg">🏢</span>
+          <form onSubmit={handleSubmit} className="p-6 space-y-4 bg-[#f1efdf]">
+            {/* Recipient banner */}
+            <div className="bg-[#e6ecd5] border border-[#c3cda7] rounded-[16px] p-3 flex items-start gap-2.5">
+              <span className="material-symbols-outlined text-[#1b6e53] text-[20px] shrink-0 mt-0.5">apartment</span>
               <div className="text-xs">
-                <p className="font-semibold text-emerald-900">Recipient Supplier:</p>
-                <p className="text-emerald-700 font-medium">{formData.targetFpo}</p>
-                <p className="text-[11px] text-emerald-600/90 mt-0.5">
+                <p className="font-bold text-[#1b6e53] font-mono uppercase">Recipient FPO:</p>
+                <p className="text-[#00372a] font-semibold">{formData.targetFpo}</p>
+                <p className="text-[11px] text-[#1b6e53] mt-0.5">
                   Discovery stage: Sending this RFQ requests binding quotes from this FPO aggregation network.
                 </p>
               </div>
             </div>
 
-            {/* Commodity & Grade */}
+            {/* Crop & Grade */}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Commodity / Crop
+                <label className="block text-[11px] font-semibold text-[#353535] mb-1 font-mono uppercase">
+                  Commodity
                 </label>
                 <input
                   type="text"
                   required
                   value={formData.crop}
                   onChange={(e) => setFormData({ ...formData, crop: e.target.value })}
-                  className="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white"
+                  className="w-full text-xs px-3.5 py-2.5 bg-[#ffffff] border border-[#c3cda7] rounded-[100px] focus:outline-none focus:ring-1 focus:ring-[#1b6e53]"
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                <label className="block text-[11px] font-semibold text-[#353535] mb-1 font-mono uppercase">
                   Required Grade
                 </label>
                 <select
                   value={formData.grade}
                   onChange={(e) => setFormData({ ...formData, grade: e.target.value })}
-                  className="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white"
+                  className="w-full text-xs px-3.5 py-2.5 bg-[#ffffff] border border-[#c3cda7] rounded-[100px] focus:outline-none focus:ring-1 focus:ring-[#1b6e53]"
                 >
                   <option value="Grade A">Grade A (Premium)</option>
                   <option value="Grade B">Grade B (Commercial)</option>
@@ -171,8 +180,8 @@ export default function ProcurementRequestModal({
             {/* Quantity & Target Budget */}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Required Quantity (kg)
+                <label className="block text-[11px] font-semibold text-[#353535] mb-1 font-mono uppercase">
+                  Target Quantity (kg)
                 </label>
                 <input
                   type="number"
@@ -181,11 +190,11 @@ export default function ProcurementRequestModal({
                   step="50"
                   value={formData.quantity}
                   onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
-                  className="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white"
+                  className="w-full text-xs px-3.5 py-2.5 bg-[#ffffff] border border-[#c3cda7] rounded-[100px] focus:outline-none focus:ring-1 focus:ring-[#1b6e53] font-mono"
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                <label className="block text-[11px] font-semibold text-[#353535] mb-1 font-mono uppercase">
                   Indicative Target Rate (₹/kg)
                 </label>
                 <input
@@ -193,7 +202,7 @@ export default function ProcurementRequestModal({
                   step="0.5"
                   value={formData.targetPrice}
                   onChange={(e) => setFormData({ ...formData, targetPrice: e.target.value })}
-                  className="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white"
+                  className="w-full text-xs px-3.5 py-2.5 bg-[#ffffff] border border-[#c3cda7] rounded-[100px] focus:outline-none focus:ring-1 focus:ring-[#1b6e53] font-mono"
                 />
               </div>
             </div>
@@ -201,57 +210,64 @@ export default function ProcurementRequestModal({
             {/* Delivery Date & Drop location */}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Required Delivery Date
+                <label className="block text-[11px] font-semibold text-[#353535] mb-1 font-mono uppercase">
+                  Delivery Date
                 </label>
                 <input
                   type="date"
                   required
                   value={formData.deliveryDate}
                   onChange={(e) => setFormData({ ...formData, deliveryDate: e.target.value })}
-                  className="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white"
+                  className="w-full text-xs px-3.5 py-2.5 bg-[#ffffff] border border-[#c3cda7] rounded-[100px] focus:outline-none focus:ring-1 focus:ring-[#1b6e53] font-mono"
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Delivery Destination Hub
+                <label className="block text-[11px] font-semibold text-[#353535] mb-1 font-mono uppercase">
+                  Destination Hub Dock
                 </label>
                 <input
                   type="text"
                   value={formData.deliveryLocation}
                   onChange={(e) => setFormData({ ...formData, deliveryLocation: e.target.value })}
-                  className="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white"
+                  className="w-full text-xs px-3.5 py-2.5 bg-[#ffffff] border border-[#c3cda7] rounded-[100px] focus:outline-none focus:ring-1 focus:ring-[#1b6e53]"
                 />
               </div>
             </div>
 
-            {/* Quality & Packing Specs */}
+            {/* Notes */}
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Specific Quality & Packing Instructions
+              <label className="block text-[11px] font-semibold text-[#353535] mb-1 font-mono uppercase">
+                Packing &amp; Quality Specifications
               </label>
               <textarea
                 rows="2"
                 value={formData.notes}
                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                className="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white"
-                placeholder="E.g., Crates packaging, max 5% moisture, FSSAI lot report required..."
+                className="w-full text-xs px-3.5 py-2.5 bg-[#ffffff] border border-[#c3cda7] rounded-[16px] focus:outline-none focus:ring-1 focus:ring-[#1b6e53]"
+                placeholder="Crates packaging, optical sorting, FSSAI lot report..."
               />
             </div>
 
-            {/* Footnote / Disclaimer */}
-            <p className="text-[11px] text-slate-500 bg-slate-50 p-2.5 rounded-lg border border-slate-200/60">
-              ℹ️ <strong>B2B Procurement Rule:</strong> This sends a non-binding Request for Quote (RFQ). The FPO will respond with committed lot availability and pricing. You will select and confirm the order only after comparing received offers.
+            {/* Notice */}
+            <p className="text-[11px] text-[#6d6d6d] bg-[#ffffff] p-3 rounded-[16px] border border-[#c3cda7]/60">
+              ℹ️ <strong>B2B Procurement Rule:</strong> This publishes a non-binding Request for Quote (RFQ). The FPO responds with committed lot availability and pricing. You confirm the order only after comparing received offers.
             </p>
 
             {/* Actions */}
             <div className="flex gap-3 pt-2">
-              <Button type="button" variant="secondary" className="flex-1" onClick={onClose}>
+              <button
+                type="button"
+                className="flex-1 py-2.5 rounded-[100px] border border-[#c3cda7] text-xs font-semibold text-[#353535] bg-[#ffffff] hover:bg-[#faf9f0] transition cursor-pointer"
+                onClick={onClose}
+              >
                 Cancel
-              </Button>
-              <Button type="submit" variant="primary" className="flex-1">
+              </button>
+              <button
+                type="submit"
+                className="flex-1 py-2.5 rounded-[100px] bg-[#1b6e53] hover:bg-[#00372a] text-[#ffffff] text-xs font-bold transition shadow-sm cursor-pointer"
+              >
                 Publish Request →
-              </Button>
+              </button>
             </div>
           </form>
         )}

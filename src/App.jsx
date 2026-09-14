@@ -35,8 +35,13 @@ import Analytics from './pages/fpo/Analytics'
 
 // Buyer Pages
 import BuyerDashboard from './pages/buyer/Dashboard'
+import Products from './pages/buyer/Products'
+import ProductResults from './pages/buyer/ProductResults'
+import FPOSearch from './pages/buyer/FPOSearch'
+import FPODetail from './pages/buyer/FPODetail'
 import Demands from './pages/buyer/Demands'
 import CreateDemand from './pages/buyer/CreateDemand'
+import RequestDetail from './pages/buyer/RequestDetail'
 import Orders from './pages/buyer/Orders'
 
 // Hub Pages
@@ -86,8 +91,14 @@ function App() {
       <Route path="/buyer" element={<BuyerLayout />}>
         <Route index element={<Navigate to="/buyer/dashboard" replace />} />
         <Route path="dashboard" element={<BuyerDashboard />} />
+        <Route path="products" element={<Products />} />
+        <Route path="products/results" element={<ProductResults />} />
+        <Route path="fpos" element={<FPOSearch />} />
+        <Route path="fpos/:id" element={<FPODetail />} />
         <Route path="demands" element={<Demands />} />
         <Route path="demands/new" element={<CreateDemand />} />
+        <Route path="demands/:id" element={<RequestDetail />} />
+        <Route path="requests/:id" element={<RequestDetail />} />
         <Route path="orders" element={<Orders />} />
       </Route>
 

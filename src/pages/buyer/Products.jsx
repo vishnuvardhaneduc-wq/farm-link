@@ -1,8 +1,5 @@
 import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router'
-import PageHeader from '../../components/ui/PageHeader'
-import Card from '../../components/ui/Card'
-import Button from '../../components/ui/Button'
 import {
   quickCategories,
   recentSearches,
@@ -42,72 +39,82 @@ export default function Products() {
     : mockCommoditiesCatalog.filter((c) => c.category.toLowerCase() === selectedCategory.toLowerCase())
 
   return (
-    <div className="space-y-8 pb-12">
-      {/* 1. Page Header */}
-      <PageHeader
-        title="Find Agricultural Products"
-        description="Search institutional crop lots directly aggregated from verified Farmer Producer Organizations (FPOs) and regional collection hubs."
-        actions={
-          <Link to="/buyer/fpos">
-            <Button variant="outline" className="text-xs">
-              🏢 Browse by FPO Directory
-            </Button>
-          </Link>
-        }
-      />
+    <div className="space-y-8">
+      {/* 1. Header Section */}
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-3 border-b border-[#c3cda7]/60">
+        <div>
+          <div className="text-[10px] uppercase font-mono tracking-widest text-[#1b6e53] font-bold bg-[#e6ecd5] px-3 py-1 rounded-[100px] border border-[#c3cda7] inline-block mb-1.5">
+            DISCOVERY CATALOG // AGRICULTURAL SUPPLY
+          </div>
+          <h1 className="font-editorial text-3xl sm:text-4xl font-light text-[#00372a] tracking-tight">
+            Find <span className="italic font-normal">Agricultural Products</span>
+          </h1>
+          <p className="text-xs sm:text-sm text-[#6d6d6d] mt-1 font-sans">
+            Search crops, vegetables, and grains aggregated at regional FPO collection centers.
+          </p>
+        </div>
 
-      {/* 2. Primary Search & Filter Workspace */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8 space-y-6">
+        <Link
+          to="/buyer/fpos"
+          className="py-2.5 px-5 rounded-[100px] bg-[#e6ecd5] hover:bg-[#c3cda7]/60 text-[#1b6e53] border border-[#c3cda7] text-xs font-bold uppercase tracking-wider flex items-center gap-2 transition"
+        >
+          <span className="material-symbols-outlined text-[18px]">apartment</span>
+          <span>FPO Directory</span>
+        </Link>
+      </div>
+
+      {/* 2. Main Search & Filter Console */}
+      <section className="rounded-[24px] bg-[#ffffff] border border-[#c3cda7] p-6 lg:p-8 shadow-xs space-y-6">
         <form onSubmit={handleSearch} className="space-y-6">
-          {/* Main Search Input */}
+          {/* Main Search Bar */}
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
-              Product Search Keyword
+            <label className="block text-[10px] font-mono font-bold uppercase tracking-widest text-[#1b6e53] mb-2">
+              Primary Crop Keyword
             </label>
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 text-lg">
-                🔍
-              </div>
+              <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[22px] text-[#6d6d6d]">
+                search
+              </span>
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search crops, vegetables, fruits (e.g. Tomato, Onion, Potato, Rice, Banana)..."
-                className="w-full pl-12 pr-4 py-3.5 text-base bg-slate-50/70 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:bg-white placeholder:text-slate-400 transition-all shadow-2xs"
+                className="w-full pl-12 pr-4 py-3.5 text-sm sm:text-base bg-[#f1efdf]/50 border border-[#c3cda7] rounded-[100px] text-[#212529] placeholder-[#6d6d6d] focus:outline-none focus:ring-2 focus:ring-[#1b6e53] focus:bg-[#ffffff] transition"
               />
             </div>
           </div>
 
           {/* Filter Matrix */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 pt-1">
-            {/* Product / Category */}
+            {/* Category */}
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+              <label className="block text-[11px] font-semibold text-[#353535] mb-1.5 font-mono uppercase tracking-wider">
                 Category
               </label>
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full text-xs font-medium px-3 py-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                className="w-full text-xs font-medium px-3.5 py-2.5 bg-[#f1efdf]/40 border border-[#c3cda7] rounded-[100px] focus:outline-none focus:ring-1 focus:ring-[#1b6e53] text-[#212529]"
               >
                 <option value="All">All Categories</option>
                 <option value="Vegetables">Vegetables</option>
                 <option value="Fruits">Fruits</option>
-                <option value="Grains">Grains & Cereals</option>
-                <option value="Pulses">Pulses & Legumes</option>
+                <option value="Grains">Grains &amp; Cereals</option>
+                <option value="Pulses">Pulses &amp; Legumes</option>
                 <option value="Spices">Spices</option>
               </select>
             </div>
 
             {/* Grade */}
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                Target Grade
+              <label className="block text-[11px] font-semibold text-[#353535] mb-1.5 font-mono uppercase tracking-wider">
+                Grade Spec
               </label>
               <select
                 value={selectedGrade}
                 onChange={(e) => setSelectedGrade(e.target.value)}
-                className="w-full text-xs font-medium px-3 py-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                className="w-full text-xs font-medium px-3.5 py-2.5 bg-[#f1efdf]/40 border border-[#c3cda7] rounded-[100px] focus:outline-none focus:ring-1 focus:ring-[#1b6e53] text-[#212529]"
               >
                 <option value="All">All Commercial Grades</option>
                 <option value="Grade A">Grade A (Premium)</option>
@@ -119,33 +126,33 @@ export default function Products() {
 
             {/* Quantity */}
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                Target Quantity (kg)
+              <label className="block text-[11px] font-semibold text-[#353535] mb-1.5 font-mono uppercase tracking-wider">
+                Target Volume
               </label>
               <select
                 value={selectedQuantity}
                 onChange={(e) => setSelectedQuantity(e.target.value)}
-                className="w-full text-xs font-medium px-3 py-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                className="w-full text-xs font-medium px-3.5 py-2.5 bg-[#f1efdf]/40 border border-[#c3cda7] rounded-[100px] focus:outline-none focus:ring-1 focus:ring-[#1b6e53] text-[#212529]"
               >
                 <option value="500">500 kg (Small Bulk)</option>
                 <option value="1000">1,000 kg (1 MT)</option>
                 <option value="2500">2,500 kg (2.5 MT)</option>
                 <option value="5000">5,000 kg (5 MT)</option>
-                <option value="10000">10,000+ kg (Commercial Fleet)</option>
+                <option value="10000">10,000+ kg (Commercial)</option>
               </select>
             </div>
 
-            {/* Location / Belt */}
+            {/* Location */}
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                FPO Location / Belt
+              <label className="block text-[11px] font-semibold text-[#353535] mb-1.5 font-mono uppercase tracking-wider">
+                FPO Belt / Location
               </label>
               <select
                 value={selectedLocation}
                 onChange={(e) => setSelectedLocation(e.target.value)}
-                className="w-full text-xs font-medium px-3 py-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                className="w-full text-xs font-medium px-3.5 py-2.5 bg-[#f1efdf]/40 border border-[#c3cda7] rounded-[100px] focus:outline-none focus:ring-1 focus:ring-[#1b6e53] text-[#212529]"
               >
-                <option value="All">All FPO Belts</option>
+                <option value="All">All Regional Belts</option>
                 <option value="East Godavari">East Godavari, AP</option>
                 <option value="West Godavari">West Godavari, AP</option>
                 <option value="Krishna District">Krishna District, AP</option>
@@ -154,58 +161,59 @@ export default function Products() {
               </select>
             </div>
 
-            {/* Delivery Timeframe */}
+            {/* Timeframe */}
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                Delivery Timeframe
+              <label className="block text-[11px] font-semibold text-[#353535] mb-1.5 font-mono uppercase tracking-wider">
+                Delivery Window
               </label>
               <select
                 value={selectedTimeframe}
                 onChange={(e) => setSelectedTimeframe(e.target.value)}
-                className="w-full text-xs font-medium px-3 py-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                className="w-full text-xs font-medium px-3.5 py-2.5 bg-[#f1efdf]/40 border border-[#c3cda7] rounded-[100px] focus:outline-none focus:ring-1 focus:ring-[#1b6e53] text-[#212529]"
               >
                 <option value="Urgent (< 48 hrs)">Urgent (&lt; 48 hrs)</option>
                 <option value="Within 7 days">Within 7 days</option>
                 <option value="Within 14 days">Within 14 days</option>
-                <option value="Monthly Forward Contract">Monthly Forward Contract</option>
+                <option value="Monthly Forward Contract">Monthly Contract</option>
               </select>
             </div>
           </div>
 
-          {/* Action Row */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2 border-t border-slate-100">
+          {/* Action Strip */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-3 border-t border-[#c3cda7]/50">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs font-semibold text-slate-500">Recently Searched:</span>
+              <span className="text-[11px] font-mono text-[#6d6d6d] uppercase tracking-wider">
+                Recently Searched:
+              </span>
               {recentSearches.map((crop) => (
                 <button
                   key={crop}
                   type="button"
                   onClick={() => handleQuickClick(crop)}
-                  className="text-xs px-2.5 py-1 rounded-full bg-slate-100 hover:bg-emerald-100 hover:text-emerald-800 text-slate-700 font-medium transition-colors"
+                  className="text-xs px-3 py-1 rounded-[100px] bg-[#f1efdf] hover:bg-[#e8fe85] hover:text-[#1b6e53] text-[#212529] font-medium border border-[#c3cda7] transition cursor-pointer"
                 >
                   {crop}
                 </button>
               ))}
             </div>
 
-            <Button
+            <button
               type="submit"
-              variant="primary"
-              size="lg"
-              className="w-full sm:w-auto px-8 bg-emerald-600 hover:bg-emerald-700 font-semibold shadow-sm"
+              className="w-full sm:w-auto py-3 px-8 rounded-[100px] bg-[#1b6e53] hover:bg-[#00372a] text-[#ffffff] text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-sm transition active:scale-[0.99] cursor-pointer"
             >
-              Search →
-            </Button>
+              <span>Search Available FPOs</span>
+              <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+            </button>
           </div>
         </form>
-      </div>
+      </section>
 
-      {/* 3. Quick Categories */}
-      <div className="space-y-3">
-        <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500">
-          Quick Commodity Categories
-        </h3>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+      {/* 3. Quick Commodity Categories */}
+      <section className="space-y-3">
+        <div className="text-[10px] uppercase font-mono tracking-widest text-[#6d6d6d]">
+          COMMODITY CATEGORIES // QUICK SELECT
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
           {quickCategories.map((cat) => {
             const isSelected = selectedCategory === cat.name
             return (
@@ -215,34 +223,34 @@ export default function Products() {
                 onClick={() => {
                   setSelectedCategory(isSelected ? 'All' : cat.name)
                 }}
-                className={`p-4 rounded-xl border text-left transition-all ${
+                className={`p-4 rounded-[20px] border text-left transition-all cursor-pointer ${
                   isSelected
-                    ? 'bg-emerald-50 border-emerald-500 shadow-xs'
-                    : 'bg-white border-slate-200 hover:border-emerald-300 hover:bg-slate-50/80 shadow-2xs'
+                    ? 'bg-[#e8fe85] border-[#1b6e53] text-[#1b6e53] shadow-xs'
+                    : 'bg-[#ffffff] border-[#c3cda7] hover:bg-[#f1efdf] text-[#212529]'
                 }`}
               >
                 <span className="text-2xl block mb-2">{cat.icon}</span>
-                <h4 className="text-sm font-bold text-slate-900">{cat.name}</h4>
-                <p className="text-[11px] text-slate-500 mt-0.5">{cat.count}</p>
+                <h4 className="font-editorial text-lg font-bold leading-tight">{cat.name}</h4>
+                <p className="text-[11px] text-[#6d6d6d] font-mono mt-0.5">{cat.count}</p>
               </button>
             )
           })}
         </div>
-      </div>
+      </section>
 
       {/* 4. Live Seasonal Produce Discovery Grid */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
+      <section className="rounded-[24px] bg-[#ffffff] border border-[#c3cda7] p-6 lg:p-7 shadow-xs space-y-5">
+        <div className="flex items-center justify-between flex-wrap gap-3 pb-4 border-b border-[#c3cda7]/50">
           <div>
-            <h3 className="text-base font-bold text-slate-900">
-              Featured Harvest Catalog
-            </h3>
-            <p className="text-xs text-slate-500">
-              Live aggregated commodities ready for forward procurement requests
-            </p>
+            <div className="text-[10px] font-mono uppercase tracking-widest text-[#1b6e53] font-bold bg-[#e6ecd5] px-2 py-0.5 rounded-full border border-[#c3cda7] inline-block mb-1">
+              LIVE HARVEST CAPACITIES
+            </div>
+            <h2 className="font-editorial text-2xl font-bold text-[#00372a] tracking-tight">
+              Featured Regional Commodities
+            </h2>
           </div>
-          <span className="text-xs text-slate-400">
-            Showing {filteredCatalog.length} commodities
+          <span className="text-xs font-mono text-[#6d6d6d]">
+            Showing {filteredCatalog.length} commodities aggregated at hubs
           </span>
         </div>
 
@@ -250,63 +258,54 @@ export default function Products() {
           {filteredCatalog.map((commodity) => (
             <div
               key={commodity.id}
-              className="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-2xs hover:shadow-md hover:border-emerald-300 transition-all flex flex-col justify-between"
+              className="rounded-[20px] bg-[#f1efdf] border border-[#c3cda7] p-5 flex flex-col justify-between hover:shadow-md hover:border-[#1b6e53] transition space-y-4"
             >
               <div className="space-y-3">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
-                    <span className="text-3xl p-2 bg-slate-50 rounded-xl border border-slate-100">
+                    <span className="text-3xl p-2 bg-[#ffffff] rounded-[16px] border border-[#c3cda7]">
                       {commodity.icon}
                     </span>
                     <div>
-                      <h4 className="text-base font-bold text-slate-900">{commodity.name}</h4>
-                      <span className="text-xs text-slate-500">{commodity.category}</span>
+                      <h3 className="font-editorial text-2xl font-bold text-[#00372a] leading-tight">
+                        {commodity.name}
+                      </h3>
+                      <span className="text-[11px] font-mono text-[#6d6d6d]">{commodity.category}</span>
                     </div>
                   </div>
-                  <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#1b6e53] bg-[#e6ecd5] px-2 py-0.5 rounded-full border border-[#c3cda7]">
                     {commodity.seasonality}
                   </span>
                 </div>
 
-                <div className="space-y-2 text-xs pt-1">
-                  <div className="flex justify-between py-1 border-b border-slate-100">
-                    <span className="text-slate-500">Indicative Price Band:</span>
-                    <span className="font-bold text-slate-800">{commodity.indicativePriceRange}</span>
+                <div className="space-y-2 text-xs py-3 border-y border-[#c3cda7]/50">
+                  <div className="flex justify-between items-baseline">
+                    <span className="text-[#6d6d6d]">Indicative Price Band:</span>
+                    <span className="font-bold text-[#683600] font-mono text-sm">{commodity.indicativePriceRange}</span>
                   </div>
-                  <div className="flex justify-between py-1 border-b border-slate-100">
-                    <span className="text-slate-500">Aggregated Capacity:</span>
-                    <span className="font-semibold text-slate-800">{commodity.aggregatedCapacity}</span>
+                  <div className="flex justify-between items-baseline">
+                    <span className="text-[#6d6d6d]">Aggregated Capacity:</span>
+                    <span className="font-bold text-[#1b6e53] font-mono">{commodity.aggregatedCapacity}</span>
                   </div>
-                  <div className="flex justify-between py-1 border-b border-slate-100">
-                    <span className="text-slate-500">Verified FPO Suppliers:</span>
-                    <span className="font-semibold text-emerald-700">{commodity.activeFpos} Active FPOs</span>
-                  </div>
-                  <div className="pt-1">
-                    <span className="text-slate-400 block text-[11px] mb-1">Standard Grades:</span>
-                    <div className="flex flex-wrap gap-1">
-                      {commodity.grades.map((g) => (
-                        <span key={g} className="text-[10px] font-medium bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded">
-                          {g}
-                        </span>
-                      ))}
-                    </div>
+                  <div className="flex justify-between items-baseline">
+                    <span className="text-[#6d6d6d]">Connected FPOs:</span>
+                    <span className="font-semibold text-[#00372a] font-mono">{commodity.activeFpos} Active FPOs</span>
                   </div>
                 </div>
               </div>
 
-              <div className="pt-4 mt-4 border-t border-slate-100 flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => handleQuickClick(commodity.name)}
-                  className="w-full py-2 px-3 text-xs font-semibold rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 transition-colors text-center cursor-pointer"
-                >
-                  View Available FPO Suppliers →
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={() => handleQuickClick(commodity.name)}
+                className="w-full py-2.5 px-4 rounded-[100px] bg-[#1b6e53] hover:bg-[#00372a] text-[#ffffff] text-xs font-bold text-center transition flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
+              >
+                <span>View Matching FPOs</span>
+                <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
+              </button>
             </div>
           ))}
         </div>
-      </div>
+      </section>
     </div>
   )
 }
