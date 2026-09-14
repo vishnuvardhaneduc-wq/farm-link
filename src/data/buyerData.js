@@ -203,6 +203,76 @@ export const initialProcurementRequests = [
     ]
   },
   {
+    id: 'REQ-1026',
+    buyer: 'FreshMart Foods',
+    deliveryDate: '20 Sep 2026',
+    deliveryLocation: 'Hyderabad Aggregation Dock #02',
+    notes: 'Direct farm lot supply with certified electronic weighment slips.',
+    status: 'Waiting Response',
+    statusVariant: 'warning',
+    createdDate: '14 Sep 2026, 08:30 AM',
+    items: [
+      {
+        itemId: 'item-1026-1',
+        crop: 'Potato',
+        variety: 'Kufri Jyoti',
+        quantity: '2,000 kg',
+        quantityVal: 2000,
+        unit: 'kg',
+        grade: 'Grade A',
+        targetPrice: '₹20 / kg',
+        qualitySpecs: '45-60mm diameter, sorted, unwashed dry.',
+        packaging: '50kg gunny bags',
+        selectedFposCount: '2 FPOs requested',
+        selectedFpoOfferId: null,
+        responses: [
+          {
+            id: 'resp-1026-1-1',
+            fpoId: 'fpo-godavari',
+            fpoName: 'Godavari Farmers FPO',
+            location: 'Rajamahendravaram',
+            status: 'NO_RESPONSE',
+            statusLabel: 'NO RESPONSE',
+            statusStyle: 'bg-[#f1efdf] text-[#6d6d6d] border border-[#c3cda7]',
+            requestSentDate: '14 Sep 2026',
+            notes: 'Awaiting FPO manager review and cold storage allocation.',
+            timestamp: '14 Sep 2026',
+            contact: 'Hub Procurement Desk'
+          }
+        ]
+      },
+      {
+        itemId: 'item-1026-2',
+        crop: 'Onion',
+        variety: 'Garwa Red',
+        quantity: '1,200 kg',
+        quantityVal: 1200,
+        unit: 'kg',
+        grade: 'Grade A',
+        targetPrice: '₹23 / kg',
+        qualitySpecs: 'Cured, sorted, 50mm+ diameter.',
+        packaging: '25kg mesh bags',
+        selectedFposCount: '2 FPOs requested',
+        selectedFpoOfferId: null,
+        responses: [
+          {
+            id: 'resp-1026-2-1',
+            fpoId: 'fpo-godavari',
+            fpoName: 'Godavari Farmers FPO',
+            location: 'Rajamahendravaram',
+            status: 'NO_RESPONSE',
+            statusLabel: 'NO RESPONSE',
+            statusStyle: 'bg-[#f1efdf] text-[#6d6d6d] border border-[#c3cda7]',
+            requestSentDate: '14 Sep 2026',
+            notes: 'Awaiting FPO manager review and member harvest intake schedule.',
+            timestamp: '14 Sep 2026',
+            contact: 'Hub Procurement Desk'
+          }
+        ]
+      }
+    ]
+  },
+  {
     id: 'REQ-1024',
     buyer: 'AgroFresh Enterprise',
     deliveryDate: '18 Sep 2026',
@@ -491,6 +561,99 @@ export function updateItemOfferSelection(demandId, itemId, offerId) {
       }
     })
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
+  } catch (e) {
+    console.error(e)
+  }
+}
+
+export function submitFpoResponse(demandId, fpoInfo, responsesPerItem) {
+  if (typeof window === 'undefined') return
+  try {
+    const demands = getStoredDemands()
+    const updated = demands.map((d) => {
+      if (d.id !== demandId) return d
+      const updatedItems = (d.items || []).map((item) => {
+        const itemResp = responsesPerItem[item.itemId]
+        if (!itemResp) return item
+
+        const existingResponses = (item.responses || []).filter(
+          (r) => r.fpoId !== fpoInfo.id && r.fpoName !== fpoInfo.name
+        )
+
+        let newRespObj = null
+
+        if (itemResp.type === 'ACCEPT') {
+          newRespObj = {
+            id: `resp-${demandId}-${item.itemId}-${fpoInfo.id || 'fpo-godavari'}`,
+            fpoId: fpoInfo.id || 'fpo-godavari',
+            fpoName: fpoInfo.name || 'Godavari Farmers FPO',
+            location: fpoInfo.location || 'Rajamahendravaram, East Godavari',
+            status: 'ACCEPTED',
+            statusLabel: 'ACCEPTED',
+            statusStyle: 'bg-[#e6ecd5] text-[#1b6e53] border border-[#c3cda7]',
+            offeredQty: `${Number(itemResp.availableQty || item.quantityVal || 1000).toLocaleString()} kg`,
+            offeredPrice: `₹${parseFloat(itemResp.offeredPrice || 27.5).toFixed(2)} / kg`,
+            deliveryDate: itemResp.deliveryDate || d.deliveryDate,
+            hub: fpoInfo.primaryHub || 'Nashik Central Hub #04',
+            notes: itemResp.notes || `Full volume allocated across member clusters. Scheduled delivery on ${itemResp.deliveryDate || d.deliveryDate}.`,
+            timestamp: 'Just now',
+            contact: fpoInfo.contactPerson || 'Hub Director Desk'
+          }
+        } else if (itemResp.type === 'BACK_OFFER') {
+          newRespObj = {
+            id: `resp-${demandId}-${item.itemId}-${fpoInfo.id || 'fpo-godavari'}`,
+            fpoId: fpoInfo.id || 'fpo-godavari',
+            fpoName: fpoInfo.name || 'Godavari Farmers FPO',
+            location: fpoInfo.location || 'Rajamahendravaram, East Godavari',
+            status: 'BACK_OFFER',
+            statusLabel: 'BACK OFFER',
+            statusStyle: 'bg-[#fceace] text-[#683600] border border-[#c3cda7]',
+            requestedQty: item.quantity,
+            offeredQty: `${Number(itemResp.availableQty || 800).toLocaleString()} kg`,
+            counterPrice: `₹${parseFloat(itemResp.offeredPrice || 29).toFixed(2)} / kg`,
+            offeredGrade: itemResp.offeredGrade || item.grade,
+            deliveryDate: itemResp.deliveryDate || d.deliveryDate,
+            hub: fpoInfo.primaryHub || 'Nashik Central Hub #04',
+            notes: itemResp.notes || 'Commercial back offer proposed.',
+            counterReasons: itemResp.counterReasons || [
+              `Rate adjusted to ₹${parseFloat(itemResp.offeredPrice || 29).toFixed(2)}/kg`,
+              itemResp.notes || `Delivery target: ${itemResp.deliveryDate || d.deliveryDate}`
+            ],
+            timestamp: 'Just now',
+            contact: fpoInfo.contactPerson || 'Hub Director Desk'
+          }
+        } else if (itemResp.type === 'DECLINE') {
+          newRespObj = {
+            id: `resp-${demandId}-${item.itemId}-${fpoInfo.id || 'fpo-godavari'}`,
+            fpoId: fpoInfo.id || 'fpo-godavari',
+            fpoName: fpoInfo.name || 'Godavari Farmers FPO',
+            location: fpoInfo.location || 'Rajamahendravaram, East Godavari',
+            status: 'DECLINED',
+            statusLabel: 'DECLINED',
+            statusStyle: 'bg-[#fceace] text-[#ba1a1a] border border-[#ba1a1a]/30',
+            declineReason: itemResp.declineReason || 'Insufficient quantity',
+            notes: itemResp.notes || itemResp.declineReason || 'Declined due to supply constraints',
+            timestamp: 'Just now',
+            contact: fpoInfo.contactPerson || 'Hub Director Desk'
+          }
+        }
+
+        return {
+          ...item,
+          responses: newRespObj ? [newRespObj, ...existingResponses] : item.responses
+        }
+      })
+
+      return {
+        ...d,
+        status: 'Partially Responded',
+        fpoResponded: true,
+        items: updatedItems
+      }
+    })
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
+    return updated
   } catch (e) {
     console.error(e)
   }

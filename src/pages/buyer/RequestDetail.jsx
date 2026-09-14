@@ -227,7 +227,8 @@ export default function RequestDetail() {
                 {(item.responses || []).map((resp) => {
                   const isAccepted = resp.status === 'ACCEPTED'
                   const isBackOffer = resp.status === 'BACK_OFFER'
-                  const isNoResponse = resp.status === 'NO_RESPONSE'
+                  const isDeclined = resp.status === 'DECLINED' || resp.status === 'Declined'
+                  const isNoResponse = resp.status === 'NO_RESPONSE' || resp.status === 'Pending'
                   const isThisOfferSelected = selectedOfferId === resp.id
 
                   return (
@@ -240,6 +241,8 @@ export default function RequestDetail() {
                           ? 'bg-[#ffffff] border-[#c3cda7] hover:border-[#1b6e53]'
                           : isBackOffer
                           ? 'bg-[#ffffff] border-[#c3cda7]'
+                          : isDeclined
+                          ? 'bg-rose-50/40 border-rose-200'
                           : 'bg-[#f1efdf]/70 border-[#c3cda7]'
                       }`}
                     >
@@ -261,10 +264,12 @@ export default function RequestDetail() {
                                 ? 'bg-[#e6ecd5] text-[#1b6e53] border border-[#c3cda7]'
                                 : isBackOffer
                                 ? 'bg-[#fceace] text-[#683600] border border-[#c3cda7]'
+                                : isDeclined
+                                ? 'bg-rose-100 text-rose-800 border border-rose-300'
                                 : 'bg-[#f1efdf] text-[#6d6d6d] border border-[#c3cda7]'
                             }`}
                           >
-                            {resp.statusLabel}
+                            {resp.statusLabel || (isDeclined ? 'DECLINED' : resp.status)}
                           </span>
                         </div>
 
@@ -313,6 +318,24 @@ export default function RequestDetail() {
                           </div>
                         )}
 
+                        {isDeclined && (
+                          <div className="space-y-2 text-xs font-sans">
+                            <div className="bg-rose-50 rounded-[14px] p-3 space-y-1 border border-rose-200">
+                              <div className="flex justify-between">
+                                <span className="text-rose-700 font-semibold">Reason:</span>
+                                <span className="font-bold text-rose-900 font-mono">{resp.declineReason || 'Insufficient supply'}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-rose-700">Fulfillment:</span>
+                                <span className="font-mono text-rose-800">Non-fulfilling</span>
+                              </div>
+                            </div>
+                            <p className="text-[11px] text-rose-700 italic">
+                              "{resp.notes || 'FPO cannot fulfill this commodity requirement.'}"
+                            </p>
+                          </div>
+                        )}
+
                         {isNoResponse && (
                           <div className="space-y-2 py-3 text-xs font-sans text-center">
                             <span className="material-symbols-outlined text-[20px] text-[#6d6d6d]">hourglass_empty</span>
@@ -352,6 +375,15 @@ export default function RequestDetail() {
                               )}
                             </button>
                           </>
+                        )}
+
+                        {isDeclined && (
+                          <button
+                            disabled
+                            className="w-full py-2 rounded-[100px] bg-rose-50 text-rose-700 border border-rose-200 text-[11px] font-mono cursor-not-allowed opacity-80"
+                          >
+                            Declined by FPO
+                          </button>
                         )}
 
                         {isNoResponse && (

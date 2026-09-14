@@ -6,9 +6,9 @@ const navSections = [
     title: 'Core Operations',
     items: [
       { to: '/fpo/dashboard', label: 'Dashboard', icon: 'dashboard', isCurrent: true },
+      { to: '/fpo/requests', label: 'Incoming Requests', icon: 'mark_email_unread', badge: '4 New', badgeHighlight: true },
       { to: '/fpo/farmers', label: 'Farmers', icon: 'group', badge: '42' },
       { to: '/fpo/buyers', label: 'Buyers', icon: 'apartment', badge: '8' },
-      { to: '/fpo/demand', label: 'Demand', icon: 'shopping_cart', badge: '4.2 T', badgeHighlight: true },
       { to: '/fpo/supply', label: 'Supply Inward', icon: 'inventory_2', badge: '3.9 T' },
       { to: '/fpo/matching', label: 'Matching Engine', icon: 'tune', badge: 'Live', badgeSolid: true },
     ],
