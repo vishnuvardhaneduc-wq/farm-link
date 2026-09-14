@@ -1,7 +1,14 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router'
+import { getStoredFpoOrders } from '../../data/fpoDashboardData'
 
-export default function DashboardTables({ buyerOrders, farmerActivity }) {
+export default function DashboardTables({ farmerActivity }) {
+  const [orders, setOrders] = useState([])
+
+  useEffect(() => {
+    setOrders(getStoredFpoOrders())
+  }, [])
+
   return (
     <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Table A: Active Orders */}
@@ -18,21 +25,21 @@ export default function DashboardTables({ buyerOrders, farmerActivity }) {
                     BUYER FULFILLMENT
                   </span>
                   <span className="px-2 py-0.5 rounded-full bg-[#fceace] text-[#683600] text-[10px] font-bold uppercase tracking-wider">
-                    5 Active Orders
+                    {orders.length} Active Orders
                   </span>
                 </div>
                 <h3 className="font-editorial text-2xl font-bold text-[#00372a] tracking-tight leading-none">
                   Active Orders
                 </h3>
                 <p className="text-xs text-[#6d6d6d] mt-1 font-sans">
-                  Buyer requirements & stage fulfillment tracker
+                  Buyer requirements &amp; fulfillment stage tracker
                 </p>
               </div>
             </div>
 
             <Link
-              to="/fpo/buyers"
-              className="inline-flex items-center gap-1 text-xs text-[#1b6e53] font-bold bg-[#e6ecd5] hover:bg-[#c3cda7]/60 px-3 py-1.5 rounded-[100px] border border-[#c3cda7] transition shrink-0 self-start"
+              to="/fpo/orders"
+              className="inline-flex items-center gap-1 text-xs text-[#1b6e53] font-bold bg-[#e6ecd5] hover:bg-[#c3cda7]/60 px-3 py-1.5 rounded-[100px] border border-[#c3cda7] transition shrink-0 self-start shadow-2xs"
             >
               <span>View All Orders</span>
               <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
@@ -41,48 +48,86 @@ export default function DashboardTables({ buyerOrders, farmerActivity }) {
 
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs min-w-[560px]">
-              <thead className="bg-[#f1efdf] text-[#353535] uppercase text-[10px] tracking-wider border-b border-[#c3cda7]/50">
+              <thead className="bg-[#f1efdf] text-[#353535] uppercase text-[10px] tracking-wider border-b border-[#c3cda7]/50 font-mono">
                 <tr>
-                  <th className="py-3 px-4">Buyer</th>
-                  <th className="py-3 px-2">Crop</th>
-                  <th className="py-3 px-2 text-right">Quantity</th>
-                  <th className="py-3 px-3">Order ID</th>
-                  <th className="py-3 px-3">Fulfillment Stage</th>
-                  <th className="py-3 px-4 text-center">Status</th>
+                  <th className="py-3 px-4">Order Ref</th>
+                  <th className="py-3 px-3">Buyer</th>
+                  <th className="py-3 px-2">Commodities</th>
+                  <th className="py-3 px-2 text-right">Volume</th>
+                  <th className="py-3 px-3 text-center">Status</th>
+                  <th className="py-3 px-4 text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#c3cda7]/30 text-[#212529]">
-                {buyerOrders.map((order, idx) => (
-                  <tr key={idx} className="hover:bg-[#faf9f0] transition">
-                    <td className="py-3 px-4 font-semibold whitespace-nowrap">{order.buyer}</td>
-                    <td className="py-3 px-2 text-[#353535] whitespace-nowrap">{order.crop}</td>
-                    <td className="py-3 px-2 text-right font-bold text-[#1b6e53] whitespace-nowrap font-mono">
-                      {order.quantity}
-                    </td>
-                    <td className="py-3 px-3 font-mono text-[#6d6d6d] text-[11px] whitespace-nowrap">
-                      {order.orderId}
-                    </td>
-                    <td className="py-3 px-3 font-medium text-[#212529] whitespace-nowrap">
-                      <span className="inline-flex items-center gap-1 bg-[#f1efdf] px-2 py-0.5 rounded-md border border-[#c3cda7]/40 text-[11px]">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#1b6e53]"></span>
-                        {order.fulfillmentStage}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-center whitespace-nowrap">
-                      <span className={`inline-block px-2.5 py-0.5 rounded-[100px] text-[10px] font-semibold ${order.statusStyle}`}>
-                        {order.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
+                {orders.map((order) => {
+                  const itemsList = order.items || []
+                  const totalVol = itemsList.reduce((acc, curr) => acc + (curr.quantityVal || 0), 0)
+                  const isConfirmed = order.status === 'Confirmed'
+                  const isPlanned = order.status === 'Fulfillment Planned'
+
+                  return (
+                    <tr key={order.orderId} className="hover:bg-[#faf9f0] transition">
+                      <td className="py-3 px-4 font-mono font-bold text-[#1b6e53] whitespace-nowrap">
+                        {order.orderId}
+                      </td>
+                      <td className="py-3 px-3 font-semibold whitespace-nowrap text-[#00372a]">
+                        {order.buyer}
+                      </td>
+                      <td className="py-3 px-2 text-[#353535] whitespace-nowrap font-mono text-[11px]">
+                        {itemsList.map((i) => i.crop).join(', ')}
+                      </td>
+                      <td className="py-3 px-2 text-right font-bold text-[#1b6e53] whitespace-nowrap font-mono">
+                        {totalVol > 0 ? `${totalVol.toLocaleString()} kg` : order.quantity || '1,000 kg'}
+                      </td>
+                      <td className="py-3 px-3 text-center whitespace-nowrap">
+                        <span
+                          className={`inline-block px-2.5 py-0.5 rounded-[100px] text-[10px] font-mono font-bold uppercase tracking-wider ${
+                            isPlanned
+                              ? 'bg-[#e8fe85] text-[#1b6e53] border border-[#1b6e53]'
+                              : isConfirmed
+                              ? 'bg-rose-50 text-rose-700 border border-rose-300'
+                              : order.statusStyle || 'bg-[#e6ecd5] text-[#1b6e53]'
+                          }`}
+                        >
+                          {order.status}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 text-right whitespace-nowrap">
+                        <Link
+                          to={`/fpo/orders/${order.orderId}/fulfillment`}
+                          className={`py-1 px-3 rounded-[100px] text-[11px] font-bold transition shadow-2xs inline-flex items-center gap-1 ${
+                            isConfirmed
+                              ? 'bg-[#1b6e53] hover:bg-[#00372a] text-[#ffffff]'
+                              : 'bg-[#e6ecd5] hover:bg-[#d8ee6f] text-[#1b6e53] border border-[#c3cda7]'
+                          }`}
+                        >
+                          <span>{isConfirmed ? 'Plan Fulfillment' : 'View Plan'}</span>
+                          <span className="material-symbols-outlined text-[13px]">
+                            {isConfirmed ? 'alt_route' : 'arrow_forward'}
+                          </span>
+                        </Link>
+                      </td>
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
           </div>
         </div>
 
-        <div className="p-4 bg-[#f1efdf] border-t border-[#c3cda7]/50 flex justify-between items-center text-xs text-[#6d6d6d] flex-wrap gap-2">
-          <span>Active Dispatch Bays: Hub A, B & C</span>
-          <span className="font-semibold text-[#1b6e53]">Total Active Volume: 3,200 kg</span>
+        {/* Fulfillment Summary Callout */}
+        <div className="p-3.5 bg-[#f1efdf] border-t border-[#c3cda7]/50 flex justify-between items-center text-xs text-[#6d6d6d] flex-wrap gap-2 font-mono">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-[#1b6e53] animate-pulse"></span>
+            <span>Hub: <strong>Rajahmundry Central Hub</strong></span>
+            <span>•</span>
+            <span>Allocated: <strong>1,000 kg</strong></span>
+            <span>•</span>
+            <span>Farmers: <strong>4</strong></span>
+          </div>
+          <span className="font-semibold text-[#1b6e53] bg-[#e6ecd5] px-2 py-0.5 rounded-full border border-[#c3cda7]">
+            Ready for Collection
+          </span>
         </div>
       </div>
 

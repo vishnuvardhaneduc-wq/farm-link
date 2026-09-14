@@ -7,6 +7,7 @@ const navSections = [
     items: [
       { to: '/fpo/dashboard', label: 'Dashboard', icon: 'dashboard', isCurrent: true },
       { to: '/fpo/requests', label: 'Incoming Requests', icon: 'mark_email_unread', badge: '4 New', badgeHighlight: true },
+      { to: '/fpo/orders', label: 'Active Orders', icon: 'shopping_bag', badge: '4 Active' },
       { to: '/fpo/farmers', label: 'Farmers', icon: 'group', badge: '42' },
       { to: '/fpo/buyers', label: 'Buyers', icon: 'apartment', badge: '8' },
       { to: '/fpo/supply', label: 'Supply Inward', icon: 'inventory_2', badge: '3.9 T' },

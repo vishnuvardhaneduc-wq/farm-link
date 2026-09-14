@@ -34,6 +34,8 @@ import Delivery from './pages/fpo/Delivery'
 import Settlements from './pages/fpo/Settlements'
 import ReserveFund from './pages/fpo/ReserveFund'
 import Analytics from './pages/fpo/Analytics'
+import FPOOrders from './pages/fpo/Orders'
+import FulfillmentPlan from './pages/fpo/FulfillmentPlan'
 
 // Buyer Pages
 import BuyerDashboard from './pages/buyer/Dashboard'
@@ -83,6 +85,8 @@ function App() {
         <Route path="demand" element={<FPORequests />} />
         <Route path="supply" element={<Supply />} />
         <Route path="matching" element={<Matching />} />
+        <Route path="orders" element={<FPOOrders />} />
+        <Route path="orders/:orderId/fulfillment" element={<FulfillmentPlan />} />
         <Route path="collection" element={<Collection />} />
         <Route path="quality" element={<Quality />} />
         <Route path="delivery" element={<Delivery />} />

@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { Link } from 'react-router'
 
 export default function MatchingEngineSection({ fulfillmentAllocationEngine, fulfillmentHubPlan }) {
   const data = fulfillmentHubPlan || fulfillmentAllocationEngine || {}
@@ -10,8 +11,8 @@ export default function MatchingEngineSection({ fulfillmentAllocationEngine, ful
   const [farmerModal, setFarmerModal] = useState(false)
 
   const activeOrder = data.activeOrder || {
-    orderId: 'ORD-8921',
-    buyer: 'Hotel Krishna',
+    orderId: 'ORD-1031',
+    buyer: 'AgroFresh Enterprise',
     crop: 'Tomato',
     grade: 'Grade A',
     requiredQuantity: '1,000 kg',
@@ -56,34 +57,44 @@ export default function MatchingEngineSection({ fulfillmentAllocationEngine, ful
           </div>
         </div>
 
-        {/* Scenario Toggle (to test Case 1 vs Case 2) */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2.5 bg-black/20 p-1.5 rounded-[100px] border border-white/15 self-start lg:self-auto">
-          <button
-            onClick={() => {
-              setScenario('single')
-              setIsConfirmed(false)
-            }}
-            className={`px-3.5 py-1.5 rounded-[100px] text-xs font-semibold transition cursor-pointer ${
-              scenario === 'single'
-                ? 'bg-[#e8fe85] text-[#1b6e53] shadow-xs'
-                : 'text-white/80 hover:text-white'
-            }`}
+        {/* Action Cluster & Scenario Toggle */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2.5 self-start lg:self-auto">
+          <Link
+            to="/fpo/orders/ORD-1031/fulfillment"
+            className="px-4 py-2 rounded-[100px] bg-[#e8fe85] text-[#1b6e53] hover:bg-[#d8ee6f] text-xs font-bold uppercase tracking-wider transition shadow-sm flex items-center gap-1.5"
           >
-            Case 1: Single Hub Sufficient
-          </button>
-          <button
-            onClick={() => {
-              setScenario('multi')
-              setIsConfirmed(false)
-            }}
-            className={`px-3.5 py-1.5 rounded-[100px] text-xs font-semibold transition cursor-pointer ${
-              scenario === 'multi'
-                ? 'bg-[#e8fe85] text-[#1b6e53] shadow-xs'
-                : 'text-white/80 hover:text-white'
-            }`}
-          >
-            Case 2: Capacity Insufficient
-          </button>
+            <span>Plan Order Fulfillment</span>
+            <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
+          </Link>
+
+          <div className="flex items-center gap-1.5 bg-black/20 p-1.5 rounded-[100px] border border-white/15">
+            <button
+              onClick={() => {
+                setScenario('single')
+                setIsConfirmed(false)
+              }}
+              className={`px-3 py-1 rounded-[100px] text-xs font-semibold transition cursor-pointer ${
+                scenario === 'single'
+                  ? 'bg-[#e8fe85] text-[#1b6e53] shadow-xs'
+                  : 'text-white/80 hover:text-white'
+              }`}
+            >
+              Case 1: Single Hub
+            </button>
+            <button
+              onClick={() => {
+                setScenario('multi')
+                setIsConfirmed(false)
+              }}
+              className={`px-3 py-1 rounded-[100px] text-xs font-semibold transition cursor-pointer ${
+                scenario === 'multi'
+                  ? 'bg-[#e8fe85] text-[#1b6e53] shadow-xs'
+                  : 'text-white/80 hover:text-white'
+              }`}
+            >
+              Case 2: 2 Hubs
+            </button>
+          </div>
         </div>
       </div>
 

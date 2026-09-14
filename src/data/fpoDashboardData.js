@@ -636,3 +636,591 @@ export const fpoDashboardData = {
     { name: 'Green Chilli (G4)', amount: '930 kg (22%)', pct: '22%', barBg: 'bg-[#b2cee7]' },
   ],
 }
+
+// ----------------------------------------------------
+// STEP 4: FPO FULFILLMENT ALLOCATION DATA & ENGINES
+// ----------------------------------------------------
+
+export const fpoHubsList = [
+  {
+    id: 'HUB-A',
+    name: 'HUB A — Rajahmundry Central Hub',
+    shortName: 'Rajahmundry Central Hub',
+    location: 'East Godavari (Rajahmundry)',
+    distance: '18 km',
+    operatingStatus: 'Active',
+    operatingHours: '05:00 – 12:00 IST',
+    farmersCount: 42,
+    crops: {
+      Tomato: { available: 1300, gradeA: true, gradeB: true },
+      Onion: { available: 800, gradeA: true, gradeB: true },
+      'Green Chilli': { available: 500, gradeA: true, gradeB: true },
+      Potato: { available: 1200, gradeA: true, gradeB: true },
+    },
+  },
+  {
+    id: 'HUB-B',
+    name: 'HUB B — Kakinada Collection Hub',
+    shortName: 'Kakinada Collection Hub',
+    location: 'East Godavari (Kakinada Port Belt)',
+    distance: '42 km',
+    operatingStatus: 'Active',
+    operatingHours: '06:00 – 13:00 IST',
+    farmersCount: 28,
+    crops: {
+      Tomato: { available: 600, gradeA: true, gradeB: true },
+      Onion: { available: 600, gradeA: true, gradeB: true },
+      'Green Chilli': { available: 300, gradeA: true, gradeB: true },
+      Potato: { available: 800, gradeA: true, gradeB: true },
+    },
+  },
+  {
+    id: 'HUB-C',
+    name: 'HUB C — Eluru Rural Hub',
+    shortName: 'Eluru Rural Hub',
+    location: 'West Godavari (Eluru Cluster)',
+    distance: '65 km',
+    operatingStatus: 'Active',
+    operatingHours: '05:30 – 11:30 IST',
+    farmersCount: 19,
+    crops: {
+      Tomato: { available: 350, gradeA: false, gradeB: true },
+      Onion: { available: 400, gradeA: true, gradeB: true },
+      'Green Chilli': { available: 150, gradeA: false, gradeB: true },
+      Potato: { available: 450, gradeA: false, gradeB: true },
+    },
+  },
+]
+
+export const fpoFarmersDirectory = [
+  // Hub A (Rajahmundry Central) - Tomato
+  {
+    id: 'FRM-101',
+    name: 'Ramesh B.',
+    primaryHub: 'HUB-A',
+    hubName: 'Rajahmundry Central Hub',
+    crop: 'Tomato',
+    eligibleGrade: 'Grade A',
+    expectedAvailableQty: 100,
+    historicalSupply: '1,450 kg',
+    reliability: '99.2%',
+  },
+  {
+    id: 'FRM-102',
+    name: 'Suresh K.',
+    primaryHub: 'HUB-A',
+    hubName: 'Rajahmundry Central Hub',
+    crop: 'Tomato',
+    eligibleGrade: 'Grade A',
+    expectedAvailableQty: 200,
+    historicalSupply: '2,800 kg',
+    reliability: '98.6%',
+  },
+  {
+    id: 'FRM-103',
+    name: 'Venkatesh M.',
+    primaryHub: 'HUB-A',
+    hubName: 'Rajahmundry Central Hub',
+    crop: 'Tomato',
+    eligibleGrade: 'Grade A',
+    expectedAvailableQty: 300,
+    historicalSupply: '3,600 kg',
+    reliability: '99.5%',
+  },
+  {
+    id: 'FRM-104',
+    name: 'Lakshmi Narayana',
+    primaryHub: 'HUB-A',
+    hubName: 'Rajahmundry Central Hub',
+    crop: 'Tomato',
+    eligibleGrade: 'Grade A',
+    expectedAvailableQty: 400,
+    historicalSupply: '4,900 kg',
+    reliability: '98.9%',
+  },
+
+  // Hub A - Onion
+  {
+    id: 'FRM-106',
+    name: 'K. Satyanarayana',
+    primaryHub: 'HUB-A',
+    hubName: 'Rajahmundry Central Hub',
+    crop: 'Onion',
+    eligibleGrade: 'Grade A',
+    expectedAvailableQty: 300,
+    historicalSupply: '2,100 kg',
+    reliability: '99.0%',
+  },
+  {
+    id: 'FRM-107',
+    name: 'M. Venkanna',
+    primaryHub: 'HUB-A',
+    hubName: 'Rajahmundry Central Hub',
+    crop: 'Onion',
+    eligibleGrade: 'Grade A',
+    expectedAvailableQty: 500,
+    historicalSupply: '3,800 kg',
+    reliability: '98.5%',
+  },
+
+  // Hub A - Green Chilli
+  {
+    id: 'FRM-108',
+    name: 'Ch. Prasad',
+    primaryHub: 'HUB-A',
+    hubName: 'Rajahmundry Central Hub',
+    crop: 'Green Chilli',
+    eligibleGrade: 'Grade A',
+    expectedAvailableQty: 200,
+    historicalSupply: '1,500 kg',
+    reliability: '99.1%',
+  },
+  {
+    id: 'FRM-109',
+    name: 'P. Rambabu',
+    primaryHub: 'HUB-A',
+    hubName: 'Rajahmundry Central Hub',
+    crop: 'Green Chilli',
+    eligibleGrade: 'Grade A',
+    expectedAvailableQty: 300,
+    historicalSupply: '2,400 kg',
+    reliability: '98.8%',
+  },
+
+  // Hub B (Kakinada Collection) - Tomato
+  {
+    id: 'FRM-201',
+    name: 'K. Ramana',
+    primaryHub: 'HUB-B',
+    hubName: 'Kakinada Collection Hub',
+    crop: 'Tomato',
+    eligibleGrade: 'Grade A',
+    expectedAvailableQty: 250,
+    historicalSupply: '1,900 kg',
+    reliability: '98.1%',
+  },
+  {
+    id: 'FRM-202',
+    name: 'P. Sambasiva Rao',
+    primaryHub: 'HUB-B',
+    hubName: 'Kakinada Collection Hub',
+    crop: 'Tomato',
+    eligibleGrade: 'Grade A',
+    expectedAvailableQty: 200,
+    historicalSupply: '2,100 kg',
+    reliability: '99.0%',
+  },
+  {
+    id: 'FRM-203',
+    name: 'G. Apparao',
+    primaryHub: 'HUB-B',
+    hubName: 'Kakinada Collection Hub',
+    crop: 'Tomato',
+    eligibleGrade: 'Grade A',
+    expectedAvailableQty: 150,
+    historicalSupply: '1,400 kg',
+    reliability: '97.8%',
+  },
+
+  // Hub B - Onion
+  {
+    id: 'FRM-204',
+    name: 'D. Nageswara Rao',
+    primaryHub: 'HUB-B',
+    hubName: 'Kakinada Collection Hub',
+    crop: 'Onion',
+    eligibleGrade: 'Grade A',
+    expectedAvailableQty: 300,
+    historicalSupply: '2,600 kg',
+    reliability: '98.7%',
+  },
+  {
+    id: 'FRM-205',
+    name: 'Y. Srinu',
+    primaryHub: 'HUB-B',
+    hubName: 'Kakinada Collection Hub',
+    crop: 'Onion',
+    eligibleGrade: 'Grade A',
+    expectedAvailableQty: 300,
+    historicalSupply: '2,400 kg',
+    reliability: '98.2%',
+  },
+
+  // Hub C (Eluru Rural)
+  {
+    id: 'FRM-301',
+    name: 'T. Srinivasa Rao',
+    primaryHub: 'HUB-C',
+    hubName: 'Eluru Rural Hub',
+    crop: 'Onion',
+    eligibleGrade: 'Grade A',
+    expectedAvailableQty: 400,
+    historicalSupply: '3,100 kg',
+    reliability: '98.3%',
+  },
+  {
+    id: 'FRM-302',
+    name: 'V. Krishna',
+    primaryHub: 'HUB-C',
+    hubName: 'Eluru Rural Hub',
+    crop: 'Tomato',
+    eligibleGrade: 'Grade B',
+    expectedAvailableQty: 350,
+    historicalSupply: '2,800 kg',
+    reliability: '96.5%',
+  },
+]
+
+export const initialFpoOrders = [
+  {
+    orderId: 'ORD-1031',
+    demandId: 'REQ-1031',
+    buyer: 'AgroFresh Enterprise',
+    deliveryDate: '29 Sep 2026',
+    deliveryLocation: 'Vijayawada Central Processing Dock',
+    totalValue: '₹52,700',
+    status: 'Confirmed',
+    fulfillmentStage: 'Hub Allocation',
+    statusStyle: 'bg-rose-50 text-rose-700 border border-rose-300 font-bold',
+    items: [
+      {
+        itemId: 'item-1031-1',
+        crop: 'Tomato',
+        variety: 'Hybrid Roma',
+        quantity: '1,000 kg',
+        quantityVal: 1000,
+        grade: 'Grade A',
+        rate: '₹27.50 / kg',
+        totalPrice: '₹27,500',
+      },
+      {
+        itemId: 'item-1031-2',
+        crop: 'Onion',
+        variety: 'Nasik Red',
+        quantity: '500 kg',
+        quantityVal: 500,
+        grade: 'Grade A',
+        rate: '₹24.00 / kg',
+        totalPrice: '₹12,000',
+      },
+      {
+        itemId: 'item-1031-3',
+        crop: 'Green Chilli',
+        variety: 'G4 Hot Export',
+        quantity: '200 kg',
+        quantityVal: 200,
+        grade: 'Grade A',
+        rate: '₹44.00 / kg',
+        totalPrice: '₹8,800',
+      },
+    ],
+  },
+  {
+    orderId: 'ORD-8921',
+    demandId: 'REQ-1030',
+    buyer: 'Hotel Krishna',
+    deliveryDate: '28 Sep 2026',
+    deliveryLocation: 'Rajahmundry Intake Dock',
+    totalValue: '₹27,500',
+    status: 'Confirmed',
+    fulfillmentStage: 'Hub Allocation',
+    statusStyle: 'bg-rose-50 text-rose-700 border border-rose-300 font-bold',
+    items: [
+      {
+        itemId: 'item-1030-1',
+        crop: 'Tomato',
+        variety: 'Hybrid Roma',
+        quantity: '1,000 kg',
+        quantityVal: 1000,
+        grade: 'Grade A',
+        rate: '₹27.50 / kg',
+        totalPrice: '₹27,500',
+      },
+    ],
+  },
+  {
+    orderId: 'ORD-8922',
+    demandId: 'REQ-1019',
+    buyer: 'Hotel A',
+    deliveryDate: '15 Sep 2026',
+    deliveryLocation: 'Guntur Aggregation Dock',
+    totalValue: '₹21,000',
+    status: 'Dispatched',
+    fulfillmentStage: 'Delivery',
+    statusStyle: 'bg-[#b2cee7] text-[#212529]',
+    items: [
+      {
+        itemId: 'item-1019-1',
+        crop: 'Tomato',
+        variety: 'Roma',
+        quantity: '500 kg',
+        quantityVal: 500,
+        grade: 'Grade A',
+        rate: '₹42.00 / kg',
+        totalPrice: '₹21,000',
+      },
+    ],
+  },
+  {
+    orderId: 'ORD-8923',
+    demandId: 'REQ-1025',
+    buyer: 'Hostel B',
+    deliveryDate: '22 Sep 2026',
+    deliveryLocation: 'Visakhapatnam Warehouse #2',
+    totalValue: '₹7,200',
+    status: 'Ready',
+    fulfillmentStage: 'Collection',
+    statusStyle: 'bg-[#e6ecd5] text-[#1b6e53]',
+    items: [
+      {
+        itemId: 'item-1025-1',
+        crop: 'Onion',
+        variety: 'Garwa',
+        quantity: '300 kg',
+        quantityVal: 300,
+        grade: 'Grade A',
+        rate: '₹24.00 / kg',
+        totalPrice: '₹7,200',
+      },
+    ],
+  },
+]
+
+const FPO_ORDERS_STORAGE_KEY = 'farmlink_fpo_orders_v2'
+const FPO_PLANS_STORAGE_KEY = 'farmlink_fpo_fulfillment_plans_v2'
+
+export function getStoredFpoOrders() {
+  if (typeof window === 'undefined') return initialFpoOrders
+  try {
+    const raw = localStorage.getItem(FPO_ORDERS_STORAGE_KEY)
+    if (!raw) {
+      localStorage.setItem(FPO_ORDERS_STORAGE_KEY, JSON.stringify(initialFpoOrders))
+      return initialFpoOrders
+    }
+    return JSON.parse(raw)
+  } catch (e) {
+    return initialFpoOrders
+  }
+}
+
+export function getFpoOrderById(orderId) {
+  const orders = getStoredFpoOrders()
+  return orders.find((o) => o.orderId === orderId || o.demandId === orderId) || orders[0]
+}
+
+export function saveStoredFpoOrders(orders) {
+  if (typeof window === 'undefined') return
+  try {
+    localStorage.setItem(FPO_ORDERS_STORAGE_KEY, JSON.stringify(orders))
+  } catch (e) {
+    console.error(e)
+  }
+}
+
+export function getStoredFulfillmentPlans() {
+  if (typeof window === 'undefined') return {}
+  try {
+    const raw = localStorage.getItem(FPO_PLANS_STORAGE_KEY)
+    return raw ? JSON.parse(raw) : {}
+  } catch (e) {
+    return {}
+  }
+}
+
+export function saveFulfillmentPlan(orderId, plan) {
+  if (typeof window === 'undefined') return
+  try {
+    const plans = getStoredFulfillmentPlans()
+    plans[orderId] = plan
+    localStorage.setItem(FPO_PLANS_STORAGE_KEY, JSON.stringify(plans))
+
+    // Update order status in orders list
+    const orders = getStoredFpoOrders()
+    const updatedOrders = orders.map((o) => {
+      if (o.orderId === orderId || o.demandId === orderId) {
+        return {
+          ...o,
+          status: 'Fulfillment Planned',
+          fulfillmentStage: 'Fulfillment Planned',
+          statusStyle: 'bg-[#e8fe85] text-[#1b6e53] border border-[#1b6e53] font-bold',
+          fulfillmentPlan: plan,
+        }
+      }
+      return o
+    })
+    saveStoredFpoOrders(updatedOrders)
+  } catch (e) {
+    console.error(e)
+  }
+}
+
+/**
+ * Evaluates hubs for a required item and computes the minimum suitable hub network
+ * Rule: Single hub if 1 hub capacity >= required, else minimum combination of hubs (e.g. 2 hubs).
+ */
+export function calculateMinimumHubNetwork(item, hubs = fpoHubsList, forceScenario = null) {
+  const requiredQty = parseInt(String(item.quantityVal || item.quantity || '0').replace(/[^0-9]/g, '')) || 1000
+  const cropName = item.crop || 'Tomato'
+  const requiredGrade = item.grade || 'Grade A'
+
+  // Evaluate each hub's suitability factors
+  const evaluatedHubs = hubs.map((hub) => {
+    const cropData = hub.crops[cropName] || { available: 0, gradeA: false, gradeB: false }
+    let availableCap = cropData.available || 0
+
+    // Adjust for multi-hub testing scenario if forced
+    if (forceScenario === 'multi' && cropName === 'Tomato') {
+      if (hub.id === 'HUB-A') availableCap = 600
+      if (hub.id === 'HUB-B') availableCap = 400
+    }
+
+    const hasCrop = availableCap > 0
+    const meetsGrade = requiredGrade === 'Grade A' ? Boolean(cropData.gradeA) : Boolean(cropData.gradeB || cropData.gradeA)
+    const isActive = hub.operatingStatus === 'Active'
+    const isSuitable = hasCrop && meetsGrade && isActive
+
+    return {
+      ...hub,
+      availableCapacity: availableCap,
+      hasCrop,
+      meetsGrade,
+      isActive,
+      isSuitable,
+      cropCapability: hasCrop ? `${cropName} Verified ✓` : 'No Supply ✕',
+      gradeCapability: meetsGrade ? `${requiredGrade} Supported ✓` : 'Grade Ineligible ✕',
+      operatingText: isActive ? `${hub.operatingHours} ✓` : 'Closed ✕',
+      distanceText: `${hub.distance} (${parseInt(hub.distance) <= 25 ? 'Direct Hub Lane ✓' : 'Inter-District Lane ✓'})`,
+    }
+  })
+
+  // Filter suitable candidate hubs and sort by capacity descending, then distance ascending
+  const suitableHubs = evaluatedHubs
+    .filter((h) => h.isSuitable)
+    .sort((a, b) => b.availableCapacity - a.availableCapacity || parseInt(a.distance) - parseInt(b.distance))
+
+  let isSingleHub = false
+  let recommendedAllocations = []
+  let recommendationType = ''
+  let recommendationReason = ''
+
+  // 1. Check if ONE single hub is sufficient
+  const singleCandidate = suitableHubs.find((h) => h.availableCapacity >= requiredQty)
+
+  if (singleCandidate && forceScenario !== 'multi') {
+    isSingleHub = true
+    recommendationType = 'Single Hub Fulfillment'
+    recommendationReason = `${singleCandidate.shortName} has ${singleCandidate.availableCapacity.toLocaleString()} kg capacity and can fulfill the complete order without requiring another hub.`
+    recommendedAllocations = [
+      {
+        hubId: singleCandidate.id,
+        hubName: singleCandidate.shortName,
+        allocatedQty: requiredQty,
+        availableCapacity: singleCandidate.availableCapacity,
+        isPrimary: true,
+      },
+    ]
+  } else {
+    // 2. Multiple hubs needed (greedy minimum hub combination)
+    recommendationType = '2 Hub Fulfillment'
+    recommendationReason = `Single hub capacity is insufficient. Minimum suitable hub network selected to fulfill the complete order.`
+    let remaining = requiredQty
+
+    for (const h of suitableHubs) {
+      if (remaining <= 0) break
+      const alloc = Math.min(remaining, h.availableCapacity)
+      if (alloc > 0) {
+        recommendedAllocations.push({
+          hubId: h.id,
+          hubName: h.shortName,
+          allocatedQty: alloc,
+          availableCapacity: h.availableCapacity,
+          isPrimary: recommendedAllocations.length === 0,
+        })
+        remaining -= alloc
+      }
+    }
+    if (recommendedAllocations.length > 1) {
+      recommendationType = `${recommendedAllocations.length} Hub Fulfillment`
+    }
+  }
+
+  return {
+    item,
+    requiredQty,
+    cropName,
+    requiredGrade,
+    evaluatedHubs,
+    suitableHubs,
+    isSingleHub,
+    recommendationType,
+    recommendationReason,
+    recommendedAllocations,
+  }
+}
+
+/**
+ * Fair Proportional Farmer Allocation Formula (MVP Rule)
+ * farmer_allocation = (farmer_available / total_eligible) * hub_requirement
+ */
+export function calculateFairFarmerAllocation(
+  hubId,
+  hubRequirement,
+  cropName,
+  requiredGrade = 'Grade A',
+  farmers = fpoFarmersDirectory
+) {
+  const reqQty = Number(hubRequirement) || 0
+  if (reqQty <= 0) return []
+
+  // Filter eligible farmers belonging to this hub, supplying crop, meeting grade, with available qty > 0
+  const eligible = farmers.filter((f) => {
+    const matchHub = f.primaryHub === hubId
+    const matchCrop = f.crop.toLowerCase() === cropName.toLowerCase()
+    const matchGrade = requiredGrade === 'Grade A' ? f.eligibleGrade === 'Grade A' : true
+    const hasSupply = (f.expectedAvailableQty || 0) > 0
+    return matchHub && matchCrop && matchGrade && hasSupply
+  })
+
+  if (eligible.length === 0) return []
+
+  const totalEligibleSupply = eligible.reduce((acc, f) => acc + (f.expectedAvailableQty || 0), 0)
+
+  if (totalEligibleSupply <= 0) return []
+
+  // Proportional ratio
+  const ratio = reqQty / totalEligibleSupply
+
+  // Allocate proportionally and round cleanly to integer kg, handling remainder on highest allocation
+  let runningSum = 0
+  const calculatedAllocations = eligible.map((f, idx) => {
+    const rawAlloc = (f.expectedAvailableQty || 0) * ratio
+    const roundedAlloc = Math.round(rawAlloc)
+    runningSum += roundedAlloc
+
+    return {
+      ...f,
+      farmerId: f.id,
+      farmerName: f.name,
+      availableSupply: f.expectedAvailableQty,
+      calculatedPct: Math.round(((f.expectedAvailableQty || 0) / totalEligibleSupply) * 100),
+      allocatedQty: roundedAlloc,
+    }
+  })
+
+  // Balance any rounding discrepancy (difference between runningSum and reqQty) on the largest supply farmer
+  const diff = reqQty - runningSum
+  if (diff !== 0 && calculatedAllocations.length > 0) {
+    let maxIdx = 0
+    let maxVal = calculatedAllocations[0].allocatedQty
+    for (let i = 1; i < calculatedAllocations.length; i++) {
+      if (calculatedAllocations[i].allocatedQty > maxVal) {
+        maxVal = calculatedAllocations[i].allocatedQty
+        maxIdx = i
+      }
+    }
+    calculatedAllocations[maxIdx].allocatedQty += diff
+  }
+
+  return calculatedAllocations
+}
+
