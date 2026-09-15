@@ -44,6 +44,9 @@ import FPOVerificationStatus from './pages/fpo/VerificationStatus'
 import FPOProducts from './pages/fpo/Products'
 import FPOProductForm from './pages/fpo/ProductForm'
 import FPOProductDetail from './pages/fpo/ProductDetail'
+import FPOHubs from './pages/fpo/Hubs'
+import FPOHubForm from './pages/fpo/HubForm'
+import FPOHubDetail from './pages/fpo/HubDetail'
 
 // Buyer Pages
 import BuyerDashboard from './pages/buyer/Dashboard'
@@ -115,6 +118,10 @@ function App() {
         <Route path="products/add" element={<FPOProductForm />} />
         <Route path="products/:id" element={<FPOProductDetail />} />
         <Route path="products/:id/edit" element={<FPOProductForm isEdit={true} />} />
+        <Route path="hubs" element={<FPOHubs />} />
+        <Route path="hubs/add" element={<FPOHubForm />} />
+        <Route path="hubs/:id" element={<FPOHubDetail />} />
+        <Route path="hubs/:id/edit" element={<FPOHubForm isEdit={true} />} />
       </Route>
 
       {/* Buyer Portal Routes */}

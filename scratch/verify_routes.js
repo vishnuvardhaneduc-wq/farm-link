@@ -8,6 +8,10 @@ const routes = [
   '/fpo/products/add',
   '/fpo/products/prod-tomato',
   '/fpo/products/prod-tomato/edit',
+  '/fpo/hubs',
+  '/fpo/hubs/add',
+  '/fpo/hubs/HUB-0007',
+  '/fpo/hubs/HUB-0007/edit',
 ]
 
 function checkRoute(route) {
@@ -32,7 +36,7 @@ async function run() {
   for (const r of routes) {
     await checkRoute(r)
   }
-  console.log('\nAll FPO Profile & Product portal routes verified successfully on Vite server!')
+  console.log('\nAll FPO Profile, Product & Hub portal routes verified successfully on Vite server!')
 }
 
 run().catch(console.error)

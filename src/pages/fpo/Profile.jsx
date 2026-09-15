@@ -404,13 +404,19 @@ export default function FPOProfile() {
             </div>
           </div>
 
-          <div className="mt-6 pt-4 border-t border-[#c3cda7]/40 flex items-center justify-between text-xs">
-            <span className="text-[#6d6d6d] font-mono text-[11px]">Display summary mode</span>
+          <div className="mt-6 pt-4 border-t border-[#c3cda7]/40 flex items-center justify-between text-xs flex-wrap gap-2">
+            <Link
+              to="/fpo/hubs"
+              className="text-[#1b6e53] font-bold hover:underline inline-flex items-center gap-1 font-mono"
+            >
+              <span>Manage Hubs ({profile.numberOfHubs})</span>
+              <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
+            </Link>
             <Link
               to="/fpo/products"
               className="text-[#1b6e53] font-bold hover:underline inline-flex items-center gap-1 font-mono"
             >
-              <span>Manage Products</span>
+              <span>Supply Catalog</span>
               <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
             </Link>
           </div>
