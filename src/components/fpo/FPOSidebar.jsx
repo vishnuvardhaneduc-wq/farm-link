@@ -28,6 +28,7 @@ const navSections = [
       { to: '/fpo/settlements', label: 'Settlements', icon: 'currency_rupee', textBadge: '₹1.84L' },
       { to: '/fpo/reserve-fund', label: 'Reserve Fund', icon: 'shield_with_heart' },
       { to: '/fpo/analytics', label: 'Analytics & Reports', icon: 'bar_chart' },
+      { to: '/fpo/profile', label: 'FPO Profile', icon: 'badge', badge: 'Verified', badgeHighlight: true },
     ],
   },
 ]
@@ -160,26 +161,28 @@ export default function FPOSidebar({ isOpen = false, onClose = () => {} }) {
 
         {/* Manager Account Tile */}
         <div className="p-4 border-t border-white/10">
-          <div className="flex items-center justify-between p-2.5 rounded-[20px] bg-white/10 border border-white/15">
+          <Link
+            to="/fpo/profile"
+            onClick={onClose}
+            className="flex items-center justify-between p-2.5 rounded-[20px] bg-white/10 border border-white/15 hover:bg-white/15 transition group cursor-pointer"
+            title="View FPO Profile"
+          >
             <div className="flex items-center gap-3 min-w-0">
               <div className="relative shrink-0">
-                <div className="w-8 h-8 rounded-full bg-[#e6ecd5] text-[#1b6e53] flex items-center justify-center font-bold text-xs">
+                <div className="w-8 h-8 rounded-full bg-[#e6ecd5] text-[#1b6e53] flex items-center justify-center font-bold text-xs group-hover:scale-105 transition-transform">
                   PV
                 </div>
                 <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-[#e8fe85] rounded-full ring-2 ring-[#1b6e53]"></span>
               </div>
               <div className="flex flex-col min-w-0">
                 <span className="text-xs font-semibold text-white truncate">p.vishnu vardhan</span>
-                <span className="text-[10px] text-[#e6ecd5]/80 truncate">Hub Director • Nashik</span>
+                <span className="text-[10px] text-[#e6ecd5]/80 truncate">Hub Director • Profile</span>
               </div>
             </div>
-            <button
-              className="text-white/70 hover:text-white p-1 rounded-full hover:bg-white/10 transition cursor-pointer"
-              title="Settings"
-            >
-              <span className="material-symbols-outlined text-[18px]">more_vert</span>
-            </button>
-          </div>
+            <span className="text-white/70 group-hover:text-white p-1 rounded-full transition">
+              <span className="material-symbols-outlined text-[18px]">badge</span>
+            </span>
+          </Link>
         </div>
       </aside>
     </>

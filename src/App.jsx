@@ -38,6 +38,9 @@ import ReserveFund from './pages/fpo/ReserveFund'
 import Analytics from './pages/fpo/Analytics'
 import FPOOrders from './pages/fpo/Orders'
 import FulfillmentPlan from './pages/fpo/FulfillmentPlan'
+import FPOProfile from './pages/fpo/Profile'
+import EditFPOProfile from './pages/fpo/EditProfile'
+import FPOVerificationStatus from './pages/fpo/VerificationStatus'
 
 // Buyer Pages
 import BuyerDashboard from './pages/buyer/Dashboard'
@@ -102,6 +105,9 @@ function App() {
         <Route path="settlements/:orderId" element={<SettlementDetail />} />
         <Route path="reserve-fund" element={<ReserveFund />} />
         <Route path="analytics" element={<Analytics />} />
+        <Route path="profile" element={<FPOProfile />} />
+        <Route path="profile/edit" element={<EditFPOProfile />} />
+        <Route path="profile/verification" element={<FPOVerificationStatus />} />
       </Route>
 
       {/* Buyer Portal Routes */}
