@@ -41,6 +41,9 @@ import FulfillmentPlan from './pages/fpo/FulfillmentPlan'
 import FPOProfile from './pages/fpo/Profile'
 import EditFPOProfile from './pages/fpo/EditProfile'
 import FPOVerificationStatus from './pages/fpo/VerificationStatus'
+import FPOProducts from './pages/fpo/Products'
+import FPOProductForm from './pages/fpo/ProductForm'
+import FPOProductDetail from './pages/fpo/ProductDetail'
 
 // Buyer Pages
 import BuyerDashboard from './pages/buyer/Dashboard'
@@ -108,6 +111,10 @@ function App() {
         <Route path="profile" element={<FPOProfile />} />
         <Route path="profile/edit" element={<EditFPOProfile />} />
         <Route path="profile/verification" element={<FPOVerificationStatus />} />
+        <Route path="products" element={<FPOProducts />} />
+        <Route path="products/add" element={<FPOProductForm />} />
+        <Route path="products/:id" element={<FPOProductDetail />} />
+        <Route path="products/:id/edit" element={<FPOProductForm isEdit={true} />} />
       </Route>
 
       {/* Buyer Portal Routes */}

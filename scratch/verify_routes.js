@@ -1,6 +1,14 @@
 import http from 'http'
 
-const routes = ['/fpo/profile', '/fpo/profile/edit', '/fpo/profile/verification']
+const routes = [
+  '/fpo/profile',
+  '/fpo/profile/edit',
+  '/fpo/profile/verification',
+  '/fpo/products',
+  '/fpo/products/add',
+  '/fpo/products/prod-tomato',
+  '/fpo/products/prod-tomato/edit',
+]
 
 function checkRoute(route) {
   return new Promise((resolve, reject) => {
@@ -24,7 +32,7 @@ async function run() {
   for (const r of routes) {
     await checkRoute(r)
   }
-  console.log('\nAll FPO Profile portal routes verified successfully on Vite server!')
+  console.log('\nAll FPO Profile & Product portal routes verified successfully on Vite server!')
 }
 
 run().catch(console.error)

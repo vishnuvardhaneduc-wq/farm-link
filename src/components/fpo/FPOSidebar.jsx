@@ -12,6 +12,7 @@ const navSections = [
       { to: '/fpo/buyers', label: 'Buyers', icon: 'apartment', badge: '8' },
       { to: '/fpo/supply', label: 'Supply Inward', icon: 'inventory_2', badge: '3.9 T' },
       { to: '/fpo/matching', label: 'Matching Engine', icon: 'tune', badge: 'Live', badgeSolid: true },
+      { to: '/fpo/products', label: 'Products', icon: 'eco', badge: '4 Crops' },
     ],
   },
   {
