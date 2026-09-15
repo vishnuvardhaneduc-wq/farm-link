@@ -32,6 +32,8 @@ import Collection from './pages/fpo/Collection'
 import Quality from './pages/fpo/Quality'
 import Delivery from './pages/fpo/Delivery'
 import Settlements from './pages/fpo/Settlements'
+import SettlementDetail from './pages/fpo/SettlementDetail'
+import OrderTracking from './pages/fpo/OrderTracking'
 import ReserveFund from './pages/fpo/ReserveFund'
 import Analytics from './pages/fpo/Analytics'
 import FPOOrders from './pages/fpo/Orders'
@@ -47,6 +49,7 @@ import Demands from './pages/buyer/Demands'
 import CreateDemand from './pages/buyer/CreateDemand'
 import RequestDetail from './pages/buyer/RequestDetail'
 import Orders from './pages/buyer/Orders'
+import BuyerOrderDetail from './pages/buyer/OrderDetail'
 
 // Hub Pages
 import HubDashboard from './pages/hub/Dashboard'
@@ -88,11 +91,15 @@ function App() {
         <Route path="supply" element={<Supply />} />
         <Route path="matching" element={<Matching />} />
         <Route path="orders" element={<FPOOrders />} />
+        <Route path="orders/:orderId" element={<OrderTracking />} />
+        <Route path="orders/:orderId/tracking" element={<OrderTracking />} />
         <Route path="orders/:orderId/fulfillment" element={<FulfillmentPlan />} />
         <Route path="collection" element={<Collection />} />
         <Route path="quality" element={<Quality />} />
         <Route path="delivery" element={<Delivery />} />
+        <Route path="delivery/:orderId" element={<OrderTracking />} />
         <Route path="settlements" element={<Settlements />} />
+        <Route path="settlements/:orderId" element={<SettlementDetail />} />
         <Route path="reserve-fund" element={<ReserveFund />} />
         <Route path="analytics" element={<Analytics />} />
       </Route>
@@ -110,6 +117,7 @@ function App() {
         <Route path="demands/:id" element={<RequestDetail />} />
         <Route path="requests/:id" element={<RequestDetail />} />
         <Route path="orders" element={<Orders />} />
+        <Route path="orders/:orderId" element={<BuyerOrderDetail />} />
       </Route>
 
       {/* Hub Operations Portal Routes */}

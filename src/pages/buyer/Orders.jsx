@@ -11,6 +11,7 @@ import {
 export default function BuyerOrders() {
   const [hubState, setHubState] = useState(getStoredHubOperations())
   const [toastMsg, setToastMsg] = useState('')
+  const [activeTab, setActiveTab] = useState('all')
 
   useEffect(() => {
     const handleStorage = () => setHubState(getStoredHubOperations())
@@ -28,6 +29,12 @@ export default function BuyerOrders() {
   const isPartialRejected = activeHubOrder.status === 'Partial Fulfillment Rejected' || shortfallState.buyerDecision === 'Rejected'
   const isPartiallyDispatched = activeHubOrder.status === 'Partially Dispatched'
   const isDispatched = activeHubOrder.status === 'Dispatched'
+  const isInTransit = activeHubOrder.status === 'In Transit'
+  const isDelivered = activeHubOrder.status === 'Delivered'
+  const isBuyerVerified = activeHubOrder.status === 'Buyer Verified' || activeHubOrder.status === 'Ready for Settlement'
+  const isPaymentConfirmed = activeHubOrder.status === 'Payment Confirmed'
+  const isCompleted = activeHubOrder.status === 'Completed'
+  const isDeliveryIssue = activeHubOrder.status === 'Delivery Issue'
 
   const handleAcceptPartial = () => {
     buyerAcceptPartialQuantity(activeHubOrder.orderId)
@@ -50,6 +57,45 @@ export default function BuyerOrders() {
     setTimeout(() => setToastMsg(''), 4500)
   }
 
+  // Dynamic status styling
+  let hubOrderStatus = activeHubOrder.status
+  let hubOrderStage = 'Quality Assay & Aggregation Active'
+  let hubStatusStyle = 'bg-[#e6ecd5] text-[#1b6e53] border border-[#c3cda7]'
+
+  if (isCompleted) {
+    hubOrderStatus = 'Completed'
+    hubOrderStage = 'Order Fulfilled & Payment Confirmed'
+    hubStatusStyle = 'bg-[#e6ecd5] text-[#1b6e53] border border-[#1b6e53] font-bold'
+  } else if (isPaymentConfirmed) {
+    hubOrderStatus = 'Payment Confirmed'
+    hubOrderStage = 'Payment Recorded — Order Completed'
+    hubStatusStyle = 'bg-[#e8fe85] text-[#1b6e53] border border-[#1b6e53] font-bold'
+  } else if (isBuyerVerified) {
+    hubOrderStatus = 'Buyer Verified'
+    hubOrderStage = 'Delivery Verified — Ready for Payment Confirmation'
+    hubStatusStyle = 'bg-[#e8fe85] text-[#1b6e53] border border-[#1b6e53] font-bold'
+  } else if (isDeliveryIssue) {
+    hubOrderStatus = 'Delivery Issue'
+    hubOrderStage = `Discrepancy Logged: ${activeHubOrder.deliveryIssue?.issueType || 'Under Review'}`
+    hubStatusStyle = 'bg-rose-50 text-rose-800 border border-rose-300 font-bold'
+  } else if (isDelivered) {
+    hubOrderStatus = 'Delivered'
+    hubOrderStage = `Delivered at ${activeHubOrder.destination} — Verify Receipt`
+    hubStatusStyle = 'bg-[#b2cee7] text-[#00372a] border border-[#00372a]/30 font-bold'
+  } else if (isInTransit) {
+    hubOrderStatus = 'In Transit'
+    hubOrderStage = `In Transit via Reefer ${activeHubOrder.dispatchDetails?.vehicleNo || 'AP-39-TX-8841'}`
+    hubStatusStyle = 'bg-[#fceace] text-[#683600] border border-[#683600]/40 font-bold'
+  } else if (isDispatched || isPartiallyDispatched) {
+    hubOrderStatus = isPartiallyDispatched ? 'Partially Dispatched' : 'Dispatched'
+    hubOrderStage = `Dispatched from ${activeHubOrder.hubName}`
+    hubStatusStyle = 'bg-[#b2cee7] text-[#00372a] border border-[#00372a]/30 font-bold'
+  } else if (isBuyerReviewRequired) {
+    hubOrderStatus = 'Buyer Review Required'
+    hubOrderStage = `Partial fulfillment review (${kpis.totalAccepted} kg available; ${kpis.shortfall} kg shortfall)`
+    hubStatusStyle = 'bg-[#fceace] text-[#683600] border border-[#683600]/40 font-bold'
+  }
+
   const baseOrders = [
     {
       id: 'ORD-1031',
@@ -57,44 +103,14 @@ export default function BuyerOrders() {
       hub: activeHubOrder.hubName,
       crop: `${activeHubOrder.crop} (${activeHubOrder.requiredGrade})`,
       quantity: `${activeHubOrder.hubAllocatedQty.toLocaleString()} kg`,
-      rate: '₹27.50 / kg',
-      totalValue: '₹18,837 (Adjusted for accepted kg)',
+      rate: '₹30 / kg',
+      totalValue: isCompleted || isBuyerVerified ? `₹${((kpis.totalAccepted || 700) * 30).toLocaleString()}` : '₹21,000',
       dispatchDate: activeHubOrder.deliveryDate,
-      deliveryStage: isPartiallyDispatched
-        ? `Partially Dispatched: ${kpis.totalAccepted} kg en route via Reefer ${activeHubOrder.dispatchDetails?.vehicleNo || 'AP-39-TX-8841'}`
-        : isDispatched
-        ? `In Transit via Reefer ${activeHubOrder.dispatchDetails?.vehicleNo || 'AP-39-TX-8841'}`
-        : isPartialApproved
-        ? `Partial fulfillment approved (${kpis.totalAccepted} kg ready for dispatch)`
-        : isAdditionalRequested
-        ? 'Additional supply requested by buyer'
-        : isPartialRejected
-        ? 'Partial fulfillment rejected by buyer'
-        : isBuyerReviewRequired
-        ? `Partial fulfillment review (${kpis.totalAccepted} kg available; ${kpis.shortfall} kg shortfall)`
-        : 'Quality Assay & Aggregation Active',
-      status: isPartiallyDispatched
-        ? 'Partially Dispatched'
-        : isDispatched
-        ? 'In Transit'
-        : isPartialApproved
-        ? 'Partial Fulfillment Approved'
-        : isAdditionalRequested
-        ? 'Additional Supply Required'
-        : isPartialRejected
-        ? 'Partial Fulfillment Rejected'
-        : isBuyerReviewRequired
-        ? 'Buyer Review Required'
-        : 'Processing',
-      statusStyle: isPartiallyDispatched || isDispatched
-        ? 'bg-[#b2cee7] text-[#00372a] border border-[#00372a]/30'
-        : isPartialApproved
-        ? 'bg-[#e8fe85] text-[#1b6e53] border border-[#1b6e53]'
-        : isBuyerReviewRequired
-        ? 'bg-[#fceace] text-[#683600] border border-[#683600]/40'
-        : isAdditionalRequested || isPartialRejected
-        ? 'bg-rose-50 text-rose-800 border border-rose-300'
-        : 'bg-[#e6ecd5] text-[#1b6e53] border border-[#c3cda7]',
+      deliveryStage: hubOrderStage,
+      status: hubOrderStatus,
+      statusStyle: hubStatusStyle,
+      isPrimary: true,
+      isCompletedOrder: isCompleted,
     },
     {
       id: 'ORD-8821',
@@ -108,6 +124,7 @@ export default function BuyerOrders() {
       deliveryStage: 'Transit to Hub Bay 2',
       status: 'In Transit',
       statusStyle: 'bg-[#fceace] text-[#683600]',
+      isCompletedOrder: false,
     },
     {
       id: 'ORD-8819',
@@ -121,6 +138,7 @@ export default function BuyerOrders() {
       deliveryStage: 'Loaded on Reefer #AP-31-TR-9021',
       status: 'In Transit',
       statusStyle: 'bg-[#fceace] text-[#683600]',
+      isCompletedOrder: false,
     },
     {
       id: 'ORD-8794',
@@ -132,10 +150,21 @@ export default function BuyerOrders() {
       totalValue: '₹22,000',
       dispatchDate: '2026-09-12',
       deliveryStage: 'Unloaded & QA Passed',
-      status: 'Fulfilled',
-      statusStyle: 'bg-[#e6ecd5] text-[#1b6e53]',
+      status: 'Completed',
+      statusStyle: 'bg-[#e6ecd5] text-[#1b6e53] font-bold border border-[#1b6e53]',
+      isCompletedOrder: true,
     },
   ]
+
+  const activeOrdersList = baseOrders.filter((o) => !o.isCompletedOrder)
+  const completedOrdersList = baseOrders.filter((o) => o.isCompletedOrder)
+
+  const displayedOrders =
+    activeTab === 'active'
+      ? activeOrdersList
+      : activeTab === 'completed'
+      ? completedOrdersList
+      : baseOrders
 
   return (
     <div className="space-y-8 pb-16">
@@ -149,13 +178,18 @@ export default function BuyerOrders() {
             Orders &amp; <span className="italic font-normal">Executed Sourcing Shipments</span>
           </h1>
           <p className="text-xs sm:text-sm text-[#6d6d6d] mt-1 font-sans">
-            Track dispatches, review partial fulfillment options, and monitor carrier delivery milestones.
+            Track dispatches, verify received dock shipments, confirm payments, and view completed orders.
           </p>
         </div>
 
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-[100px] bg-[#ffffff] border border-[#c3cda7] text-xs font-mono text-[#00372a]">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#1b6e53] animate-pulse"></span>
-          <span>{baseOrders.length} Active Contracts</span>
+        <div className="flex items-center gap-2">
+          <Link
+            to="/buyer/orders/ORD-1031"
+            className="py-2 px-4 rounded-[100px] bg-[#1b6e53] hover:bg-[#00372a] text-[#ffffff] text-xs font-bold font-mono transition shadow-2xs flex items-center gap-1.5 cursor-pointer"
+          >
+            <span className="material-symbols-outlined text-[16px]">local_shipping</span>
+            <span>Track Live Order ORD-1031</span>
+          </Link>
         </div>
       </div>
 
@@ -169,7 +203,7 @@ export default function BuyerOrders() {
         </div>
       )}
 
-      {/* PARTIAL FULFILLMENT BUYER DECISION BANNER (SECTION 4 & 5) */}
+      {/* PARTIAL FULFILLMENT BUYER DECISION BANNER (IF REVIEW REQUIRED) */}
       {isBuyerReviewRequired && (
         <section className="p-6 rounded-[24px] bg-[#ffffff] border-2 border-[#683600] shadow-md space-y-4 animate-in fade-in">
           <div className="flex items-start justify-between gap-3 pb-3 border-b border-[#c3cda7]/50">
@@ -195,7 +229,6 @@ export default function BuyerOrders() {
             </span>
           </div>
 
-          {/* Quantities Display */}
           <div className="grid grid-cols-3 gap-3 font-mono text-xs">
             <div className="p-3.5 rounded-[16px] bg-[#f1efdf] border border-[#c3cda7] space-y-0.5">
               <span className="text-[#6d6d6d] block text-[10px] uppercase">Ordered Quantity</span>
@@ -213,7 +246,6 @@ export default function BuyerOrders() {
             </div>
           </div>
 
-          {/* 3 Buyer Action Buttons */}
           <div className="pt-2 flex flex-col sm:flex-row items-center gap-3">
             <button
               type="button"
@@ -245,6 +277,27 @@ export default function BuyerOrders() {
         </section>
       )}
 
+      {/* Filter Tabs */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-1">
+        {[
+          { id: 'all', label: `All Orders (${baseOrders.length})` },
+          { id: 'active', label: `Active Orders (${activeOrdersList.length})` },
+          { id: 'completed', label: `Completed Orders (${completedOrdersList.length})` },
+        ].map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`px-4 py-2 rounded-[100px] text-xs font-mono transition whitespace-nowrap cursor-pointer ${
+              activeTab === tab.id
+                ? 'bg-[#1b6e53] text-[#ffffff] font-bold shadow-xs'
+                : 'bg-[#ffffff] text-[#353535] hover:bg-[#f1efdf] border border-[#c3cda7]'
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
       {/* Orders Table */}
       <section className="rounded-[24px] bg-[#ffffff] border border-[#c3cda7] overflow-hidden shadow-xs">
         <div className="p-5 border-b border-[#c3cda7]/50 flex items-center justify-between flex-wrap gap-3">
@@ -254,33 +307,36 @@ export default function BuyerOrders() {
             </div>
             <div>
               <h3 className="font-editorial text-2xl font-bold text-[#00372a] tracking-tight leading-none">
-                Active Sourcing Shipments
+                {activeTab === 'completed' ? 'Completed Orders' : 'Sourcing Shipments & Orders'}
               </h3>
               <p className="text-xs text-[#6d6d6d] mt-1 font-sans">
-                Real-time carrier milestones and verified FPO hub origin dispatches
+                Click on any order to view real-time delivery milestones, dock verification, and payment status.
               </p>
             </div>
           </div>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs min-w-[700px]">
+          <table className="w-full text-left text-xs min-w-[760px]">
             <thead className="bg-[#f1efdf] text-[#353535] uppercase text-[10px] tracking-wider border-b border-[#c3cda7]/50 font-mono">
               <tr>
-                <th className="py-3 px-4">Order ID</th>
+                <th className="py-3 px-4">Order Ref</th>
                 <th className="py-3 px-3">FPO &amp; Collection Hub</th>
                 <th className="py-3 px-3">Commodity</th>
                 <th className="py-3 px-3 text-right">Quantity</th>
                 <th className="py-3 px-3 text-right">Contract Value</th>
                 <th className="py-3 px-3">Delivery Milestone</th>
-                <th className="py-3 px-4 text-center">Status</th>
+                <th className="py-3 px-3 text-center">Status</th>
+                <th className="py-3 px-4 text-right">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#c3cda7]/30 text-[#212529]">
-              {baseOrders.map((order) => (
+              {displayedOrders.map((order) => (
                 <tr key={order.id} className="hover:bg-[#faf9f0] transition font-sans">
                   <td className="py-3.5 px-4 font-mono font-bold text-[#1b6e53] whitespace-nowrap">
-                    {order.id}
+                    <Link to={`/buyer/orders/${order.id}`} className="hover:underline">
+                      {order.id}
+                    </Link>
                   </td>
                   <td className="py-3.5 px-3 whitespace-nowrap">
                     <span className="font-bold text-[#212529] block font-editorial text-base">{order.fpo}</span>
@@ -301,10 +357,19 @@ export default function BuyerOrders() {
                       <span>{order.deliveryStage}</span>
                     </span>
                   </td>
-                  <td className="py-3.5 px-4 text-center whitespace-nowrap">
+                  <td className="py-3.5 px-3 text-center whitespace-nowrap">
                     <span className={`inline-block px-3 py-1 rounded-[100px] text-[10px] font-mono font-bold uppercase ${order.statusStyle}`}>
                       {order.status}
                     </span>
+                  </td>
+                  <td className="py-3.5 px-4 text-right whitespace-nowrap">
+                    <Link
+                      to={`/buyer/orders/${order.id}`}
+                      className="py-1.5 px-3.5 rounded-[100px] bg-[#1b6e53] hover:bg-[#00372a] text-[#ffffff] text-xs font-bold transition shadow-2xs inline-flex items-center gap-1 font-mono"
+                    >
+                      <span>{order.status === 'Completed' ? 'View Details' : 'Track Order'}</span>
+                      <span className="material-symbols-outlined text-[13px]">arrow_forward</span>
+                    </Link>
                   </td>
                 </tr>
               ))}

@@ -38,7 +38,7 @@ export default function FPORequestDetail() {
   ]
 
   // Track per-item response state:
-  // responses[itemId] = { type: 'ACCEPT' | 'BACK_OFFER' | 'DECLINE', availableQty, offeredPrice, offeredGrade, deliveryDate, declineReason, notes }
+  // responses[itemId] = { type: 'ACCEPT' | 'BACK_OFFER' | 'DECLINE', availableQty, producePrice, transportCost, offeredGrade, deliveryDate, declineReason, notes }
   const [itemResponses, setItemResponses] = useState(() => {
     const initial = {}
     items.forEach((item, idx) => {
@@ -47,22 +47,26 @@ export default function FPORequestDetail() {
 
       // If demo REQ-1027, initialize with the prompt's realistic scenario
       if (idx === 0) {
-        // Item 1: Tomato -> Accept
+        // Item 1: Tomato -> Accept (Produce: ₹27/kg, Transport: ₹1,500)
         initial[item.itemId] = {
           type: 'ACCEPT',
           availableQty: String(rawQty),
-          offeredPrice: (targetRateNum - 0.5).toFixed(2),
+          producePrice: '27.00',
+          offeredPrice: '27.00',
+          transportCost: '1500',
           offeredGrade: item.grade || 'Grade A',
           deliveryDate: demand?.deliveryDate || '2026-09-25',
           declineReason: '',
           notes: `Full ${rawQty} kg Grade A Roma tomatoes allocated from member farmer clusters. Crates loaded for scheduled delivery.`
         }
       } else if (idx === 1) {
-        // Item 2: Onion -> Back Offer
+        // Item 2: Onion -> Back Offer (Produce: ₹25/kg, Transport: ₹800)
         initial[item.itemId] = {
           type: 'BACK_OFFER',
           availableQty: String(Math.round(rawQty * 0.8)), // e.g. 400kg out of 500kg
-          offeredPrice: (targetRateNum + 1.0).toFixed(2), // e.g. ₹25/kg
+          producePrice: '25.00',
+          offeredPrice: '25.00',
+          transportCost: '800',
           offeredGrade: item.grade || 'Grade A',
           deliveryDate: '2026-09-26',
           declineReason: '',
@@ -73,7 +77,9 @@ export default function FPORequestDetail() {
         initial[item.itemId] = {
           type: 'DECLINE',
           availableQty: '',
+          producePrice: '',
           offeredPrice: '',
+          transportCost: '600',
           offeredGrade: '',
           deliveryDate: '',
           declineReason: 'Insufficient Grade A supply',
@@ -110,7 +116,9 @@ export default function FPORequestDetail() {
             ...current,
             type: 'ACCEPT',
             availableQty: current.availableQty || String(rawQty),
-            offeredPrice: current.offeredPrice || (targetRateNum - 0.5).toFixed(2),
+            producePrice: current.producePrice || (targetRateNum - 1.0).toFixed(2),
+            offeredPrice: current.producePrice || (targetRateNum - 1.0).toFixed(2),
+            transportCost: current.transportCost || '1500',
             offeredGrade: item.grade || 'Grade A',
             deliveryDate: demand.deliveryDate || '2026-09-25',
             declineReason: '',
@@ -124,7 +132,9 @@ export default function FPORequestDetail() {
             ...current,
             type: 'BACK_OFFER',
             availableQty: current.availableQty || String(Math.round(rawQty * 0.8)),
-            offeredPrice: current.offeredPrice || (targetRateNum + 1.0).toFixed(2),
+            producePrice: current.producePrice || (targetRateNum + 1.0).toFixed(2),
+            offeredPrice: current.producePrice || (targetRateNum + 1.0).toFixed(2),
+            transportCost: current.transportCost || '1500',
             offeredGrade: current.offeredGrade || item.grade || 'Grade A',
             deliveryDate: current.deliveryDate || demand.deliveryDate || '2026-09-26',
             declineReason: '',
@@ -307,15 +317,14 @@ export default function FPORequestDetail() {
             return (
               <div
                 key={item.itemId || idx}
-                className={`rounded-[24px] bg-[#ffffff] border transition-all p-6 lg:p-7 shadow-xs space-y-6 ${
-                  isItemConfirmed
+                className={`rounded-[24px] bg-[#ffffff] border transition-all p-6 lg:p-7 shadow-xs space-y-6 ${isItemConfirmed
                     ? 'border-rose-300 bg-rose-50/15'
                     : isAccept
-                    ? 'border-[#1b6e53]/60'
-                    : isBackOffer
-                    ? 'border-[#683600]/60'
-                    : 'border-rose-300'
-                }`}
+                      ? 'border-[#1b6e53]/60'
+                      : isBackOffer
+                        ? 'border-[#683600]/60'
+                        : 'border-rose-300'
+                  }`}
               >
                 {/* Item Header & Buyer Specs */}
                 <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-[#c3cda7]/50">
@@ -406,11 +415,10 @@ export default function FPORequestDetail() {
                         <button
                           type="button"
                           onClick={() => handleSwitchType(item, 'ACCEPT')}
-                          className={`py-3 px-4 rounded-[16px] text-xs font-bold transition flex items-center justify-between border cursor-pointer ${
-                            isAccept
+                          className={`py-3 px-4 rounded-[16px] text-xs font-bold transition flex items-center justify-between border cursor-pointer ${isAccept
                               ? 'bg-[#1b6e53] text-[#ffffff] border-[#1b6e53] shadow-xs'
                               : 'bg-[#ffffff] text-[#1b6e53] border-[#c3cda7] hover:bg-[#e6ecd5]'
-                          }`}
+                            }`}
                         >
                           <div className="flex items-center gap-2">
                             <span className="material-symbols-outlined text-[18px]">check_circle</span>
@@ -423,11 +431,10 @@ export default function FPORequestDetail() {
                         <button
                           type="button"
                           onClick={() => handleSwitchType(item, 'BACK_OFFER')}
-                          className={`py-3 px-4 rounded-[16px] text-xs font-bold transition flex items-center justify-between border cursor-pointer ${
-                            isBackOffer
+                          className={`py-3 px-4 rounded-[16px] text-xs font-bold transition flex items-center justify-between border cursor-pointer ${isBackOffer
                               ? 'bg-[#683600] text-[#ffffff] border-[#683600] shadow-xs'
                               : 'bg-[#ffffff] text-[#683600] border-[#c3cda7] hover:bg-[#fceace]'
-                          }`}
+                            }`}
                         >
                           <div className="flex items-center gap-2">
                             <span className="material-symbols-outlined text-[18px]">cached</span>
@@ -440,11 +447,10 @@ export default function FPORequestDetail() {
                         <button
                           type="button"
                           onClick={() => handleSwitchType(item, 'DECLINE')}
-                          className={`py-3 px-4 rounded-[16px] text-xs font-bold transition flex items-center justify-between border cursor-pointer ${
-                            isDecline
+                          className={`py-3 px-4 rounded-[16px] text-xs font-bold transition flex items-center justify-between border cursor-pointer ${isDecline
                               ? 'bg-rose-700 text-[#ffffff] border-rose-700 shadow-xs'
                               : 'bg-[#ffffff] text-rose-700 border-[#c3cda7] hover:bg-rose-50'
-                          }`}
+                            }`}
                         >
                           <div className="flex items-center gap-2">
                             <span className="material-symbols-outlined text-[18px]">cancel</span>
@@ -456,7 +462,15 @@ export default function FPORequestDetail() {
                     </div>
 
                     {/* Active Response Form Box */}
-                    {isAccept && (
+                    {isAccept && (() => {
+                      const curQty = Number(resp.availableQty || item.quantityVal || 1000)
+                      const curRate = parseFloat(String(resp.producePrice || resp.offeredPrice || 27).replace(/[^0-9.]/g, '')) || 27
+                      const curTransport = parseFloat(String(resp.transportCost !== undefined && resp.transportCost !== '' ? resp.transportCost : 1500).replace(/[^0-9.]/g, '')) || 1500
+                      const curProduceVal = Math.round(curQty * curRate)
+                      const curDeliveredTotal = curProduceVal + curTransport
+                      const curEffectiveRate = curQty > 0 ? (curDeliveredTotal / curQty).toFixed(2) : curRate.toFixed(2)
+
+                      return (
                       <div className="bg-[#e6ecd5]/40 rounded-[20px] p-5 border border-[#1b6e53]/30 space-y-4 animate-in fade-in">
                         <div className="flex items-center justify-between border-b border-[#c3cda7]/50 pb-2">
                           <span className="text-xs font-mono font-bold text-[#1b6e53] uppercase flex items-center gap-1.5">
@@ -468,7 +482,7 @@ export default function FPORequestDetail() {
                           </span>
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                           {/* Available Qty */}
                           <div>
                             <label className="block text-[11px] font-semibold text-[#353535] mb-1 font-mono uppercase">
@@ -483,17 +497,35 @@ export default function FPORequestDetail() {
                             />
                           </div>
 
-                          {/* Offered Price */}
+                          {/* Produce Price */}
                           <div>
                             <label className="block text-[11px] font-semibold text-[#353535] mb-1 font-mono uppercase">
-                              Offered Rate (₹ / kg) <span className="text-rose-600">*</span>
+                              Produce Rate (₹ / kg) <span className="text-rose-600">*</span>
                             </label>
                             <input
                               type="number"
                               step="0.1"
                               required
-                              value={resp.offeredPrice}
-                              onChange={(e) => handleUpdateResponse(item.itemId, 'offeredPrice', e.target.value)}
+                              value={resp.producePrice !== undefined ? resp.producePrice : resp.offeredPrice}
+                              onChange={(e) => {
+                                handleUpdateResponse(item.itemId, 'producePrice', e.target.value)
+                                handleUpdateResponse(item.itemId, 'offeredPrice', e.target.value)
+                              }}
+                              className="w-full text-xs px-3.5 py-2.5 bg-[#ffffff] border border-[#c3cda7] rounded-[100px] focus:outline-none focus:ring-1 focus:ring-[#1b6e53] font-mono text-[#212529]"
+                            />
+                          </div>
+
+                          {/* Transportation Cost */}
+                          <div>
+                            <label className="block text-[11px] font-semibold text-[#353535] mb-1 font-mono uppercase">
+                              Transportation Cost (₹) <span className="text-rose-600">*</span>
+                            </label>
+                            <input
+                              type="number"
+                              step="50"
+                              required
+                              value={resp.transportCost !== undefined ? resp.transportCost : '1500'}
+                              onChange={(e) => handleUpdateResponse(item.itemId, 'transportCost', e.target.value)}
                               className="w-full text-xs px-3.5 py-2.5 bg-[#ffffff] border border-[#c3cda7] rounded-[100px] focus:outline-none focus:ring-1 focus:ring-[#1b6e53] font-mono text-[#212529]"
                             />
                           </div>
@@ -513,6 +545,30 @@ export default function FPORequestDetail() {
                           </div>
                         </div>
 
+                        {/* Live Delivered Cost Breakdown Card */}
+                        <div className="bg-[#ffffff] rounded-[16px] p-4 border border-[#c3cda7]/60 grid grid-cols-2 sm:grid-cols-5 gap-3 font-mono text-xs">
+                          <div>
+                            <span className="text-[10px] text-[#6d6d6d] uppercase block">Produce Rate</span>
+                            <strong className="text-sm text-[#00372a]">₹{curRate.toFixed(2)}/kg</strong>
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-[#6d6d6d] uppercase block">Produce Value</span>
+                            <strong className="text-sm text-[#00372a]">₹{curProduceVal.toLocaleString('en-IN')}</strong>
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-[#6d6d6d] uppercase block">Transportation (FPO)</span>
+                            <strong className="text-sm text-[#683600]">₹{curTransport.toLocaleString('en-IN')}</strong>
+                          </div>
+                          <div className="bg-[#e6ecd5] p-2 rounded-[10px]">
+                            <span className="text-[10px] text-[#1b6e53] uppercase font-bold block">Delivered Total</span>
+                            <strong className="text-base text-[#1b6e53]">₹{curDeliveredTotal.toLocaleString('en-IN')}</strong>
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-[#6d6d6d] uppercase block">Effective Price</span>
+                            <strong className="text-sm text-[#1b6e53]">₹{curEffectiveRate}/kg</strong>
+                          </div>
+                        </div>
+
                         {/* Notes */}
                         <div>
                           <label className="block text-[11px] font-semibold text-[#353535] mb-1 font-mono uppercase">
@@ -527,9 +583,18 @@ export default function FPORequestDetail() {
                           />
                         </div>
                       </div>
-                    )}
+                      )
+                    })()}
 
-                    {isBackOffer && (
+                    {isBackOffer && (() => {
+                      const curQty = Number(resp.availableQty || 800)
+                      const curRate = parseFloat(String(resp.producePrice || resp.offeredPrice || 29).replace(/[^0-9.]/g, '')) || 29
+                      const curTransport = parseFloat(String(resp.transportCost !== undefined && resp.transportCost !== '' ? resp.transportCost : 1500).replace(/[^0-9.]/g, '')) || 1500
+                      const curProduceVal = Math.round(curQty * curRate)
+                      const curDeliveredTotal = curProduceVal + curTransport
+                      const curEffectiveRate = curQty > 0 ? (curDeliveredTotal / curQty).toFixed(2) : curRate.toFixed(2)
+
+                      return (
                       <div className="bg-[#fceace]/50 rounded-[20px] p-5 border border-[#683600]/40 space-y-4 animate-in fade-in">
                         <div className="flex items-center justify-between border-b border-[#c3cda7]/50 pb-2">
                           <span className="text-xs font-mono font-bold text-[#683600] uppercase flex items-center gap-1.5">
@@ -541,7 +606,7 @@ export default function FPORequestDetail() {
                           </span>
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-5 gap-4">
                           {/* Available Qty */}
                           <div>
                             <label className="block text-[11px] font-semibold text-[#353535] mb-1 font-mono uppercase">
@@ -557,18 +622,36 @@ export default function FPORequestDetail() {
                             />
                           </div>
 
-                          {/* Counter Rate */}
+                          {/* Produce Rate */}
                           <div>
                             <label className="block text-[11px] font-semibold text-[#353535] mb-1 font-mono uppercase">
-                              Counter Rate (₹ / kg) <span className="text-rose-600">*</span>
+                              Produce Rate (₹ / kg) <span className="text-rose-600">*</span>
                             </label>
                             <input
                               type="number"
                               step="0.5"
                               required
-                              value={resp.offeredPrice}
-                              onChange={(e) => handleUpdateResponse(item.itemId, 'offeredPrice', e.target.value)}
-                              placeholder="e.g. 25"
+                              value={resp.producePrice !== undefined ? resp.producePrice : resp.offeredPrice}
+                              onChange={(e) => {
+                                handleUpdateResponse(item.itemId, 'producePrice', e.target.value)
+                                handleUpdateResponse(item.itemId, 'offeredPrice', e.target.value)
+                              }}
+                              placeholder="e.g. 29"
+                              className="w-full text-xs px-3.5 py-2.5 bg-[#ffffff] border border-[#c3cda7] rounded-[100px] focus:outline-none focus:ring-1 focus:ring-[#683600] font-mono text-[#212529]"
+                            />
+                          </div>
+
+                          {/* Transportation Cost */}
+                          <div>
+                            <label className="block text-[11px] font-semibold text-[#353535] mb-1 font-mono uppercase">
+                              Transportation (₹) <span className="text-rose-600">*</span>
+                            </label>
+                            <input
+                              type="number"
+                              step="50"
+                              required
+                              value={resp.transportCost !== undefined ? resp.transportCost : '1500'}
+                              onChange={(e) => handleUpdateResponse(item.itemId, 'transportCost', e.target.value)}
                               className="w-full text-xs px-3.5 py-2.5 bg-[#ffffff] border border-[#c3cda7] rounded-[100px] focus:outline-none focus:ring-1 focus:ring-[#683600] font-mono text-[#212529]"
                             />
                           </div>
@@ -593,7 +676,7 @@ export default function FPORequestDetail() {
                           {/* Delivery Date */}
                           <div>
                             <label className="block text-[11px] font-semibold text-[#353535] mb-1 font-mono uppercase">
-                              Counter Delivery Date <span className="text-rose-600">*</span>
+                              Delivery Date <span className="text-rose-600">*</span>
                             </label>
                             <input
                               type="date"
@@ -602,6 +685,30 @@ export default function FPORequestDetail() {
                               onChange={(e) => handleUpdateResponse(item.itemId, 'deliveryDate', e.target.value)}
                               className="w-full text-xs px-3.5 py-2.5 bg-[#ffffff] border border-[#c3cda7] rounded-[100px] focus:outline-none focus:ring-1 focus:ring-[#683600] font-mono text-[#212529]"
                             />
+                          </div>
+                        </div>
+
+                        {/* Live Delivered Cost Breakdown Card */}
+                        <div className="bg-[#ffffff] rounded-[16px] p-4 border border-[#c3cda7]/60 grid grid-cols-2 sm:grid-cols-5 gap-3 font-mono text-xs">
+                          <div>
+                            <span className="text-[10px] text-[#6d6d6d] uppercase block">Produce Rate</span>
+                            <strong className="text-sm text-[#683600]">₹{curRate.toFixed(2)}/kg</strong>
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-[#6d6d6d] uppercase block">Produce Value</span>
+                            <strong className="text-sm text-[#00372a]">₹{curProduceVal.toLocaleString('en-IN')}</strong>
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-[#6d6d6d] uppercase block">Transportation (FPO)</span>
+                            <strong className="text-sm text-[#683600]">₹{curTransport.toLocaleString('en-IN')}</strong>
+                          </div>
+                          <div className="bg-[#fceace] p-2 rounded-[10px]">
+                            <span className="text-[10px] text-[#683600] uppercase font-bold block">Delivered Total</span>
+                            <strong className="text-base text-[#683600]">₹{curDeliveredTotal.toLocaleString('en-IN')}</strong>
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-[#6d6d6d] uppercase block">Effective Price</span>
+                            <strong className="text-sm text-[#683600]">₹{curEffectiveRate}/kg</strong>
                           </div>
                         </div>
 
@@ -620,7 +727,8 @@ export default function FPORequestDetail() {
                           />
                         </div>
                       </div>
-                    )}
+                      )
+                    })()}
 
                     {isDecline && (
                       <div className="bg-rose-50/60 rounded-[20px] p-5 border border-rose-200 space-y-4 animate-in fade-in">
@@ -732,26 +840,24 @@ export default function FPORequestDetail() {
               return (
                 <div
                   key={item.itemId || idx}
-                  className={`p-4 rounded-[18px] border space-y-1.5 ${
-                    isAccept
+                  className={`p-4 rounded-[18px] border space-y-1.5 ${isAccept
                       ? 'bg-[#e6ecd5]/70 border-[#1b6e53]/50'
                       : isBackOffer
-                      ? 'bg-[#fceace]/70 border-[#683600]/40'
-                      : 'bg-rose-50/70 border-rose-200'
-                  }`}
+                        ? 'bg-[#fceace]/70 border-[#683600]/40'
+                        : 'bg-rose-50/70 border-rose-200'
+                    }`}
                 >
                   <div className="flex items-center justify-between">
                     <span className="font-bold text-[#00372a] font-editorial text-lg">
                       {item.crop}
                     </span>
                     <span
-                      className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-[100px] ${
-                        isAccept
+                      className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-[100px] ${isAccept
                           ? 'bg-[#1b6e53] text-[#ffffff]'
                           : isBackOffer
-                          ? 'bg-[#683600] text-[#ffffff]'
-                          : 'bg-rose-700 text-[#ffffff]'
-                      }`}
+                            ? 'bg-[#683600] text-[#ffffff]'
+                            : 'bg-rose-700 text-[#ffffff]'
+                        }`}
                     >
                       {isAccept ? 'ACCEPTED' : isBackOffer ? 'BACK OFFER' : 'DECLINED'}
                     </span>

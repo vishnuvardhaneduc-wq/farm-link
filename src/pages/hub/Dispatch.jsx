@@ -121,10 +121,10 @@ export default function HubDispatch() {
                 type="button"
                 disabled={!isReadyForDispatch}
                 onClick={() => setShowDispatchModal(true)}
-                className="py-3 px-6 rounded-[100px] bg-[#1b6e53] hover:bg-[#00372a] disabled:opacity-50 disabled:cursor-not-allowed text-[#ffffff] text-xs font-bold uppercase tracking-wider transition shadow-sm flex items-center gap-2 cursor-pointer shrink-0"
+                className="py-3 px-6 rounded-[100px] bg-[#1b6e53] hover:bg-[#00372a] disabled:opacity-50 disabled:cursor-not-allowed text-[#ffffff] text-xs font-bold uppercase tracking-wider transition shadow-sm flex items-center gap-2 cursor-pointer shrink-0 font-mono"
               >
                 <span className="material-symbols-outlined text-[18px]">local_shipping</span>
-                <span>Create Dispatch</span>
+                <span>Confirm Dispatch</span>
               </button>
             ) : (
               <div className="py-2.5 px-5 rounded-[100px] bg-[#b2cee7] text-[#00372a] font-mono text-xs font-bold flex items-center gap-2">
@@ -136,25 +136,31 @@ export default function HubDispatch() {
         </div>
 
         {/* Read-Only Dispatch Specifications Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 font-mono text-xs">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 font-mono text-xs">
           <div className="p-4 rounded-[18px] bg-[#f1efdf] border border-[#c3cda7] space-y-1">
-            <span className="text-[10px] text-[#6d6d6d] uppercase block">Buyer</span>
+            <span className="text-[10px] text-[#6d6d6d] uppercase block">Order &amp; Buyer</span>
             <strong className="text-base text-[#00372a] block font-editorial">{activeOrder.buyer}</strong>
-            <p className="text-[10px] text-[#6d6d6d] font-sans">Institutional Client</p>
+            <p className="text-[10px] text-[#1b6e53] font-mono font-bold">{activeOrder.orderId}</p>
           </div>
 
           <div className="p-4 rounded-[18px] bg-[#f1efdf] border border-[#c3cda7] space-y-1">
-            <span className="text-[10px] text-[#6d6d6d] uppercase block">Origin &amp; Destination</span>
+            <span className="text-[10px] text-[#6d6d6d] uppercase block">FPO &amp; Collection Hub</span>
             <strong className="text-sm text-[#00372a] block">{activeOrder.hubName}</strong>
-            <span className="text-[10px] text-[#1b6e53] block font-sans">➔ {activeOrder.destination}</span>
+            <span className="text-[10px] text-[#1b6e53] block font-sans">Godavari Farmers FPO</span>
+          </div>
+
+          <div className="p-4 rounded-[18px] bg-[#f1efdf] border border-[#c3cda7] space-y-1">
+            <span className="text-[10px] text-[#6d6d6d] uppercase block">Item &amp; Destination</span>
+            <strong className="text-sm text-[#00372a] block">{activeOrder.crop} ({activeOrder.requiredGrade})</strong>
+            <span className="text-[10px] text-[#6d6d6d] block font-sans">➔ {activeOrder.destination}</span>
           </div>
 
           <div className="p-4 rounded-[18px] bg-[#e6ecd5] border border-[#c3cda7] space-y-1">
-            <span className="text-[10px] text-[#1b6e53] uppercase block">Accepted Volume</span>
+            <span className="text-[10px] text-[#1b6e53] uppercase font-bold block">Dispatched Quantity</span>
             <div className="text-xl font-bold text-[#1b6e53]">
-              {kpis.totalAccepted.toLocaleString()} kg
+              {(activeOrder.dispatchDetails?.dispatchedQty || kpis.totalAccepted || 700).toLocaleString()} kg
             </div>
-            <p className="text-[10px] text-[#1b6e53] font-sans">100% Grade A Quality Cleared</p>
+            <p className="text-[10px] text-[#1b6e53] font-sans">100% Quality Cleared</p>
           </div>
         </div>
 
@@ -169,26 +175,45 @@ export default function HubDispatch() {
                 </strong>
               </div>
               <span className="px-3 py-0.5 rounded-[100px] bg-[#e8fe85] text-[#1b6e53] font-mono text-[10px] font-bold">
-                MANIFEST ISSUED
+                STATUS: DISPATCHED
               </span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 font-mono text-xs">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 font-mono text-xs">
               <div>
-                <span className="text-[10px] text-[#6d6d6d] block">Vehicle Reference:</span>
-                <strong className="text-sm text-[#00372a]">{activeOrder.dispatchDetails.vehicleNo}</strong>
+                <span className="text-[10px] text-[#6d6d6d] block">Order ID:</span>
+                <strong className="text-sm text-[#00372a]">{activeOrder.orderId}</strong>
+              </div>
+              <div>
+                <span className="text-[10px] text-[#6d6d6d] block">Dispatch Hub:</span>
+                <strong className="text-sm text-[#00372a]">{activeOrder.hubName}</strong>
+              </div>
+              <div>
+                <span className="text-[10px] text-[#6d6d6d] block">Destination:</span>
+                <strong className="text-sm text-[#00372a]">{activeOrder.destination}</strong>
+              </div>
+              <div>
+                <span className="text-[10px] text-[#6d6d6d] block">Dispatched Quantity:</span>
+                <strong className="text-sm text-[#1b6e53]">{activeOrder.dispatchDetails.dispatchedQty} kg</strong>
+              </div>
+              <div>
+                <span className="text-[10px] text-[#6d6d6d] block">Dispatch Timestamp:</span>
+                <strong className="text-sm text-[#1b6e53]">{activeOrder.dispatchDetails.dispatchedAt}</strong>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 font-mono text-xs pt-2 border-t border-[#c3cda7]/40">
+              <div>
+                <span className="text-[10px] text-[#6d6d6d] block">Vehicle No:</span>
+                <strong className="text-xs text-[#00372a]">{activeOrder.dispatchDetails.vehicleNo}</strong>
               </div>
               <div>
                 <span className="text-[10px] text-[#6d6d6d] block">Driver / Carrier Contact:</span>
-                <strong className="text-sm text-[#00372a]">{activeOrder.dispatchDetails.driverName}</strong>
+                <strong className="text-xs text-[#00372a]">{activeOrder.dispatchDetails.driverName}</strong>
               </div>
               <div>
                 <span className="text-[10px] text-[#6d6d6d] block">Carrier:</span>
-                <strong className="text-sm text-[#00372a]">{activeOrder.dispatchDetails.carrier}</strong>
-              </div>
-              <div>
-                <span className="text-[10px] text-[#6d6d6d] block">Dispatch Time:</span>
-                <strong className="text-sm text-[#1b6e53]">{activeOrder.dispatchDetails.dispatchedAt}</strong>
+                <strong className="text-xs text-[#00372a]">{activeOrder.dispatchDetails.carrier}</strong>
               </div>
             </div>
 
@@ -200,17 +225,17 @@ export default function HubDispatch() {
         )}
       </section>
 
-      {/* 3. Dispatch Creation Modal */}
+      {/* 3. Dispatch Creation Confirmation Modal */}
       {showDispatchModal && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-[#ffffff] border border-[#c3cda7] rounded-[24px] max-w-xl w-full p-6 lg:p-7 space-y-5 shadow-2xl animate-in fade-in zoom-in-95 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between pb-3 border-b border-[#c3cda7]">
               <div>
                 <span className="text-[10px] font-mono text-[#1b6e53] font-bold uppercase tracking-wider">
-                  DISPATCH RECORD // {activeOrder.orderId}
+                  HUB DISPATCH // {activeOrder.orderId}
                 </span>
                 <h3 className="font-editorial text-2xl font-bold text-[#00372a]">
-                  Create Outbound Dispatch
+                  Confirm Dispatch?
                 </h3>
               </div>
               <button
@@ -221,6 +246,10 @@ export default function HubDispatch() {
                 ✕
               </button>
             </div>
+
+            <p className="text-xs text-[#353535] font-sans">
+              This will mark the order as dispatched and start buyer/FPO tracking.
+            </p>
 
             {/* Read-Only Dispatch Reference Details */}
             <div className="bg-[#f1efdf] p-4 rounded-[18px] space-y-2 border border-[#c3cda7]/60 text-xs font-sans">
@@ -234,18 +263,22 @@ export default function HubDispatch() {
                   <strong className="text-[#00372a]">{activeOrder.buyer}</strong>
                 </div>
                 <div>
+                  <span className="text-[#6d6d6d] text-[10px] block">Supplier FPO:</span>
+                  <strong className="text-[#00372a]">Godavari Farmers Producer Org</strong>
+                </div>
+                <div>
                   <span className="text-[#6d6d6d] text-[10px] block">Collection Hub:</span>
                   <strong className="text-[#00372a]">{activeOrder.hubName}</strong>
                 </div>
                 <div>
-                  <span className="text-[#6d6d6d] text-[10px] block">Crop:</span>
+                  <span className="text-[#6d6d6d] text-[10px] block">Item &amp; Grade:</span>
                   <strong className="text-[#00372a]">{activeOrder.crop} ({activeOrder.requiredGrade})</strong>
                 </div>
                 <div>
-                  <span className="text-[#6d6d6d] text-[10px] block">Accepted Quantity:</span>
-                  <strong className="text-[#1b6e53] text-sm">{kpis.totalAccepted} kg</strong>
+                  <span className="text-[#6d6d6d] text-[10px] block">Dispatched Quantity:</span>
+                  <strong className="text-[#1b6e53] text-sm">{kpis.totalAccepted || 700} kg</strong>
                 </div>
-                <div>
+                <div className="col-span-2">
                   <span className="text-[#6d6d6d] text-[10px] block">Destination:</span>
                   <strong className="text-[#00372a]">{activeOrder.destination}</strong>
                 </div>
@@ -332,10 +365,10 @@ export default function HubDispatch() {
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-3 rounded-[100px] bg-[#1b6e53] hover:bg-[#00372a] text-[#ffffff] text-xs font-bold transition shadow-sm cursor-pointer flex items-center justify-center gap-1.5"
+                  className="flex-1 py-3 rounded-[100px] bg-[#1b6e53] hover:bg-[#00372a] text-[#ffffff] text-xs font-bold transition shadow-sm cursor-pointer flex items-center justify-center gap-1.5 font-mono"
                 >
                   <span className="material-symbols-outlined text-[16px]">local_shipping</span>
-                  <span>Mark as Dispatched</span>
+                  <span>Confirm Dispatch</span>
                 </button>
               </div>
             </form>

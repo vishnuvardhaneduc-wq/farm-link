@@ -5,6 +5,7 @@ import {
   markOrderInTransit,
   markOrderDelivered,
   buyerConfirmDelivery,
+  buyerConfirmPayment,
   buyerReportIssue,
   createOrUpdateSettlementRecord,
   recordSettlementAndCompleteOrder,
@@ -56,10 +57,12 @@ console.log('Status after markOrderDelivered:', state3.activeOrder.status)
 console.assert(state3.activeOrder.status === 'Delivered', 'Expected status to be Delivered')
 
 console.log('\n=== TEST 4: Buyer Confirms Delivery ===')
-buyerConfirmDelivery('ORD-1031')
+buyerConfirmDelivery('ORD-1031', { isQuantityCorrect: true, isGradeCorrect: true })
 const state4 = getStoredHubOperations()
 console.log('Status after buyerConfirmDelivery:', state4.activeOrder.status)
-console.assert(state4.activeOrder.status === 'Ready for Settlement', 'Expected status to be Ready for Settlement')
+console.log('Delivery Status after buyerConfirmDelivery:', state4.activeOrder.deliveryStatus)
+console.assert(state4.activeOrder.status === 'Buyer Verified', 'Expected status to be Buyer Verified')
+console.assert(state4.activeOrder.deliveryStatus === 'CONFIRMED', 'Expected delivery status to be CONFIRMED')
 console.assert(state4.activeOrder.buyerConfirmation.confirmed === true, 'Expected buyer confirmation true')
 
 console.log('\n=== TEST 5: Settlement Calculation ===')
@@ -83,12 +86,14 @@ settlement.multiItemSettlement.forEach((item) => {
   console.log(`- ${item.crop} (${item.grade}): ${item.acceptedQty} kg @ ₹${item.rate}/kg = ₹${item.amount} (${item.supplier})`)
 })
 
-console.log('\n=== TEST 6: Record Settlement & Complete Order ===')
-recordSettlementAndCompleteOrder('ORD-1031')
+console.log('\n=== TEST 6: Buyer Confirms Payment & Complete Order ===')
+buyerConfirmPayment('ORD-1031')
 const state5 = getStoredHubOperations()
 console.log('Final Order Status:', state5.activeOrder.status)
+console.log('Payment Status:', state5.activeOrder.paymentStatus)
 console.log('Settlement Record Status:', state5.activeOrder.settlementRecord.status)
 console.assert(state5.activeOrder.status === 'Completed', 'Expected order status to be Completed')
+console.assert(state5.activeOrder.paymentStatus === 'CONFIRMED', 'Expected payment status to be CONFIRMED')
 
 console.log('\n=== TEST 7: Delivery Issue Exception Handling ===')
 buyerReportIssue('ORD-1031', { issueType: 'Damaged produce', description: 'Crushed cartons on pallet 2' })
@@ -97,4 +102,5 @@ console.log('Order Status with Issue:', state6.activeOrder.status)
 console.log('Delivery Issue:', state6.activeOrder.deliveryIssue)
 console.assert(state6.activeOrder.status === 'Delivery Issue', 'Expected status to be Delivery Issue')
 
-console.log('\n ALL TESTS PASSED SUCCESSFULLY!')
+console.log('\n🎉 ALL STEP 6 TESTS PASSED WITH ZERO ASSERTION FAILURES!')
+

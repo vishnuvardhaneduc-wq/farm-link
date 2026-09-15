@@ -286,19 +286,40 @@ export default function FPOOrders() {
                           </Link>
                         )}
 
-                        <Link
-                          to={`/fpo/orders/${order.orderId}/fulfillment`}
-                          className={`py-1.5 px-4 rounded-[100px] text-xs font-bold transition shadow-2xs inline-flex items-center gap-1.5 cursor-pointer ${
-                            isConfirmed
-                              ? 'bg-[#1b6e53] hover:bg-[#00372a] text-[#ffffff]'
-                              : 'bg-[#e6ecd5] hover:bg-[#c3cda7]/60 text-[#1b6e53] border border-[#c3cda7]'
-                          }`}
-                        >
-                          <span>{isConfirmed ? 'Plan Fulfillment' : 'View Plan'}</span>
-                          <span className="material-symbols-outlined text-[14px]">
-                            {isConfirmed ? 'alt_route' : 'arrow_forward'}
-                          </span>
-                        </Link>
+                        {['Dispatched', 'In Transit', 'Delivered', 'Buyer Verified', 'Payment Confirmed', 'Completed', 'Delivery Issue'].includes(currentStatus) ? (
+                          <div className="flex items-center gap-1.5">
+                            <Link
+                              to={`/fpo/orders/${order.orderId}/tracking`}
+                              className="py-1.5 px-3 rounded-[100px] bg-[#1b6e53] hover:bg-[#00372a] text-[#ffffff] text-xs font-bold transition shadow-2xs inline-flex items-center gap-1 font-mono"
+                            >
+                              <span className="material-symbols-outlined text-[13px]">my_location</span>
+                              <span>Track</span>
+                            </Link>
+                            {['Buyer Verified', 'Payment Confirmed', 'Completed'].includes(currentStatus) && (
+                              <Link
+                                to={`/fpo/settlements/${order.orderId}`}
+                                className="py-1.5 px-3 rounded-[100px] bg-[#e6ecd5] hover:bg-[#c3cda7]/60 text-[#1b6e53] border border-[#c3cda7] text-xs font-bold transition inline-flex items-center gap-1 font-mono"
+                              >
+                                <span className="material-symbols-outlined text-[13px]">receipt_long</span>
+                                <span>Ledger</span>
+                              </Link>
+                            )}
+                          </div>
+                        ) : (
+                          <Link
+                            to={`/fpo/orders/${order.orderId}/fulfillment`}
+                            className={`py-1.5 px-4 rounded-[100px] text-xs font-bold transition shadow-2xs inline-flex items-center gap-1.5 cursor-pointer ${
+                              isConfirmed
+                                ? 'bg-[#1b6e53] hover:bg-[#00372a] text-[#ffffff]'
+                                : 'bg-[#e6ecd5] hover:bg-[#c3cda7]/60 text-[#1b6e53] border border-[#c3cda7]'
+                            }`}
+                          >
+                            <span>{isConfirmed ? 'Plan Fulfillment' : 'View Plan'}</span>
+                            <span className="material-symbols-outlined text-[14px]">
+                              {isConfirmed ? 'alt_route' : 'arrow_forward'}
+                            </span>
+                          </Link>
+                        )}
                       </div>
                     </td>
                   </tr>

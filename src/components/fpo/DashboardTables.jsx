@@ -64,6 +64,7 @@ export default function DashboardTables({ farmerActivity }) {
                   const totalVol = itemsList.reduce((acc, curr) => acc + (curr.quantityVal || 0), 0)
                   const isConfirmed = order.status === 'Confirmed'
                   const isPlanned = order.status === 'Fulfillment Planned'
+                  const isStep6 = ['Dispatched', 'In Transit', 'Delivered', 'Buyer Verified', 'Payment Confirmed', 'Completed', 'Delivery Issue'].includes(order.status)
 
                   return (
                     <tr key={order.orderId} className="hover:bg-[#faf9f0] transition">
@@ -82,7 +83,11 @@ export default function DashboardTables({ farmerActivity }) {
                       <td className="py-3 px-3 text-center whitespace-nowrap">
                         <span
                           className={`inline-block px-2.5 py-0.5 rounded-[100px] text-[10px] font-mono font-bold uppercase tracking-wider ${
-                            isPlanned
+                            order.status === 'Completed' || order.status === 'Payment Confirmed'
+                              ? 'bg-[#1b6e53] text-[#ffffff] border border-[#1b6e53]'
+                              : isStep6
+                              ? 'bg-[#b2cee7] text-[#00372a] border border-[#00372a]/30'
+                              : isPlanned
                               ? 'bg-[#e8fe85] text-[#1b6e53] border border-[#1b6e53]'
                               : isConfirmed
                               ? 'bg-rose-50 text-rose-700 border border-rose-300'
@@ -94,16 +99,16 @@ export default function DashboardTables({ farmerActivity }) {
                       </td>
                       <td className="py-3 px-4 text-right whitespace-nowrap">
                         <Link
-                          to={`/fpo/orders/${order.orderId}/fulfillment`}
+                          to={isStep6 ? `/fpo/orders/${order.orderId}/tracking` : `/fpo/orders/${order.orderId}/fulfillment`}
                           className={`py-1 px-3 rounded-[100px] text-[11px] font-bold transition shadow-2xs inline-flex items-center gap-1 ${
-                            isConfirmed
+                            isStep6 || isConfirmed
                               ? 'bg-[#1b6e53] hover:bg-[#00372a] text-[#ffffff]'
                               : 'bg-[#e6ecd5] hover:bg-[#d8ee6f] text-[#1b6e53] border border-[#c3cda7]'
                           }`}
                         >
-                          <span>{isConfirmed ? 'Plan Fulfillment' : 'View Plan'}</span>
+                          <span>{isStep6 ? 'Track' : isConfirmed ? 'Plan Fulfillment' : 'View Plan'}</span>
                           <span className="material-symbols-outlined text-[13px]">
-                            {isConfirmed ? 'alt_route' : 'arrow_forward'}
+                            {isStep6 ? 'my_location' : isConfirmed ? 'alt_route' : 'arrow_forward'}
                           </span>
                         </Link>
                       </td>

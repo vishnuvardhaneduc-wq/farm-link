@@ -20,34 +20,41 @@ export default function FPOOrderTracking() {
   const activeOrder = hubState.activeOrder
   const currentStatus = activeOrder.status
 
+  // 11-stage tracking timeline matching Buyer and Hub
   const timelineStages = [
     { key: 'Confirmed', label: 'Confirmed', desc: 'Commercial terms accepted' },
-    { key: 'Fulfillment Planned', label: 'Fulfillment Planned', desc: 'Hub & farmer quota allocated' },
-    { key: 'Collected', label: 'Collected', desc: 'Inward gate weighment verified' },
-    { key: 'Quality Approved', label: 'Quality Approved', desc: 'Assay lab grade verified' },
+    { key: 'Fulfillment Planned', label: 'Fulfillment Planned', desc: 'Hub & quota planned' },
+    { key: 'Collection', label: 'Collection', desc: 'Inward gate intake' },
+    { key: 'Quality Approved', label: 'Quality Approved', desc: 'Lab QA verified' },
     { key: 'Aggregated', label: 'Aggregated', desc: 'Consignment palletized' },
-    { key: 'Dispatched', label: 'Dispatched', desc: 'Loaded & outbound manifest issued' },
-    { key: 'In Transit', label: 'In Transit', desc: 'Reefer vehicle on NH corridor' },
-    { key: 'Delivered', label: 'Delivered', desc: 'Arrived at destination dock' },
-    { key: 'Completed', label: 'Completed', desc: 'Delivery confirmed & settled' },
+    { key: 'Dispatched', label: 'Dispatched', desc: 'Outbound manifest issued' },
+    { key: 'In Transit', label: 'In Transit', desc: 'Carrier on transit corridor' },
+    { key: 'Delivered', label: 'Delivered', desc: 'Arrived at buyer dock' },
+    { key: 'Buyer Verified', label: 'Buyer Verified', desc: 'Buyer verified quantity & grade' },
+    { key: 'Payment Confirmed', label: 'Payment Confirmed', desc: 'Escrow payment recorded' },
+    { key: 'Completed', label: 'Completed', desc: 'Settlement recorded & completed' },
   ]
 
   const getStageIndex = (status) => {
     if (status === 'Confirmed') return 0
     if (status === 'Fulfillment Planned') return 1
-    if (status === 'Aggregation In Progress') return 3
-    if (status === 'Partial Fulfillment Available' || status === 'Buyer Review Required') return 4
-    if (status === 'Ready for Partial Dispatch' || status === 'Ready for Dispatch') return 4
+    if (status === 'Collection' || status === 'Collected') return 2
+    if (status === 'Quality Approved' || status === 'Quality Inspection' || status === 'Aggregation In Progress') return 3
+    if (status === 'Aggregated' || status === 'Ready for Dispatch' || status === 'Partial Fulfillment Available' || status === 'Buyer Review Required' || status === 'Ready for Partial Dispatch') return 4
     if (status === 'Dispatched' || status === 'Partially Dispatched') return 5
     if (status === 'In Transit') return 6
     if (status === 'Delivered') return 7
-    if (status === 'Ready for Settlement') return 7
+    if (status === 'Buyer Verified' || status === 'Ready for Settlement') return 8
+    if (status === 'Payment Confirmed') return 9
+    if (status === 'Completed') return 10
     if (status === 'Delivery Issue') return 7
-    if (status === 'Completed') return 8
     return 5
   }
 
   const currentStageIndex = getStageIndex(currentStatus)
+  const isBuyerVerified = currentStatus === 'Buyer Verified' || currentStatus === 'Ready for Settlement' || currentStatus === 'Payment Confirmed' || currentStatus === 'Completed'
+  const isPaymentConfirmed = activeOrder.paymentStatus === 'CONFIRMED' || currentStatus === 'Completed' || currentStatus === 'Payment Confirmed'
+  const isCompleted = currentStatus === 'Completed'
 
   return (
     <div className="space-y-8 pb-16">
@@ -60,23 +67,23 @@ export default function FPOOrderTracking() {
             </Link>
             <span className="text-[#c3cda7]">/</span>
             <span className="text-[10px] uppercase font-mono tracking-widest text-[#1b6e53] font-bold bg-[#e6ecd5] px-3 py-0.5 rounded-[100px] border border-[#c3cda7]">
-              FPO DELIVERY TRACKING (READ-ONLY)
+              FPO DELIVERY TRACKING (VIEW-ONLY)
             </span>
           </div>
           <h1 className="font-editorial text-3xl sm:text-4xl font-light text-[#00372a] tracking-tight">
             Order Tracking: <span className="italic font-bold">{activeOrder.orderId}</span>
           </h1>
           <p className="text-xs sm:text-sm text-[#6d6d6d] mt-1 font-sans">
-            Real-time fulfillment milestone monitoring from collection hub to buyer destination receiving dock.
+            Real-time fulfillment milestone monitoring from collection hub to buyer receiving dock.
           </p>
         </div>
 
         <div className="flex items-center gap-2.5">
           <span
             className={`px-4 py-1.5 rounded-[100px] text-xs font-mono font-bold uppercase tracking-wider ${
-              currentStatus === 'Completed'
+              isCompleted
                 ? 'bg-[#e6ecd5] text-[#1b6e53] border border-[#1b6e53]'
-                : currentStatus === 'Ready for Settlement'
+                : isBuyerVerified
                 ? 'bg-[#e8fe85] text-[#1b6e53] border border-[#1b6e53]'
                 : currentStatus === 'Delivery Issue'
                 ? 'bg-rose-50 text-rose-800 border border-rose-300'
@@ -97,15 +104,15 @@ export default function FPOOrderTracking() {
         <div className="flex items-center gap-2">
           <span className="material-symbols-outlined text-[18px] text-[#1b6e53]">shield</span>
           <span>
-            <strong>FPO Visibility Rule:</strong> The FPO can view real-time delivery progress. Delivery confirmation is exclusively authorized by the Buyer.
+            <strong>FPO View-Only Rule:</strong> The FPO tracks live shipment progression. Delivery verification &amp; payment confirmation are exclusively authorized by the Buyer.
           </span>
         </div>
-        {(currentStatus === 'Ready for Settlement' || currentStatus === 'Completed') && (
+        {(isBuyerVerified || isCompleted) && (
           <Link
             to={`/fpo/settlements/${activeOrder.orderId}`}
             className="py-1 px-3 rounded-[100px] bg-[#1b6e53] hover:bg-[#00372a] text-[#ffffff] text-xs font-bold transition flex items-center gap-1 shadow-2xs"
           >
-            <span>View Settlement</span>
+            <span>View Farmer Settlement Ledger</span>
             <span className="material-symbols-outlined text-[13px]">arrow_forward</span>
           </Link>
         )}
@@ -142,13 +149,13 @@ export default function FPOOrderTracking() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 font-mono text-xs">
           <div className="p-3.5 rounded-[16px] bg-[#f1efdf] border border-[#c3cda7] space-y-0.5">
             <span className="text-[10px] text-[#6d6d6d] uppercase block">Target Requirement</span>
-            <div className="text-base font-bold text-[#00372a]">{activeOrder.hubAllocatedQty} kg</div>
+            <div className="text-base font-bold text-[#00372a]">{activeOrder.hubAllocatedQty || 700} kg</div>
             <p className="text-[10px] text-[#6d6d6d] font-sans">Allocated Hub Quota</p>
           </div>
 
           <div className="p-3.5 rounded-[16px] bg-[#e6ecd5] border border-[#c3cda7] space-y-0.5">
             <span className="text-[10px] text-[#1b6e53] uppercase font-bold block">Accepted / Weighed</span>
-            <div className="text-base font-bold text-[#1b6e53]">{kpis.totalAccepted} kg</div>
+            <div className="text-base font-bold text-[#1b6e53]">{kpis.totalAccepted || 700} kg</div>
             <p className="text-[10px] text-[#1b6e53] font-sans">100% Grade A Net</p>
           </div>
 
@@ -166,7 +173,7 @@ export default function FPOOrderTracking() {
         </div>
       </section>
 
-      {/* 3. STATUS TIMELINE */}
+      {/* 3. STATUS TIMELINE (11 STAGES) */}
       <section className="rounded-[24px] bg-[#ffffff] border border-[#c3cda7] p-6 lg:p-7 shadow-xs space-y-5">
         <div className="flex items-center justify-between pb-3 border-b border-[#c3cda7]/50">
           <div className="flex items-center gap-2">
@@ -182,7 +189,7 @@ export default function FPOOrderTracking() {
 
         {/* Timeline Bar */}
         <div className="relative pt-2 pb-4 overflow-x-auto">
-          <div className="flex items-start justify-between min-w-[720px] relative">
+          <div className="flex items-start justify-between min-w-[880px] relative">
             {/* Connecting Track */}
             <div className="absolute top-4 left-6 right-6 h-1 bg-[#f1efdf] border-t border-b border-[#c3cda7]/50 z-0"></div>
 
@@ -191,10 +198,10 @@ export default function FPOOrderTracking() {
               const isCurrent = idx === currentStageIndex
 
               return (
-                <div key={stage.key} className="flex flex-col items-center text-center relative z-10 w-24 px-1">
+                <div key={stage.key} className="flex flex-col items-center text-center relative z-10 w-20 px-0.5">
                   {/* Step Marker Dot */}
                   <div
-                    className={`w-9 h-9 rounded-full flex items-center justify-center font-mono text-xs font-bold transition-all shadow-xs ${
+                    className={`w-8 h-8 rounded-full flex items-center justify-center font-mono text-xs font-bold transition-all shadow-xs ${
                       isPast
                         ? 'bg-[#1b6e53] text-[#ffffff] ring-2 ring-[#e8fe85]'
                         : isCurrent
@@ -203,18 +210,18 @@ export default function FPOOrderTracking() {
                     }`}
                   >
                     {isPast ? (
-                      <span className="material-symbols-outlined text-[16px]">check</span>
+                      <span className="material-symbols-outlined text-[15px]">check</span>
                     ) : isCurrent ? (
-                      <span className="w-2.5 h-2.5 rounded-full bg-[#1b6e53] animate-ping"></span>
+                      <span className="w-2 h-2 rounded-full bg-[#1b6e53] animate-ping"></span>
                     ) : (
                       idx + 1
                     )}
                   </div>
 
                   {/* Stage Label */}
-                  <div className="mt-2.5 space-y-0.5">
+                  <div className="mt-2 space-y-0.5">
                     <span
-                      className={`text-[11px] font-mono block leading-tight ${
+                      className={`text-[10px] font-mono block leading-tight ${
                         isCurrent
                           ? 'font-bold text-[#1b6e53]'
                           : isPast
@@ -232,14 +239,16 @@ export default function FPOOrderTracking() {
         </div>
       </section>
 
-      {/* 4. Active Logistics Telemetry Section */}
+      {/* 4. Active Logistics Telemetry Section (View-Only Status) */}
       <section className="rounded-[24px] bg-[#ffffff] border-2 border-[#1b6e53] p-6 lg:p-8 shadow-sm space-y-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[#c3cda7]/50">
           <div className="flex items-start gap-3.5">
             <div
               className={`w-12 h-12 rounded-[18px] flex items-center justify-center text-2xl font-bold shrink-0 ${
-                currentStatus === 'Completed' || currentStatus === 'Ready for Settlement'
+                isCompleted
                   ? 'bg-[#e6ecd5] text-[#1b6e53]'
+                  : isBuyerVerified
+                  ? 'bg-[#e8fe85] text-[#1b6e53]'
                   : currentStatus === 'Delivered'
                   ? 'bg-[#b2cee7] text-[#00372a]'
                   : currentStatus === 'Delivery Issue'
@@ -247,25 +256,21 @@ export default function FPOOrderTracking() {
                   : 'bg-[#fceace] text-[#683600]'
               }`}
             >
-              {currentStatus === 'Completed' || currentStatus === 'Ready for Settlement'
-                ? '✅'
-                : currentStatus === 'Delivered'
-                ? '🏢'
-                : currentStatus === 'Delivery Issue'
-                ? '⚠️'
-                : '🚚'}
+              {isCompleted ? '🏆' : isBuyerVerified ? '✅' : currentStatus === 'Delivered' ? '🏢' : currentStatus === 'Delivery Issue' ? '⚠️' : '🚚'}
             </div>
             <div>
               <span className="text-[10px] font-mono text-[#1b6e53] uppercase font-bold tracking-wider">
                 FPO LOGISTICS STATUS // {activeOrder.orderId}
               </span>
               <h3 className="font-editorial text-2xl font-bold text-[#00372a]">
-                {currentStatus === 'Completed'
+                {isCompleted
                   ? 'Order Completed & Settled'
-                  : currentStatus === 'Ready for Settlement'
-                  ? 'Delivery Confirmed by Buyer'
+                  : currentStatus === 'Payment Confirmed'
+                  ? 'Buyer Payment Confirmed'
+                  : isBuyerVerified
+                  ? 'Delivery Confirmed & Verified by Buyer'
                   : currentStatus === 'Delivered'
-                  ? 'Shipment Reached Buyer Dock'
+                  ? 'Shipment Reached Buyer Receiving Dock'
                   : currentStatus === 'Delivery Issue'
                   ? 'Delivery Issue Logged by Buyer'
                   : currentStatus === 'In Transit'
@@ -276,10 +281,10 @@ export default function FPOOrderTracking() {
           </div>
 
           <div className="flex items-center gap-2">
-            {activeOrder.buyerConfirmation?.confirmed ? (
+            {isBuyerVerified ? (
               <span className="py-2 px-4 rounded-[100px] bg-[#e6ecd5] text-[#1b6e53] font-mono text-xs font-bold border border-[#1b6e53] flex items-center gap-1.5">
                 <span className="material-symbols-outlined text-[16px]">verified</span>
-                <span>Delivery Confirmed by Buyer</span>
+                <span>Delivery: Confirmed</span>
               </span>
             ) : (
               <span className="py-2 px-4 rounded-[100px] bg-[#f1efdf] text-[#683600] font-mono text-xs font-bold border border-[#c3cda7]">
@@ -289,41 +294,45 @@ export default function FPOOrderTracking() {
           </div>
         </div>
 
-        {/* 4 Details Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 font-mono text-xs">
+        {/* Status Breakdown Grid for FPO: Delivery, Verification, Payment, Settlement */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 font-mono text-xs">
           <div className="p-4 rounded-[18px] bg-[#f1efdf] border border-[#c3cda7] space-y-1">
-            <span className="text-[10px] text-[#6d6d6d] uppercase block">Dispatch Manifest Date</span>
-            <strong className="text-sm text-[#00372a] block">
-              {activeOrder.dispatchDetails?.dispatchDate || '2026-09-14'}
+            <span className="text-[10px] text-[#6d6d6d] uppercase block">Delivery Status</span>
+            <strong className={`text-sm block ${isBuyerVerified ? 'text-[#1b6e53]' : 'text-[#00372a]'}`}>
+              {isBuyerVerified ? 'Confirmed' : currentStatus === 'Delivered' ? 'At Dock' : 'In Transit'}
             </strong>
-            <span className="text-[10px] text-[#6d6d6d] font-sans">Origin: {activeOrder.hubName}</span>
+            <span className="text-[10px] text-[#6d6d6d] font-sans">
+              Destination: {activeOrder.destination}
+            </span>
           </div>
 
           <div className="p-4 rounded-[18px] bg-[#f1efdf] border border-[#c3cda7] space-y-1">
-            <span className="text-[10px] text-[#6d6d6d] uppercase block">Accepted Quantity</span>
-            <strong className="text-base text-[#1b6e53] block">
-              {kpis.totalAccepted} kg
+            <span className="text-[10px] text-[#6d6d6d] uppercase block">Buyer Verification</span>
+            <strong className={`text-sm block ${isBuyerVerified ? 'text-[#1b6e53]' : 'text-[#683600]'}`}>
+              {isBuyerVerified ? 'Completed' : 'Pending Verification'}
             </strong>
-            <span className="text-[10px] text-[#6d6d6d] font-sans">Weighed &amp; QA Certified</span>
+            <span className="text-[10px] text-[#6d6d6d] font-sans">
+              {isBuyerVerified ? '100% Quality & Qty Passed' : 'Dock Inspection'}
+            </span>
           </div>
 
           <div className="p-4 rounded-[18px] bg-[#f1efdf] border border-[#c3cda7] space-y-1">
-            <span className="text-[10px] text-[#6d6d6d] uppercase block">Carrier &amp; Transport</span>
-            <strong className="text-xs text-[#00372a] block truncate">
-              {activeOrder.dispatchDetails?.carrier || 'Delta Cold-Chain'}
+            <span className="text-[10px] text-[#6d6d6d] uppercase block">Payment Status</span>
+            <strong className={`text-sm block ${isPaymentConfirmed ? 'text-[#1b6e53]' : 'text-[#683600]'}`}>
+              {isPaymentConfirmed ? 'Confirmed' : 'Awaiting Buyer'}
             </strong>
-            <span className="text-[10px] text-[#1b6e53] font-mono block">
-              Vehicle: {activeOrder.dispatchDetails?.vehicleNo || 'AP-39-TX-8841'}
+            <span className="text-[10px] text-[#6d6d6d] font-sans">
+              {isPaymentConfirmed ? 'Simulated Escrow Cleared' : 'Due on verification'}
             </span>
           </div>
 
           <div className="p-4 rounded-[18px] bg-[#e6ecd5] border border-[#c3cda7] space-y-1">
-            <span className="text-[10px] text-[#1b6e53] uppercase font-bold block">Delivery Location</span>
-            <strong className="text-xs text-[#00372a] block truncate">
-              {activeOrder.destination}
+            <span className="text-[10px] text-[#1b6e53] uppercase font-bold block">Settlement Status</span>
+            <strong className="text-base text-[#1b6e53] block">
+              {isCompleted ? 'Recorded' : isBuyerVerified ? 'Ready' : 'Pending Delivery'}
             </strong>
             <span className="text-[10px] text-[#1b6e53] font-sans block">
-              Destination Receiving Gate
+              ₹17,500 Farmer Payout
             </span>
           </div>
         </div>
@@ -339,7 +348,7 @@ export default function FPOOrderTracking() {
             </h3>
           </div>
           <span className="text-xs font-mono text-[#6d6d6d]">
-            {activeOrder.items?.length || 2} Commodities
+            3 Commodities Monitored
           </span>
         </div>
 
@@ -351,19 +360,17 @@ export default function FPOOrderTracking() {
                 <th className="py-3 px-3">Variety &amp; Grade</th>
                 <th className="py-3 px-3 text-right">Ordered Qty</th>
                 <th className="py-3 px-3 text-right">Accepted Qty</th>
-                <th className="py-3 px-3 text-right">Shortfall</th>
                 <th className="py-3 px-4 text-center">Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#c3cda7]/30 text-[#212529] font-mono">
-              {(activeOrder.items || [
+              {[
                 {
                   crop: 'Tomato',
                   variety: 'Hybrid Roma',
                   grade: 'Grade A',
                   orderedQty: 700,
-                  acceptedQty: 685,
-                  shortfallQty: 15,
+                  acceptedQty: kpis.totalAccepted || 700,
                   status: currentStatus,
                 },
                 {
@@ -372,10 +379,17 @@ export default function FPOOrderTracking() {
                   grade: 'Grade A',
                   orderedQty: 500,
                   acceptedQty: 500,
-                  shortfallQty: 0,
-                  status: 'Ready for Dispatch',
+                  status: isCompleted ? 'Completed' : 'Ready for Dispatch',
                 },
-              ]).map((item, idx) => (
+                {
+                  crop: 'Green Chilli',
+                  variety: 'G4 Export',
+                  grade: 'Grade A',
+                  orderedQty: 200,
+                  acceptedQty: 200,
+                  status: isCompleted ? 'Completed' : 'Ready for Dispatch',
+                },
+              ].map((item, idx) => (
                 <tr key={idx} className="hover:bg-[#faf9f0] transition">
                   <td className="py-3.5 px-4 font-bold text-[#00372a] text-sm font-editorial">
                     {item.crop}
@@ -389,18 +403,17 @@ export default function FPOOrderTracking() {
                   <td className="py-3.5 px-3 text-right font-bold text-[#1b6e53]">
                     {item.acceptedQty} kg
                   </td>
-                  <td className="py-3.5 px-3 text-right font-bold text-[#683600]">
-                    {item.shortfallQty > 0 ? `${item.shortfallQty} kg` : '0 kg'}
-                  </td>
                   <td className="py-3.5 px-4 text-center">
                     <span
                       className={`inline-block px-3 py-0.5 rounded-[100px] text-[10px] font-bold uppercase tracking-wider ${
-                        item.shortfallQty === 0
+                        item.status === 'Completed'
+                          ? 'bg-[#e6ecd5] text-[#1b6e53] border border-[#1b6e53]'
+                          : item.status === 'Buyer Verified'
                           ? 'bg-[#e8fe85] text-[#1b6e53] border border-[#1b6e53]'
                           : 'bg-[#fceace] text-[#683600] border border-[#c3cda7]'
                       }`}
                     >
-                      {item.crop === 'Tomato' ? currentStatus : item.status || 'Ready for Dispatch'}
+                      {item.status}
                     </span>
                   </td>
                 </tr>

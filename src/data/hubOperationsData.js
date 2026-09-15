@@ -28,13 +28,13 @@ export const initialHubOperationsState = {
     hubId: 'HUB-A',
     destination: 'Vijayawada Processing Hub',
     deliveryDate: '29 Sep 2026',
-    
+
     // Core fulfillment & shortage state:
     // 'Aggregation In Progress' | 'Partial Fulfillment Available' | 'Buyer Review Required' | 
     // 'Partial Fulfillment Approved' | 'Additional Supply Required' | 'Partial Fulfillment Rejected' | 
     // 'Ready for Dispatch' | 'Ready for Partial Dispatch' | 'Partially Dispatched' | 'Dispatched'
     status: 'Partial Fulfillment Available',
-    
+
     // Shortfall communication metadata
     shortfallState: {
       hasShortfall: true,
@@ -49,7 +49,7 @@ export const initialHubOperationsState = {
       buyerDecisionAt: null,
       notes: '15 kg shortfall detected during quality assay.',
     },
-    
+
     // Multi-item order items support
     items: [
       {
@@ -76,7 +76,7 @@ export const initialHubOperationsState = {
 
     dispatchDetails: null, // { vehicleNo, driverName, carrier, dispatchDate, notes, dispatchedAt, dispatchedQty, isPartial }
   },
-  
+
   // Farmer collection lots for Rajahmundry Central Hub (ORD-1031 Tomato Grade A: 685 kg accepted total)
   farmerLots: [
     {
@@ -86,13 +86,13 @@ export const initialHubOperationsState = {
       orderId: 'ORD-1031',
       crop: 'Tomato',
       requiredGrade: 'Grade A',
-      
+
       allocatedQty: 70, // 70 kg allocated
       actualCollectedQty: 66.5,
       weighedQty: 66.5,
       acceptedQty: 64, // 64 kg accepted
       rejectedQty: 2.5,
-      
+
       status: 'Passed',
       collectionTime: '2026-09-14 07:05 AM',
       collectionNotes: 'Gate intake verified at Bay 1',
@@ -112,13 +112,13 @@ export const initialHubOperationsState = {
       orderId: 'ORD-1031',
       crop: 'Tomato',
       requiredGrade: 'Grade A',
-      
+
       allocatedQty: 140,
       actualCollectedQty: 135,
       weighedQty: 135,
       acceptedQty: 135, // 135 kg accepted
       rejectedQty: 0,
-      
+
       status: 'Passed',
       collectionTime: '2026-09-14 07:15 AM',
       collectionNotes: 'Delivered in standard ventilated crates',
@@ -138,13 +138,13 @@ export const initialHubOperationsState = {
       orderId: 'ORD-1031',
       crop: 'Tomato',
       requiredGrade: 'Grade A',
-      
+
       allocatedQty: 210,
       actualCollectedQty: 200,
       weighedQty: 200,
       acceptedQty: 198, // 198 kg accepted
       rejectedQty: 2,
-      
+
       status: 'Passed',
       collectionTime: '2026-09-14 07:45 AM',
       collectionNotes: 'Gate receipt #GR-4029 issued',
@@ -164,13 +164,13 @@ export const initialHubOperationsState = {
       orderId: 'ORD-1031',
       crop: 'Tomato',
       requiredGrade: 'Grade A',
-      
+
       allocatedQty: 280,
       actualCollectedQty: 290,
       weighedQty: 290,
       acceptedQty: 288, // 288 kg accepted
       rejectedQty: 2,
-      
+
       status: 'Passed',
       collectionTime: '2026-09-14 08:15 AM',
       collectionNotes: 'Crate intake logged at Bay 1',
@@ -391,7 +391,7 @@ export function notifyFpoOfShortfall(orderId = 'ORD-1031', customNotes = '') {
   order.shortfallState.hubNotifiedFpo = true
   order.shortfallState.hubNotifiedAt = `${today} ${now}`
   order.shortfallState.notes = customNotes || `${kpis.shortfall} kg shortfall detected. Notify FPO for buyer review.`
-  
+
   // Update status to Buyer Review Required
   order.status = 'Buyer Review Required'
 
@@ -536,7 +536,7 @@ export function calculateHubKPIs(state = getStoredHubOperations()) {
   const activeOrder = state.activeOrder || {}
 
   const expectedCollection = lots.reduce((acc, l) => acc + (l.allocatedQty || 0), 0)
-  
+
   const collected = lots.reduce((acc, l) => {
     if (l.status !== 'Pending') {
       return acc + (l.actualCollectedQty || l.weighedQty || l.allocatedQty || 0)
@@ -615,7 +615,25 @@ function syncHubToOtherPortals(hubState) {
           let stageText = order.status
           let statusStyle = 'bg-[#e6ecd5] text-[#1b6e53] border border-[#c3cda7] font-bold'
 
-          if (order.status === 'Dispatched' || order.status === 'Partially Dispatched') {
+          if (order.status === 'Completed') {
+            stageText = 'Completed'
+            statusStyle = 'bg-[#e6ecd5] text-[#1b6e53] border border-[#1b6e53] font-bold'
+          } else if (order.status === 'Payment Confirmed') {
+            stageText = 'Payment Confirmed'
+            statusStyle = 'bg-[#e8fe85] text-[#1b6e53] border border-[#1b6e53] font-bold'
+          } else if (order.status === 'Buyer Verified' || order.status === 'Ready for Settlement') {
+            stageText = 'Buyer Verified'
+            statusStyle = 'bg-[#e8fe85] text-[#1b6e53] border border-[#1b6e53] font-bold'
+          } else if (order.status === 'Delivery Issue') {
+            stageText = 'Delivery Issue'
+            statusStyle = 'bg-rose-50 text-rose-800 border border-rose-300 font-bold'
+          } else if (order.status === 'Delivered') {
+            stageText = 'Delivered'
+            statusStyle = 'bg-[#b2cee7] text-[#00372a] border border-[#00372a]/30 font-bold'
+          } else if (order.status === 'In Transit') {
+            stageText = 'In Transit'
+            statusStyle = 'bg-[#fceace] text-[#683600] border border-[#683600]/40 font-bold'
+          } else if (order.status === 'Dispatched' || order.status === 'Partially Dispatched') {
             stageText = order.status === 'Partially Dispatched' ? 'Partially Dispatched' : 'Dispatched'
             statusStyle = 'bg-[#b2cee7] text-[#212529] border border-[#212529]/30 font-bold'
           } else if (order.status === 'Buyer Review Required') {
@@ -673,10 +691,58 @@ function syncHubToOtherPortals(hubState) {
       const buyerOrders = JSON.parse(rawBuyer)
       const updatedBuyer = buyerOrders.map((bo) => {
         if (bo.id === orderId || bo.orderId === orderId) {
+          if (order.status === 'Completed') {
+            return {
+              ...bo,
+              status: 'Completed',
+              deliveryStage: 'Delivery Verified & Payment Confirmed',
+              statusStyle: 'bg-[#e6ecd5] text-[#1b6e53] border border-[#1b6e53] font-bold',
+            }
+          }
+          if (order.status === 'Payment Confirmed') {
+            return {
+              ...bo,
+              status: 'Payment Confirmed',
+              deliveryStage: 'Payment Confirmed — Order Completed',
+              statusStyle: 'bg-[#e8fe85] text-[#1b6e53] border border-[#1b6e53] font-bold',
+            }
+          }
+          if (order.status === 'Buyer Verified' || order.status === 'Ready for Settlement') {
+            return {
+              ...bo,
+              status: 'Buyer Verified',
+              deliveryStage: 'Verified by Buyer — Awaiting Payment Confirmation',
+              statusStyle: 'bg-[#e8fe85] text-[#1b6e53] border border-[#1b6e53] font-bold',
+            }
+          }
+          if (order.status === 'Delivery Issue') {
+            return {
+              ...bo,
+              status: 'Delivery Issue',
+              deliveryStage: `Issue Logged: ${order.deliveryIssue?.issueType || 'Discrepancy Reported'}`,
+              statusStyle: 'bg-rose-50 text-rose-800 border border-rose-300 font-bold',
+            }
+          }
+          if (order.status === 'Delivered') {
+            return {
+              ...bo,
+              status: 'Delivered',
+              deliveryStage: `Arrived at ${order.destination} — Ready for Verification`,
+              statusStyle: 'bg-[#b2cee7] text-[#00372a] border border-[#00372a]/30 font-bold',
+            }
+          }
+          if (order.status === 'In Transit') {
+            return {
+              ...bo,
+              status: 'In Transit',
+              deliveryStage: `En Route via ${order.dispatchDetails?.vehicleNo || 'Reefer'} (${kpis.totalAccepted} kg)`,
+              statusStyle: 'bg-[#fceace] text-[#683600] border border-[#683600]/40 font-bold',
+            }
+          }
           if (order.status === 'Dispatched' || order.status === 'Partially Dispatched') {
             return {
               ...bo,
-              status: order.status === 'Partially Dispatched' ? 'Partially Dispatched' : 'In Transit',
+              status: order.status === 'Partially Dispatched' ? 'Partially Dispatched' : 'Dispatched',
               deliveryStage: `En Route via ${order.dispatchDetails?.vehicleNo || 'Carrier'} (${kpis.totalAccepted} kg)`,
               statusStyle: 'bg-[#b2cee7] text-[#00372a] border border-[#00372a]/30 font-bold',
             }
@@ -723,3 +789,500 @@ function syncHubToOtherPortals(hubState) {
     console.error('Error syncing hub to other portals', e)
   }
 }
+
+// =========================================================================
+// STEP 6: DELIVERY TRACKING -> BUYER VERIFICATION -> PAYMENT CONFIRMATION -> COMPLETION
+// =========================================================================
+
+/**
+ * 10. Advance Dispatched order to In Transit
+ */
+export function markOrderInTransit(orderId = 'ORD-1031') {
+  const state = getStoredHubOperations()
+  const order = state.activeOrder
+  const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+  const today = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+
+  order.status = 'In Transit'
+  order.transitDetails = {
+    startedAt: `${today} ${now}`,
+    carrier: order.dispatchDetails?.carrier || 'Delta Cold-Chain Logistics Ltd',
+    vehicleNo: order.dispatchDetails?.vehicleNo || 'AP-39-TX-8841',
+    driverName: order.dispatchDetails?.driverName || 'Ramesh Naidu (+91 98480 22341)',
+    currentLocation: 'NH16 Corridor (Near Eluru Toll Bay)',
+    temperature: '12.4°C (Optimal)',
+    expectedDelivery: '25 Sep 2026',
+  }
+
+  saveHubOperationsState(state)
+  return true
+}
+
+/**
+ * 11. Mark In Transit order as Delivered at Buyer Dock
+ */
+export function markOrderDelivered(orderId = 'ORD-1031') {
+  const state = getStoredHubOperations()
+  const order = state.activeOrder
+  const kpis = calculateHubKPIs(state)
+  const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+  const today = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+
+  order.status = 'Delivered'
+  order.deliveryDetails = {
+    deliveredAt: `${today} ${now}`,
+    deliveryDate: '25 Sep 2026',
+    destination: order.destination || 'Vijayawada Processing Hub',
+    orderedQty: order.hubAllocatedQty || 700,
+    deliveredQty: kpis.totalAccepted || 700,
+    requiredGrade: order.requiredGrade || 'Grade A',
+    deliveredGrade: order.requiredGrade || 'Grade A',
+    fpo: 'Godavari Farmers Producer Org',
+    hub: order.hubName || 'Rajahmundry Central Hub',
+  }
+
+  saveHubOperationsState(state)
+  return true
+}
+
+/**
+ * 12. Buyer Verifies Delivery (Quantity & Grade) and Confirms Receipt
+ * Sets status: 'Buyer Verified', deliveryStatus: 'CONFIRMED'
+ */
+export function buyerConfirmDelivery(orderId = 'ORD-1031', verificationData = {}) {
+  const state = getStoredHubOperations()
+  const order = state.activeOrder
+  const kpis = calculateHubKPIs(state)
+  const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+  const today = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+
+  order.status = 'Buyer Verified'
+  order.deliveryStatus = 'CONFIRMED'
+  order.paymentStatus = 'Payment Due'
+  order.buyerConfirmation = {
+    confirmed: true,
+    confirmedAt: `${today} ${now}`,
+    confirmedBy: 'AgroFresh Inward Quality Inspector',
+    orderedQty: order.hubAllocatedQty || 700,
+    confirmedQty: kpis.totalAccepted || 700,
+    verifiedGrade: order.requiredGrade || 'Grade A',
+    isQuantityCorrect: verificationData.isQuantityCorrect !== undefined ? verificationData.isQuantityCorrect : true,
+    isGradeCorrect: verificationData.isGradeCorrect !== undefined ? verificationData.isGradeCorrect : true,
+    isOrderReceived: true,
+    notes: verificationData.notes || '100% physically inspected & verified at Vijayawada receiving dock.',
+  }
+
+  // Clear any existing issue
+  order.deliveryIssue = null
+
+  // Ensure settlement record is computed
+  createOrUpdateSettlementRecord(state)
+
+  saveHubOperationsState(state)
+  return true
+}
+
+/**
+ * 13. Buyer Confirms Payment (Simulated Escrow Payment Confirmation)
+ * Sets paymentStatus: 'CONFIRMED', status: 'COMPLETED'
+ */
+export function buyerConfirmPayment(orderId = 'ORD-1031') {
+  const state = getStoredHubOperations()
+  const order = state.activeOrder
+  const kpis = calculateHubKPIs(state)
+  const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+  const today = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+
+  order.status = 'Completed'
+  order.paymentStatus = 'CONFIRMED'
+  order.paymentDetails = {
+    paymentStatus: 'CONFIRMED',
+    confirmedAt: `${today} ${now}`,
+    transactionRef: `TXN-ESC-${Math.floor(100000 + Math.random() * 900000)}`,
+    verifiedQty: kpis.totalAccepted || 700,
+    produceValue: 27000,
+    transportCost: 1500,
+    agreedOrderValue: 28500,
+    notes: 'Simulated payment confirmation recorded. Order completed.',
+  }
+
+  // Update settlement status
+  if (!order.settlementRecord) {
+    createOrUpdateSettlementRecord(state)
+  }
+  if (order.settlementRecord) {
+    order.settlementRecord.status = 'Completed'
+    order.settlementRecord.buyerPaymentStatus = 'Payment Confirmed (₹28,500 Delivered Total)'
+    order.settlementRecord.settlementStatus = 'Settlement Recorded'
+    order.settlementRecord.farmerPayoutStatus = 'Recorded'
+  }
+
+  saveHubOperationsState(state)
+  return true
+}
+
+/**
+ * 14. Buyer Reports Delivery Issue
+ * Sets status: 'Delivery Issue', blocks payment confirmation
+ */
+export function buyerReportIssue(orderId = 'ORD-1031', { issueType = 'Damaged produce', description = '' } = {}) {
+  const state = getStoredHubOperations()
+  const order = state.activeOrder
+  const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+  const today = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+
+  order.status = 'Delivery Issue'
+  order.deliveryIssue = {
+    issueType,
+    description: description || 'Delivery discrepancy observed during dock intake inspection.',
+    reportedAt: `${today} ${now}`,
+    status: 'Open Issue (Awaiting FPO Resolution)',
+  }
+
+  saveHubOperationsState(state)
+  return true
+}
+
+/**
+ * Helper to resolve delivery issue back to Delivered / Buyer Verified
+ */
+export function resolveDeliveryIssue(orderId = 'ORD-1031') {
+  const state = getStoredHubOperations()
+  const order = state.activeOrder
+
+  order.status = 'Delivered'
+  order.deliveryIssue = null
+
+  saveHubOperationsState(state)
+  return true
+}
+
+/**
+ * 15. Create or Update Settlement Record with exact formula:
+ * Farmer Settlement Pool = Accepted Quantity × Agreed Farmer Settlement Rate
+ * Example: Accepted 700 kg × ₹25/kg = ₹17,500
+ * Internal FPO breakdown:
+ * - Total Buyer Payment: ₹28,500
+ * - Farmer Settlement: ₹17,500
+ * - Transportation Cost: ₹1,500 (Status: Recorded)
+ * - Hub Handling Cost: ₹1,000 (Status: Recorded)
+ * - FPO Operating Realization: ₹8,500
+ */
+export function createOrUpdateSettlementRecord(state = getStoredHubOperations()) {
+  const kpis = calculateHubKPIs(state)
+  const lots = state.farmerLots || []
+  const activeOrder = state.activeOrder || {}
+
+  const acceptedQty = kpis.totalAccepted || 700
+  const agreedFarmerRate = 25 // ₹25/kg base rate for farmers
+  const producePrice = 38.5714 // ₹27,000 / 700 kg
+  const produceValue = 27000
+  const transportationCost = 1500
+  const hubHandlingCost = 1000
+  const buyerDeliveredTotal = produceValue + transportationCost // ₹28,500
+  const farmerSettlementTotal = acceptedQty * agreedFarmerRate // ₹17,500
+  const fpoOperatingRealization = buyerDeliveredTotal - farmerSettlementTotal - transportationCost - hubHandlingCost // ₹8,500
+
+  // Standard allocation proportions from previous fulfillment (70, 140, 210, 280 kg = 700 kg total)
+  const defaultAllocations = [70, 140, 210, 280]
+  const farmerPayouts = lots.map((lot, idx) => {
+    const lotAccepted = lot.acceptedQty || defaultAllocations[idx] || 70
+    const lotPayout = lotAccepted * agreedFarmerRate
+    return {
+      lotId: lot.id || `LOT-1031-0${idx + 1}`,
+      farmerId: lot.farmerId || `FARM-00${idx + 1}`,
+      farmerName: lot.farmerName || `Farmer ${String.fromCharCode(65 + idx)}`,
+      allocatedQty: lot.allocatedQty || defaultAllocations[idx] || 70,
+      actualCollectedQty: lot.actualCollectedQty || lot.weighedQty || lot.allocatedQty || defaultAllocations[idx],
+      acceptedQty: lotAccepted,
+      agreedRate: agreedFarmerRate,
+      payoutAmount: lotPayout,
+      status: 'Recorded',
+    }
+  })
+
+  // Multi-item breakdown support
+  const multiItemSettlement = [
+    {
+      crop: 'Tomato',
+      variety: activeOrder.variety || 'Hybrid Roma',
+      grade: activeOrder.requiredGrade || 'Grade A',
+      orderedQty: activeOrder.hubAllocatedQty || 700,
+      acceptedQty: acceptedQty,
+      rate: agreedFarmerRate,
+      amount: acceptedQty * agreedFarmerRate,
+      transportCost: 1500,
+      deliveredTotal: 28500,
+      supplier: 'Godavari Farmers Producer Org',
+    },
+    {
+      crop: 'Onion',
+      variety: 'Nasik Red',
+      grade: 'Grade A',
+      orderedQty: 500,
+      acceptedQty: 500,
+      rate: 22,
+      amount: 500 * 22,
+      transportCost: 1200,
+      deliveredTotal: 14200,
+      supplier: 'Delta Agro FPO',
+    },
+    {
+      crop: 'Green Chilli',
+      variety: 'G4 Hot Export',
+      grade: 'Grade A',
+      orderedQty: 200,
+      acceptedQty: 200,
+      rate: 38,
+      amount: 200 * 38,
+      transportCost: 800,
+      deliveredTotal: 9600,
+      supplier: 'Green Valley FPO',
+    },
+  ]
+
+  const isCompleted = activeOrder.status === 'Completed'
+  const isPaymentConfirmed = activeOrder.paymentStatus === 'CONFIRMED' || isCompleted
+
+  const settlement = {
+    settlementId: `SET-${activeOrder.orderId || 'ORD-1031'}-01`,
+    orderId: activeOrder.orderId || 'ORD-1031',
+    buyer: activeOrder.buyer || 'AgroFresh Enterprise',
+    fpoName: 'Godavari Farmers Producer Org',
+    crop: activeOrder.crop || 'Tomato',
+    requiredGrade: activeOrder.requiredGrade || 'Grade A',
+    orderedQty: activeOrder.hubAllocatedQty || 700,
+    acceptedQty,
+    shortfallQty: kpis.shortfall || 0,
+    agreedFarmerRate,
+    produceValue,
+    transportationCost,
+    transportStatus: 'Recorded',
+    hubHandlingCost,
+    hubCostStatus: 'Recorded',
+    buyerDeliveredTotal,
+    farmerSettlementTotal,
+    settlementAmount: farmerSettlementTotal,
+    buyerInvoiceAmount: buyerDeliveredTotal,
+    fpoOperatingRealization,
+    fpoMargin: fpoOperatingRealization,
+    formulaExplanation: `${acceptedQty} kg accepted × ₹${agreedFarmerRate}/kg agreed farmer rate = ₹${farmerSettlementTotal.toLocaleString('en-IN')}`,
+    buyerPaymentStatus: isPaymentConfirmed ? 'Payment Confirmed (₹28,500 Delivered Total)' : 'Payment Due (Delivered Total: ₹28,500)',
+    farmerPayoutStatus: isCompleted ? 'Recorded' : 'Ready for Recording',
+    settlementStatus: isCompleted ? 'Settlement Recorded' : 'Calculated',
+    status: isCompleted ? 'Completed' : 'Ready for Settlement',
+    farmerPayouts,
+    multiItemSettlement,
+  }
+
+  activeOrder.settlementRecord = settlement
+  return settlement
+}
+
+/**
+ * 16. Record Settlement & Complete Order (from FPO Settlement page)
+ */
+export function recordSettlementAndCompleteOrder(orderId = 'ORD-1031') {
+  const state = getStoredHubOperations()
+  const order = state.activeOrder
+
+  order.status = 'Completed'
+  order.paymentStatus = 'CONFIRMED'
+  order.deliveryStatus = 'CONFIRMED'
+
+  if (!order.settlementRecord) {
+    createOrUpdateSettlementRecord(state)
+  }
+  if (order.settlementRecord) {
+    order.settlementRecord.status = 'Completed'
+    order.settlementRecord.settlementStatus = 'Settlement Recorded'
+    order.settlementRecord.farmerPayoutStatus = 'Recorded'
+    order.settlementRecord.buyerPaymentStatus = 'Payment Confirmed (₹28,500 Delivered Total)'
+  }
+
+  saveHubOperationsState(state)
+  return true
+}
+
+export const recordFpoSettlement = recordSettlementAndCompleteOrder
+
+/**
+ * 17. Demo Quick State Switcher for Testing
+ */
+export function setOrderTestScenario(scenario = 'dispatched') {
+  const state = getStoredHubOperations()
+  const order = state.activeOrder
+  const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+  const today = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+
+  // Ensure farmer lots are populated with standard accepted weights (70, 140, 210, 280 = 700 kg)
+  state.farmerLots = [
+    {
+      id: 'LOT-1031-01',
+      farmerId: 'FARM-001',
+      farmerName: 'Farmer A (Ramesh B.)',
+      orderId: 'ORD-1031',
+      crop: 'Tomato',
+      requiredGrade: 'Grade A',
+      allocatedQty: 70,
+      actualCollectedQty: 70,
+      weighedQty: 70,
+      acceptedQty: 70,
+      rejectedQty: 0,
+      status: 'Passed',
+    },
+    {
+      id: 'LOT-1031-02',
+      farmerId: 'FARM-002',
+      farmerName: 'Farmer B (G. Somaraju)',
+      orderId: 'ORD-1031',
+      crop: 'Tomato',
+      requiredGrade: 'Grade A',
+      allocatedQty: 140,
+      actualCollectedQty: 140,
+      weighedQty: 140,
+      acceptedQty: 140,
+      rejectedQty: 0,
+      status: 'Passed',
+    },
+    {
+      id: 'LOT-1031-03',
+      farmerId: 'FARM-003',
+      farmerName: 'Farmer C (K. Satyanarayana)',
+      orderId: 'ORD-1031',
+      crop: 'Tomato',
+      requiredGrade: 'Grade A',
+      allocatedQty: 210,
+      actualCollectedQty: 210,
+      weighedQty: 210,
+      acceptedQty: 210,
+      rejectedQty: 0,
+      status: 'Passed',
+    },
+    {
+      id: 'LOT-1031-04',
+      farmerId: 'FARM-004',
+      farmerName: 'Farmer D (M. Venkat Rao)',
+      orderId: 'ORD-1031',
+      crop: 'Tomato',
+      requiredGrade: 'Grade A',
+      allocatedQty: 280,
+      actualCollectedQty: 280,
+      weighedQty: 280,
+      acceptedQty: 280,
+      rejectedQty: 0,
+      status: 'Passed',
+    },
+  ]
+
+  order.hubAllocatedQty = 700
+  order.deliveryIssue = null
+
+  if (scenario === 'dispatched') {
+    order.status = 'Dispatched'
+    order.dispatchDetails = {
+      vehicleNo: 'AP-39-TX-8841',
+      driverName: 'Ramesh Naidu (+91 98480 22341)',
+      carrier: 'Delta Cold-Chain Logistics Ltd',
+      dispatchDate: '2026-09-14',
+      dispatchedAt: `${today} ${now}`,
+      dispatchedQty: 700,
+      notes: 'Insulated container sealed with tamper-proof RFID tag #TG-9021; set to 12°C.',
+      manifestRef: 'MNF-DSP-4029',
+    }
+    order.buyerConfirmation = null
+    order.paymentStatus = 'PENDING'
+  } else if (scenario === 'in_transit') {
+    order.status = 'In Transit'
+    order.dispatchDetails = {
+      vehicleNo: 'AP-39-TX-8841',
+      driverName: 'Ramesh Naidu (+91 98480 22341)',
+      carrier: 'Delta Cold-Chain Logistics Ltd',
+      dispatchDate: '2026-09-14',
+      dispatchedAt: `${today} ${now}`,
+      dispatchedQty: 700,
+      notes: 'Insulated container sealed with tamper-proof RFID tag #TG-9021; set to 12°C.',
+      manifestRef: 'MNF-DSP-4029',
+    }
+    order.transitDetails = {
+      startedAt: `${today} ${now}`,
+      carrier: 'Delta Cold-Chain Logistics Ltd',
+      vehicleNo: 'AP-39-TX-8841',
+      driverName: 'Ramesh Naidu (+91 98480 22341)',
+      currentLocation: 'NH16 Corridor (Near Eluru Toll Bay)',
+      temperature: '12.4°C (Optimal)',
+      expectedDelivery: '25 Sep 2026',
+    }
+    order.buyerConfirmation = null
+    order.paymentStatus = 'PENDING'
+  } else if (scenario === 'delivered') {
+    order.status = 'Delivered'
+    order.deliveryDetails = {
+      deliveredAt: `${today} ${now}`,
+      deliveryDate: '25 Sep 2026',
+      destination: 'Vijayawada Processing Hub',
+      orderedQty: 700,
+      deliveredQty: 700,
+      requiredGrade: 'Grade A',
+      deliveredGrade: 'Grade A',
+      fpo: 'Godavari Farmers Producer Org',
+      hub: 'Rajahmundry Central Hub',
+    }
+    order.buyerConfirmation = null
+    order.paymentStatus = 'PENDING'
+  } else if (scenario === 'buyer_verified' || scenario === 'ready_for_settlement') {
+    order.status = 'Buyer Verified'
+    order.deliveryStatus = 'CONFIRMED'
+    order.buyerConfirmation = {
+      confirmed: true,
+      confirmedAt: `${today} ${now}`,
+      confirmedBy: 'AgroFresh Inward Quality Inspector',
+      orderedQty: 700,
+      confirmedQty: 700,
+      verifiedGrade: 'Grade A',
+      isQuantityCorrect: true,
+      isGradeCorrect: true,
+      isOrderReceived: true,
+      notes: '100% physically inspected & verified at Vijayawada receiving dock.',
+    }
+    order.paymentStatus = 'PENDING'
+    createOrUpdateSettlementRecord(state)
+  } else if (scenario === 'completed') {
+    order.status = 'Completed'
+    order.deliveryStatus = 'CONFIRMED'
+    order.paymentStatus = 'CONFIRMED'
+    order.buyerConfirmation = {
+      confirmed: true,
+      confirmedAt: `${today} ${now}`,
+      confirmedBy: 'AgroFresh Inward Quality Inspector',
+      orderedQty: 700,
+      confirmedQty: 700,
+      verifiedGrade: 'Grade A',
+      isQuantityCorrect: true,
+      isGradeCorrect: true,
+      isOrderReceived: true,
+      notes: '100% physically inspected & verified at Vijayawada receiving dock.',
+    }
+    order.paymentDetails = {
+      paymentStatus: 'CONFIRMED',
+      confirmedAt: `${today} ${now}`,
+      transactionRef: 'TXN-ESC-902188',
+      verifiedQty: 700,
+      agreedOrderValue: 21000,
+      notes: 'Simulated escrow payment confirmation recorded. Order completed.',
+    }
+    createOrUpdateSettlementRecord(state)
+  } else if (scenario === 'issue') {
+    order.status = 'Delivery Issue'
+    order.deliveryIssue = {
+      issueType: 'Damaged produce',
+      description: 'Crate seals compromised on pallet 2 during unloading.',
+      reportedAt: `${today} ${now}`,
+      status: 'Open Issue (Awaiting FPO Resolution)',
+    }
+  }
+
+  saveHubOperationsState(state)
+  return state
+}
+
