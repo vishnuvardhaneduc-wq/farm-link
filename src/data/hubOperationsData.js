@@ -1,5 +1,5 @@
 /**
- * FARMLINK — HUB OPERATIONS DATA LAYER (STEP 5)
+ * KRISHISETU — HUB OPERATIONS DATA LAYER (STEP 5)
  * Manages physical hub fulfillment workflow:
  * Collection -> Weighing -> Quality Inspection -> Aggregation -> Dispatch
  * 

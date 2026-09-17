@@ -61,7 +61,7 @@ export default function FPOSidebar({ isOpen = false, onClose = () => {} }) {
               <div>
                 <div className="flex items-center gap-1.5">
                   <span className="font-editorial text-xl font-normal tracking-tight text-[#ffffff]">
-                    farmlink
+                    krishisetu
                   </span>
                   <span className="text-[9px] font-semibold uppercase tracking-wider bg-[#e8fe85]/20 text-[#e8fe85] px-1.5 py-0.5 rounded-full">
                     OS

@@ -37,7 +37,7 @@ export default function BuyerLogin() {
                   <span className="material-symbols-outlined text-[17px]">apartment</span>
                 </div>
                 <span className="font-editorial text-xl font-bold text-[#00372a] tracking-tight">
-                  FarmLink
+                  KrishiSetu
                 </span>
                 <span className="px-2.5 py-0.5 rounded-full bg-[#ffffff]/80 border border-[#c3cda7] text-[#1b6e53] font-mono text-[9px] font-bold tracking-widest uppercase">
                   BUYER ENTERPRISE

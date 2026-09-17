@@ -3,7 +3,7 @@ export const fpoDashboardData = {
     name: 'Nashik Central Hub #04',
     cycle: 'raju Cycle • 2026.09.13',
     status: 'raju Hub Live',
-    journalVol: 'Vol. 04 — FarmLink Agrarian Journal',
+    journalVol: 'Vol. 04 — KrishiSetu Agrarian Journal',
     operatingWindow: '05:00 – 12:00 IST',
     thermalPaper: '92%',
     syncTime: '07:18 AM IST',

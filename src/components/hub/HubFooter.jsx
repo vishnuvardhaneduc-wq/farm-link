@@ -5,7 +5,7 @@ export default function HubFooter() {
     <footer className="py-4 px-6 lg:px-10 border-t border-[#c3cda7]/60 text-xs text-[#6d6d6d] flex flex-col sm:flex-row items-center justify-between gap-4 bg-[#f1efdf]">
       <div className="flex items-center gap-2">
         <span className="font-medium text-[#212529]">
-          FarmLink · Rajahmundry Central Hub Workspace
+          KrishiSetu · Rajahmundry Central Hub Workspace
         </span>
         <span className="px-2 py-0.5 rounded-full bg-[#e6ecd5] text-[#1b6e53] text-[10px] font-mono font-bold border border-[#c3cda7]">
           HUB

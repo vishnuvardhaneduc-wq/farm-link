@@ -23,7 +23,7 @@ export default function FPOLogin() {
       {/* 1. Minimal Top Navigation Bar */}
       <header className="w-full bg-[#f1efdf]/90 backdrop-blur-md sticky top-0 z-40 border-b border-[#c3cda7]/50">
         <div className="max-w-7xl mx-auto h-20 px-6 sm:px-10 flex items-center justify-between">
-          {/* Left: FarmLink Identity */}
+          {/* Left: KrishiSetu Identity */}
           <div className="flex items-center gap-3.5">
             <Link to="/" className="flex items-center gap-3 group">
               <div className="w-10 h-10 rounded-full bg-[#1b6e53] text-[#ffffff] flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
@@ -33,7 +33,7 @@ export default function FPOLogin() {
               </div>
               <div className="flex items-center gap-3">
                 <span className="font-editorial text-2xl font-bold tracking-tight text-[#00372a]">
-                  FarmLink
+                  KrishiSetu
                 </span>
                 <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#e6ecd5] border border-[#c3cda7] text-[#1b6e53]">
                   <span className="w-2 h-2 rounded-full bg-[#1b6e53]"></span>
@@ -72,7 +72,7 @@ export default function FPOLogin() {
                   <span className="material-symbols-outlined text-[17px]">eco</span>
                 </div>
                 <span className="font-editorial text-xl font-bold text-[#00372a] tracking-tight">
-                  FarmLink
+                  KrishiSetu
                 </span>
                 <span className="px-2.5 py-0.5 rounded-full bg-[#ffffff]/80 border border-[#c3cda7] text-[#1b6e53] font-mono text-[9px] font-bold tracking-widest uppercase">
                   FPO FEDERATION
@@ -311,7 +311,7 @@ export default function FPOLogin() {
       <footer className="w-full bg-[#f1efdf] py-6 border-t border-[#c3cda7]/50">
         <div className="max-w-7xl mx-auto px-6 sm:px-10 flex flex-col sm:flex-row items-center justify-between gap-3 text-[#6d6d6d] font-sans text-xs">
           <div>
-            © 2026 FarmLink AgroTech Systems. Institutional FPO Access Tier.
+            © 2026 KrishiSetu AgroTech Systems. Institutional FPO Access Tier.
           </div>
           <div className="flex items-center gap-6">
             <span className="hover:text-[#1b6e53] transition-colors cursor-pointer">Security Protocol</span>

@@ -80,7 +80,7 @@ export default function ForgotPassword() {
                   <span className="material-symbols-outlined text-[17px]">lock_reset</span>
                 </div>
                 <span className="font-editorial text-xl font-bold text-[#00372a] tracking-tight">
-                  FarmLink
+                  KrishiSetu
                 </span>
                 <span className="px-2.5 py-0.5 rounded-full bg-[#ffffff]/80 border border-[#c3cda7] text-[#1b6e53] font-mono text-[9px] font-bold tracking-widest uppercase">
                   SECURITY VAULT
@@ -314,7 +314,7 @@ export default function ForgotPassword() {
       </main>
 
       {/* 3. Minimal Bottom Editorial Footer */}
-      <AuthFooter tierLabel="FarmLink Cryptographic Security Tier" />
+      <AuthFooter tierLabel="KrishiSetu Cryptographic Security Tier" />
     </div>
   )
 }

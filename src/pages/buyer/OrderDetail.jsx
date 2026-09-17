@@ -1024,7 +1024,7 @@ export default function BuyerOrderDetail() {
 
             <p className="text-[11px] font-mono text-[#6d6d6d] bg-[#faf9f0] p-3 rounded-[12px] border border-[#c3cda7]/60">
               <strong className="text-[#00372a]">MVP Notice: </strong>
-              This simulated payment confirmation records the completion in the FarmLink escrow ledger. No external bank transfer is initiated.
+              This simulated payment confirmation records the completion in the KrishiSetu escrow ledger. No external bank transfer is initiated.
             </p>
 
             <div className="flex items-center gap-3 pt-2">

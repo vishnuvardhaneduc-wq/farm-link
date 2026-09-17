@@ -38,7 +38,7 @@ export default function BottomTriad({ priceTransparency, priorityAlerts, weeklyA
               </span>
             </div>
             <div className="flex items-center justify-between p-3 rounded-[16px] bg-[#e6ecd5] border border-[#c3cda7]">
-              <span className="text-xs font-semibold text-[#1b6e53]">FarmLink Farmer Realization</span>
+              <span className="text-xs font-semibold text-[#1b6e53]">KrishiSetu Farmer Realization</span>
               <span className="text-base font-bold text-[#1b6e53] font-mono">
                 {priceTransparency.realization}
               </span>

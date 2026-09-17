@@ -39,7 +39,7 @@ export default function HubSidebar({ isOpen = false, onClose = () => {} }) {
               <div>
                 <div className="flex items-center gap-1.5">
                   <span className="font-editorial text-xl font-normal tracking-tight text-[#ffffff]">
-                    farmlink
+                    krishisetu
                   </span>
                   <span className="text-[9px] font-bold uppercase tracking-wider bg-[#e8fe85] text-[#1b6e53] px-2 py-0.5 rounded-full shadow-2xs">
                     HUB

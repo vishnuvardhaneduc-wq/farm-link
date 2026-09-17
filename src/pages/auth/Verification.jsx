@@ -103,7 +103,7 @@ export default function VerificationSuccess() {
       </main>
 
       {/* 3. Minimal Bottom Editorial Footer */}
-      <AuthFooter tierLabel="FarmLink Verification & Settlement Protocol" />
+      <AuthFooter tierLabel="KrishiSetu Verification & Settlement Protocol" />
     </div>
   )
 }

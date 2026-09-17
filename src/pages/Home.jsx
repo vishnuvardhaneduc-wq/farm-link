@@ -77,7 +77,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 2. Top Navigation Header with FarmLink Logo */}
+      {/* 2. Top Navigation Header with KrishiSetu Logo */}
       <header className="bg-[#1b6e53] text-white sticky top-0 z-50 px-6 sm:px-10 py-4 shadow-md">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3 group">
@@ -89,7 +89,7 @@ export default function Home() {
             <div className="flex flex-col">
               <div className="flex items-center gap-2">
                 <span className="font-editorial text-2xl font-bold tracking-tight text-white leading-none">
-                  FarmLink
+                  KrishiSetu
                 </span>
                 <span className="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded-full bg-white/15 text-[9px] font-semibold text-[#e8fe85] uppercase tracking-wider">
                   OS v4.2
@@ -144,7 +144,7 @@ export default function Home() {
 
             {/* Short Product Description */}
             <p className="text-base sm:text-lg text-[#353535] leading-relaxed font-normal max-w-2xl mx-auto">
-              FarmLink connects institutional commercial buyers with regional FPOs and automated village aggregation hubs for zero-leakage agricultural procurement.
+              KrishiSetu connects institutional commercial buyers with regional FPOs and automated village aggregation hubs for zero-leakage agricultural procurement.
             </p>
 
             {/* Three Feature Highlight Pills */}
@@ -278,10 +278,10 @@ export default function Home() {
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 pb-6 border-b border-white/10">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-full bg-[#e8fe85] flex items-center justify-center text-[#1b6e53] font-bold text-sm">
-                FL
+                KS
               </div>
               <span className="font-editorial text-2xl font-bold tracking-tight text-white">
-                FarmLink
+                KrishiSetu
               </span>
               <span className="text-xs text-emerald-200/80 font-light ml-2 hidden sm:inline">
                 National Agritech Procurement & Aggregation Portal
@@ -296,7 +296,7 @@ export default function Home() {
           </div>
 
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-emerald-200/60 font-mono">
-            <p>© 2026 FarmLink Agritech Network. All rights reserved.</p>
+            <p>© 2026 KrishiSetu Agritech Network. All rights reserved.</p>
             <div className="flex items-center gap-4">
               <span>Zero-Intermediary Guarantee</span>
               <span>•</span>

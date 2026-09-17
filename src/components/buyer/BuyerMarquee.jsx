@@ -10,7 +10,7 @@ export default function BuyerMarquee() {
             BUYER WORKSPACE ACTIVE
           </span>
           <span className="font-editorial italic text-[14px] text-[#212529]">
-            Vol. 04 — FarmLink Agrarian Journal // Institutional Procurement Terminal
+            Vol. 04 — KrishiSetu Agrarian Journal // Institutional Procurement Terminal
           </span>
           <span className="text-[#353535] text-[11px] hidden sm:inline tracking-wider uppercase font-mono">
             • MULTI-FPO BROADCAST ACTIVE • ZERO FARMER APP DEPENDENCY • ESCROW T+0

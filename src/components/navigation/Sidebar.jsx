@@ -2,7 +2,7 @@ import React from 'react'
 import { NavLink, Link } from 'react-router'
 
 export default function Sidebar({
-  brandTitle = 'FarmLink',
+  brandTitle = 'KrishiSetu',
   brandSubtitle = 'Supply Chain OS',
   badge = 'FPO',
   badgeColor = 'bg-emerald-100 text-emerald-800',

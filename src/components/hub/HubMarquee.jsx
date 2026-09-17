@@ -10,7 +10,7 @@ export default function HubMarquee() {
             HUB WORKSPACE ACTIVE
           </span>
           <span className="font-editorial italic text-[14px] text-[#212529]">
-            FarmLink // Rajahmundry Central Hub Operations Desk
+            KrishiSetu // Rajahmundry Central Hub Operations Desk
           </span>
           <span className="text-[#353535] text-[11px] hidden sm:inline tracking-wider uppercase font-mono">
             • INWARD INTAKE • PRECISION WEIGHMENT • LAB QA ASSAY • AGGREGATION &amp; DISPATCH

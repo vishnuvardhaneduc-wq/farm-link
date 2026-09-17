@@ -1932,7 +1932,7 @@ export const mockFPOs = [
     certifications: ['FSSAI Certified', 'SFAC Certified', 'Jaivik Bharat Organic'],
     contactPerson: 'Mahendra Patel',
     phone: '+91 268 255 1204',
-    email: 'khedaproducers@farmlink.in',
+    email: 'khedaproducers@krishisetu.in',
     overview: 'Farmer federation specializing in both organic staples and grade-separated commercial vegetable crops.',
     badge: 'Organic Traceability'
   }
