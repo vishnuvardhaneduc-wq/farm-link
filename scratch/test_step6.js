@@ -21,8 +21,8 @@ global.localStorage = {
   clear: () => { Object.keys(storage).forEach((k) => delete storage[k]) }
 }
 global.window = {
-  addEventListener: () => {},
-  removeEventListener: () => {},
+  addEventListener: () => { },
+  removeEventListener: () => { },
 }
 
 console.log('=== TEST 1: Initial State & Dispatch ===')
