@@ -8,8 +8,13 @@ export default function RequestDetail() {
   const [demand, setDemand] = useState(() => getDemandById(id))
 
   useEffect(() => {
-    const current = getDemandById(id)
-    setDemand(current)
+    const handleSync = () => {
+      const current = getDemandById(id)
+      setDemand(current)
+    }
+    handleSync()
+    window.addEventListener('storage', handleSync)
+    return () => window.removeEventListener('storage', handleSync)
   }, [id])
 
   const [activeOfferModal, setActiveOfferModal] = useState(null)
@@ -21,28 +26,23 @@ export default function RequestDetail() {
   useEffect(() => {
     if (demand?.items) {
       const initialMap = {}
-      demand.items.forEach((item) => {
+      demand.items.forEach((item, idx) => {
+        const itemKey = item.itemId || item.id || `item-${idx + 1}`
         if (item.confirmedOfferId) {
-          initialMap[item.itemId] = item.confirmedOfferId
+          initialMap[itemKey] = item.confirmedOfferId
         } else if (item.selectedFpoOfferId) {
-          initialMap[item.itemId] = item.selectedFpoOfferId
-        } else {
-          // Preselect first accepted offer if present for convenient demo
-          const accepted = (item.responses || []).find(
-            (r) => r.status === 'ACCEPTED' || r.status === 'ORDER_CONFIRMED'
-          )
-          if (accepted) {
-            initialMap[item.itemId] = accepted.id
-          }
+          initialMap[itemKey] = item.selectedFpoOfferId
         }
       })
-      setSelectedOfferPerItem(initialMap)
+      setSelectedOfferPerItem((prev) => ({
+        ...initialMap,
+        ...prev
+      }))
     }
   }, [demand])
 
   const handleToggleSelectOffer = (itemId, offerId) => {
-    // Prevent changing selection if item is already confirmed
-    const item = (demand?.items || []).find((i) => i.itemId === itemId)
+    const item = (demand?.items || []).find((i) => (i.itemId || i.id) === itemId)
     if (item?.isConfirmed) return
 
     setSelectedOfferPerItem((prev) => ({
@@ -67,19 +67,30 @@ export default function RequestDetail() {
   ]
 
   const totalItemsCount = items.length
-  const confirmedItemsCount = items.filter((it) => it.isConfirmed).length
-  const pendingSelectedCount = items.filter(
-    (it) => !it.isConfirmed && selectedOfferPerItem[it.itemId]
-  ).length
-  const selectedItemsCount = Object.values(selectedOfferPerItem).filter(Boolean).length
+  const confirmedItemsCount = items.filter((it) => it.isConfirmed || it.status === 'ORDER CONFIRMED').length
+  const validSelectedItemsCount = items.filter((item, idx) => {
+    const itemKey = item.itemId || item.id || `item-${idx + 1}`
+    const selectedOfferId = selectedOfferPerItem[itemKey]
+    if (!selectedOfferId) return false
+    const resp = (item.responses || []).find((r) => r.id === selectedOfferId)
+    return resp && (resp.status === 'ACCEPTED' || resp.status === 'BACK_OFFER' || resp.status === 'ORDER_CONFIRMED')
+  }).length
+
+  const isAllItemsSelected = totalItemsCount > 0 && validSelectedItemsCount === totalItemsCount
+  const isOrderFullyConfirmed = totalItemsCount > 0 && confirmedItemsCount === totalItemsCount
 
   const handleConfirmOrder = () => {
     setActiveOfferModal(null)
-    const updated = confirmProcurementOrder(demand.id, selectedOfferPerItem)
-    if (updated) {
-      setDemand(updated)
+    const result = confirmProcurementOrder(demand.id, selectedOfferPerItem)
+    if (result) {
+      const updatedDemand = result.updatedDemand || result
+      setDemand(updatedDemand)
+      setOrderConfirmed(true)
+      const targetOrderId = result.orderId || `ORD-${demand.id.replace(/^REQ-/, '')}`
+      setTimeout(() => {
+        navigate(`/buyer/orders/${targetOrderId}`)
+      }, 500)
     }
-    setOrderConfirmed(true)
   }
 
   const [compareModalItem, setCompareModalItem] = useState(null)
@@ -204,14 +215,15 @@ export default function RequestDetail() {
 
         {/* Item-by-Item Breakdown */}
         {items.map((item, idx) => {
-          const selectedOfferId = selectedOfferPerItem[item.itemId]
+          const itemKey = item.itemId || item.id || `item-${idx + 1}`
+          const selectedOfferId = selectedOfferPerItem[itemKey]
           const validResponses = (item.responses || []).filter(
             (r) => r.status === 'ACCEPTED' || r.status === 'BACK_OFFER' || r.status === 'ORDER_CONFIRMED'
           )
 
           return (
             <div
-              key={item.itemId || idx}
+              key={itemKey || idx}
               className="rounded-[24px] bg-[#ffffff] border border-[#c3cda7] p-6 lg:p-7 shadow-xs space-y-5"
             >
               {/* Item Header Banner */}
@@ -252,7 +264,7 @@ export default function RequestDetail() {
                     </span>
                   ) : (
                     <span className="text-xs font-mono font-bold text-[#1b6e53] bg-[#e6ecd5] px-3 py-1 rounded-[100px] border border-[#c3cda7]">
-                      {(item.responses || []).length} FPO Responses
+                      {(item.responses || []).length} {(item.responses || []).length === 1 ? 'FPO Response' : 'FPO Responses'}
                     </span>
                   )}
                 </div>
@@ -350,17 +362,17 @@ export default function RequestDetail() {
                             </div>
 
                             {/* Original response specifications remain visible */}
-                            {(resp.offeredPrice || resp.counterPrice) && (
+                            {(resp.offeredPrice || resp.counterPrice || resp.producePrice) && (
                               <div className="bg-[#ffffff]/80 rounded-[14px] p-3 space-y-1 border border-[#c3cda7]/50 text-xs">
                                 <div className="flex justify-between">
                                   <span className="text-[#6d6d6d]">Quoted Rate:</span>
                                   <span className="font-bold text-[#6d6d6d] font-mono text-sm">
-                                    {resp.offeredPrice || resp.counterPrice}
+                                    {resp.offeredPrice || resp.counterPrice || resp.producePrice}
                                   </span>
                                 </div>
                                 <div className="flex justify-between">
                                   <span className="text-[#6d6d6d]">Proposed Volume:</span>
-                                  <span className="font-mono text-[#6d6d6d]">{resp.offeredQty || item.quantity}</span>
+                                  <span className="font-mono text-[#6d6d6d]">{resp.offeredQty || resp.quantity || item.quantity}</span>
                                 </div>
                                 {resp.deliveryDate && (
                                   <div className="flex justify-between">
@@ -384,11 +396,11 @@ export default function RequestDetail() {
                             <div className="bg-[#e6ecd5]/50 rounded-[14px] p-3 space-y-1.5 border border-[#c3cda7]/50">
                               <div className="flex justify-between">
                                 <span className="text-[#6d6d6d]">Produce Rate:</span>
-                                <span className="font-extrabold text-[#1b6e53] font-mono text-base">{resp.offeredPrice}</span>
+                                <span className="font-extrabold text-[#1b6e53] font-mono text-base">{resp.offeredPrice || resp.producePrice}</span>
                               </div>
                               <div className="flex justify-between">
                                 <span className="text-[#6d6d6d]">Committed Volume:</span>
-                                <span className="font-bold text-[#1b6e53] font-mono">{resp.offeredQty}</span>
+                                <span className="font-bold text-[#1b6e53] font-mono">{resp.offeredQty || resp.quantity || item.quantity}</span>
                               </div>
                               {produceVal != null && (
                                 <div className="flex justify-between pt-1 border-t border-[#c3cda7]/40 text-[11px]">
@@ -430,11 +442,11 @@ export default function RequestDetail() {
                             <div className="bg-[#fceace]/60 rounded-[14px] p-3 space-y-1.5 border border-[#c3cda7]/50">
                               <div className="flex justify-between">
                                 <span className="text-[#683600] font-bold">Counter Rate:</span>
-                                <span className="font-extrabold text-[#683600] font-mono text-base">{resp.counterPrice}</span>
+                                <span className="font-extrabold text-[#683600] font-mono text-base">{resp.counterPrice || resp.producePrice || resp.offeredPrice}</span>
                               </div>
                               <div className="flex justify-between">
                                 <span className="text-[#6d6d6d]">Offered Volume:</span>
-                                <span className="font-bold text-[#212529] font-mono">{resp.offeredQty}</span>
+                                <span className="font-bold text-[#212529] font-mono">{resp.offeredQty || resp.quantity || item.quantity}</span>
                               </div>
                               {produceVal != null && (
                                 <div className="flex justify-between pt-1 border-t border-[#c3cda7]/40 text-[11px]">
@@ -516,7 +528,7 @@ export default function RequestDetail() {
                           <>
                             <button
                               type="button"
-                              onClick={() => setActiveOfferModal({ ...resp, itemCrop: item.crop, itemGrade: item.grade, itemId: item.itemId, isItemConfirmed, produceVal, transCost, delTotal, effPrice })}
+                              onClick={() => setActiveOfferModal({ ...resp, itemCrop: item.crop, itemGrade: item.grade, itemId: itemKey, isItemConfirmed, produceVal, transCost, delTotal, effPrice })}
                               className="flex-1 py-2 rounded-[100px] border border-[#c3cda7] text-xs font-semibold text-[#353535] bg-[#ffffff] hover:bg-[#f1efdf] transition cursor-pointer text-center"
                             >
                               Review
@@ -525,7 +537,7 @@ export default function RequestDetail() {
                             <button
                               type="button"
                               disabled={isItemConfirmed}
-                              onClick={() => handleToggleSelectOffer(item.itemId, resp.id)}
+                              onClick={() => handleToggleSelectOffer(itemKey, resp.id)}
                               className={`flex-1 py-2 rounded-[100px] text-xs font-bold transition flex items-center justify-center gap-1 cursor-pointer ${
                                 isThisOfferSelected
                                   ? 'bg-[#1b6e53] text-[#ffffff] shadow-xs'
@@ -537,7 +549,7 @@ export default function RequestDetail() {
                                   <span>✓ Selected</span>
                                 </>
                               ) : (
-                                <span>Select Offer</span>
+                                <span>Select FPO</span>
                               )}
                             </button>
                           </>
@@ -582,7 +594,7 @@ export default function RequestDetail() {
               <strong className={`${confirmedItemsCount > 0 ? 'text-rose-700' : 'text-[#1b6e53]'} font-bold font-mono text-sm`}>
                 {confirmedItemsCount > 0
                   ? `${confirmedItemsCount} of ${totalItemsCount} items confirmed`
-                  : `${selectedItemsCount} of ${totalItemsCount} items selected`}
+                  : `${validSelectedItemsCount} of ${totalItemsCount} items selected`}
               </strong>
               . Each commodity is contracted directly to its designated FPO partner with transport & settlement logic recorded.
             </p>
@@ -590,23 +602,51 @@ export default function RequestDetail() {
 
           <button
             type="button"
-            disabled={pendingSelectedCount === 0 && confirmedItemsCount > 0}
+            disabled={!isAllItemsSelected || isOrderFullyConfirmed}
             onClick={handleConfirmOrder}
             className={`w-full sm:w-auto py-3.5 px-8 rounded-[100px] ${
-              confirmedItemsCount === totalItemsCount
+              isOrderFullyConfirmed
                 ? 'bg-rose-700 text-[#ffffff]'
                 : 'bg-[#1b6e53] hover:bg-[#00372a] text-[#ffffff]'
             } disabled:opacity-50 disabled:cursor-not-allowed text-xs font-bold uppercase tracking-wider transition shadow-sm flex items-center justify-center gap-2 cursor-pointer shrink-0 active:scale-[0.99]`}
           >
             <span className="material-symbols-outlined text-[18px]">verified</span>
             <span>
-              {confirmedItemsCount === totalItemsCount
+              {isOrderFullyConfirmed
                 ? 'Order Confirmed ✓'
-                : pendingSelectedCount > 0
-                ? `Confirm Order (${pendingSelectedCount} Items Selected) →`
-                : 'Confirm Order →'}
+                : isAllItemsSelected
+                ? `CONFIRM ORDER (${validSelectedItemsCount} of ${totalItemsCount} Items Selected) →`
+                : `Confirm Order (${validSelectedItemsCount} of ${totalItemsCount} Items Selected)`}
             </span>
           </button>
+        </div>
+
+        {/* Selected Supplier Per Item Breakdown */}
+        <div className="pt-3 border-t border-[#c3cda7]/50 space-y-2">
+          <span className="text-[10px] font-mono uppercase tracking-widest text-[#1b6e53] font-bold block">
+            SELECTED ALLOCATION PER ITEM
+          </span>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {items.map((item, idx) => {
+              const itemKey = item.itemId || item.id || `item-${idx + 1}`
+              const selectedOfferId = selectedOfferPerItem[itemKey]
+              const selectedResp = (item.responses || []).find((r) => r.id === selectedOfferId)
+              const supplierName = selectedResp?.fpoName || (item.isConfirmed ? item.confirmedFpoName : null)
+
+              return (
+                <div key={itemKey || idx} className="p-3 bg-[#f1efdf] rounded-[16px] border border-[#c3cda7] text-xs font-mono">
+                  <div className="text-[10px] text-[#6d6d6d] uppercase">{item.crop} ({item.quantity})</div>
+                  <div className="font-bold text-sm mt-0.5 flex items-center gap-1">
+                    {supplierName ? (
+                      <span className="text-[#1b6e53]">→ {supplierName}</span>
+                    ) : (
+                      <span className="text-[#6d6d6d]">→ Not Selected</span>
+                    )}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
         </div>
 
         {/* Confirmed Order Summary */}
@@ -721,7 +761,8 @@ export default function RequestDetail() {
                       const transCost = resp.transportCost != null ? resp.transportCost : 0
                       const delTotal = resp.deliveredTotal != null ? resp.deliveredTotal : produceVal + transCost
                       const effPrice = resp.effectivePrice != null ? resp.effectivePrice : (delTotal && (parseFloat(String(resp.offeredQty || compareModalItem.quantity).replace(/[^0-9.]/g, '')) || 1) ? (delTotal / (parseFloat(String(resp.offeredQty || compareModalItem.quantity).replace(/[^0-9.]/g, '')) || 1)).toFixed(2) : '—')
-                      const isThisSelected = selectedOfferPerItem[compareModalItem.itemId] === resp.id
+                      const itemKey = compareModalItem.itemId || compareModalItem.id
+                      const isThisSelected = selectedOfferPerItem[itemKey] === resp.id
 
                       return (
                         <tr key={resp.id} className={`hover:bg-[#f1efdf]/50 ${isThisSelected ? 'bg-[#e6ecd5]/40' : ''}`}>
@@ -730,7 +771,7 @@ export default function RequestDetail() {
                             <div className="text-[10px] text-[#6d6d6d] font-mono">{resp.location}</div>
                           </td>
                           <td className="py-3 px-3 font-mono font-bold text-[#1b6e53]">
-                            {resp.offeredPrice || resp.counterPrice}
+                            {resp.offeredPrice || resp.counterPrice || resp.producePrice}
                           </td>
                           <td className="py-3 px-3 font-mono text-[#00372a]">
                             ₹{produceVal.toLocaleString('en-IN')}
@@ -749,7 +790,7 @@ export default function RequestDetail() {
                               type="button"
                               disabled={compareModalItem.isConfirmed}
                               onClick={() => {
-                                handleToggleSelectOffer(compareModalItem.itemId, resp.id)
+                                handleToggleSelectOffer(itemKey, resp.id)
                                 setCompareModalItem(null)
                               }}
                               className={`py-1.5 px-3 rounded-[100px] text-xs font-bold transition cursor-pointer ${
@@ -758,7 +799,7 @@ export default function RequestDetail() {
                                   : 'bg-[#e6ecd5] text-[#1b6e53] hover:bg-[#d8ee6f] border border-[#c3cda7]'
                               }`}
                             >
-                              {isThisSelected ? '✓ Selected' : 'Select'}
+                              {isThisSelected ? '✓ Selected' : 'Select FPO'}
                             </button>
                           </td>
                         </tr>

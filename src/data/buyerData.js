@@ -80,6 +80,133 @@ export function calculateOfferFinancials(quantity, producePrice, transportCost) 
 
 export const initialProcurementRequests = [
   {
+    id: 'REQ-1030',
+    buyer: 'AgroFresh Enterprise',
+    deliveryDate: '25 Sep 2026',
+    deliveryLocation: 'Vijayawada Central Processing Dock',
+    notes: 'Standard optical grading Grade A required. Forward supply tender dispatched to multiple regional FPOs.',
+    status: 'Receiving Offers',
+    statusVariant: 'warning',
+    createdDate: '14 Sep 2026, 10:00 AM',
+    items: [
+      {
+        itemId: 'item-1030-1',
+        crop: 'Tomato',
+        variety: 'Hybrid Roma',
+        quantity: '1,000 kg',
+        quantityVal: 1000,
+        unit: 'kg',
+        grade: 'Grade A',
+        targetPrice: '₹28 / kg',
+        qualitySpecs: 'Optical grading Grade A required, max 5% moisture tolerance.',
+        packaging: 'Ventilated 20kg crates',
+        selectedFposCount: '3 FPOs requested',
+        selectedFpoOfferId: null,
+        responses: [
+          {
+            id: 'resp-1030-1-1',
+            requestId: 'REQ-1030',
+            itemId: 'item-1030-1',
+            fpoId: 'fpo-godavari',
+            fpoName: 'Godavari Farmers FPO',
+            location: 'Rajamahendravaram, East Godavari',
+            status: 'ACCEPTED',
+            statusLabel: 'ACCEPTED',
+            statusStyle: 'bg-[#e6ecd5] text-[#1b6e53] border border-[#c3cda7]',
+            offeredQty: '1,000 kg',
+            quantity: '1,000 kg',
+            offeredGrade: 'Grade A',
+            grade: 'Grade A',
+            producePrice: '₹27 / kg',
+            producePriceVal: 27,
+            produceValue: '₹27,000',
+            produceValueVal: 27000,
+            transportCost: '₹1,500',
+            transportCostVal: 1500,
+            deliveredTotal: '₹28,500',
+            deliveredTotalVal: 28500,
+            effectivePrice: '₹28.50 / kg',
+            effectivePriceVal: 28.50,
+            transportStatus: 'Recorded',
+            offeredPrice: '₹27 / kg',
+            deliveryDate: '25 Sep 2026',
+            hub: 'Rajahmundry Central Hub',
+            notes: 'Full 1,000 kg Grade A volume allocated. Ready for direct dock dispatch on 25 Sep.',
+            timestamp: '14 Sep 2026, 10:15 AM',
+            contact: 'K. Venkateswara Rao'
+          },
+          {
+            id: 'resp-1030-1-2',
+            requestId: 'REQ-1030',
+            itemId: 'item-1030-1',
+            fpoId: 'fpo-delta-agro',
+            fpoName: 'Delta Agro FPO',
+            location: 'East Godavari (Mandapeta Hub)',
+            status: 'BACK_OFFER',
+            statusLabel: 'BACK OFFER',
+            statusStyle: 'bg-[#fceace] text-[#683600] border border-[#c3cda7]',
+            requestedQty: '1,000 kg',
+            offeredQty: '900 kg',
+            quantity: '900 kg',
+            offeredGrade: 'Grade A',
+            grade: 'Grade A',
+            producePrice: '₹28 / kg',
+            counterPrice: '₹28 / kg',
+            producePriceVal: 28,
+            produceValue: '₹25,200',
+            produceValueVal: 25200,
+            transportCost: '₹1,000',
+            transportCostVal: 1000,
+            deliveredTotal: '₹26,200',
+            deliveredTotalVal: 26200,
+            effectivePrice: '₹29.11 / kg',
+            effectivePriceVal: 29.11,
+            transportStatus: 'Recorded',
+            offeredPrice: '₹28 / kg',
+            deliveryDate: '26 Sep 2026',
+            hub: 'Mandapeta Agro Dock',
+            notes: 'Commercial back offer: 900 kg available at ₹28/kg. Dispatch on 26 Sep.',
+            counterReasons: ['Available harvest volume 900 kg', 'Cold storage staging scheduled for 26 Sep'],
+            timestamp: '14 Sep 2026, 10:30 AM',
+            contact: 'S. Ramakrishna Raju'
+          },
+          {
+            id: 'resp-1030-1-3',
+            requestId: 'REQ-1030',
+            itemId: 'item-1030-1',
+            fpoId: 'fpo-green-valley',
+            fpoName: 'Green Valley FPO',
+            location: 'West Godavari (Tadepalligudem)',
+            status: 'ACCEPTED',
+            statusLabel: 'ACCEPTED',
+            statusStyle: 'bg-[#e6ecd5] text-[#1b6e53] border border-[#c3cda7]',
+            offeredQty: '1,000 kg',
+            quantity: '1,000 kg',
+            offeredGrade: 'Grade A',
+            grade: 'Grade A',
+            producePrice: '₹29 / kg',
+            producePriceVal: 29,
+            produceValue: '₹29,000',
+            produceValueVal: 29000,
+            transportCost: '₹800',
+            transportCostVal: 800,
+            deliveredTotal: '₹29,800',
+            deliveredTotalVal: 29800,
+            effectivePrice: '₹29.80 / kg',
+            effectivePriceVal: 29.80,
+            transportStatus: 'Recorded',
+            offeredPrice: '₹29 / kg',
+            deliveryDate: '25 Sep 2026',
+            hub: 'Tadepalligudem Horti Hub',
+            notes: 'Full 1,000 kg Grade A volume allocated. Scheduled delivery on 25 Sep.',
+            timestamp: '14 Sep 2026, 10:45 AM',
+            contact: 'B. Lakshmi Narayana'
+          }
+        ]
+      }
+    ]
+  },
+  {
     id: 'REQ-1032',
     buyer: 'AgroFresh Enterprise',
     deliveryDate: '30 Sep 2026',
@@ -1312,7 +1439,7 @@ export const initialProcurementRequests = [
 ]
 
 // Storage helpers for state persistence across the demo
-const STORAGE_KEY = 'farmlink_buyer_demands_v9'
+const STORAGE_KEY = 'farmlink_buyer_demands_v12'
 
 export function getStoredDemands() {
   if (typeof window === 'undefined') return initialProcurementRequests
@@ -1322,7 +1449,20 @@ export function getStoredDemands() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(initialProcurementRequests))
       return initialProcurementRequests
     }
-    return JSON.parse(raw)
+    const parsed = JSON.parse(raw)
+    const existingIds = new Set(parsed.map((d) => d.id))
+    let needsUpdate = false
+    const merged = [...parsed]
+    initialProcurementRequests.forEach((initialReq) => {
+      if (!existingIds.has(initialReq.id)) {
+        merged.push(initialReq)
+        needsUpdate = true
+      }
+    })
+    if (needsUpdate) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(merged))
+    }
+    return merged
   } catch (e) {
     return initialProcurementRequests
   }
@@ -1332,8 +1472,11 @@ export function saveNewDemand(demand) {
   if (typeof window === 'undefined') return demand
   try {
     const existing = getStoredDemands()
-    const updated = [demand, ...existing]
+    const updated = [demand, ...existing.filter((d) => d.id !== demand.id)]
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('storage'))
+    }
     return demand
   } catch (e) {
     return demand
@@ -1352,7 +1495,8 @@ export function updateItemOfferSelection(demandId, itemId, offerId) {
     const updated = demands.map((d) => {
       if (d.id !== demandId) return d
       const updatedItems = (d.items || []).map((item) => {
-        if (item.itemId !== itemId) return item
+        const itemKey = item.itemId || item.id
+        if (itemKey !== itemId && item.itemId !== itemId && item.id !== itemId) return item
         return {
           ...item,
           selectedFpoOfferId: item.selectedFpoOfferId === offerId ? null : offerId
@@ -1364,6 +1508,9 @@ export function updateItemOfferSelection(demandId, itemId, offerId) {
       }
     })
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('storage'))
+    }
   } catch (e) {
     console.error(e)
   }
@@ -1374,12 +1521,15 @@ export function confirmProcurementOrder(demandId, selectedOffersPerItem = {}) {
   try {
     const demands = getStoredDemands()
     let targetUpdatedDemand = null
+    const orderId = `ORD-${demandId.replace(/^REQ-/, '')}`
+    let builtOrderItems = []
 
     const updated = demands.map((d) => {
       if (d.id !== demandId) return d
 
       const updatedItems = (d.items || []).map((item) => {
-        const selectedOfferId = selectedOffersPerItem[item.itemId] || item.selectedFpoOfferId || item.confirmedOfferId
+        const itemKey = item.itemId || item.id
+        const selectedOfferId = selectedOffersPerItem[itemKey] || selectedOffersPerItem[item.itemId] || selectedOffersPerItem[item.id] || item.selectedFpoOfferId || item.confirmedOfferId
         if (!selectedOfferId) return item
 
         const selectedResp = (item.responses || []).find((r) => r.id === selectedOfferId)
@@ -1407,12 +1557,12 @@ export function confirmProcurementOrder(demandId, selectedOffersPerItem = {}) {
           }
         })
 
-        const itemQty = Number(item.quantityVal || parseInt(String(item.quantity || '1000').replace(/[^0-9]/g, '')) || 1000)
+        const itemQty = Number(item.quantityVal || parseInt(String(selectedResp?.offeredQty || item.quantity || '1000').replace(/[^0-9]/g, '')) || 1000)
         const pRate = selectedResp?.producePriceVal || parseFloat(String(selectedResp?.producePrice || selectedResp?.offeredPrice || selectedResp?.counterPrice || 27).replace(/[^0-9.]/g, '')) || 27
-        const tCost = selectedResp?.transportCostVal !== undefined ? selectedResp.transportCostVal : 1500
+        const tCost = selectedResp?.transportCostVal !== undefined ? selectedResp.transportCostVal : (selectedResp?.transportCost ? parseFloat(String(selectedResp.transportCost).replace(/[^0-9.]/g, '')) || 1500 : 1500)
         const fin = calculateOfferFinancials(itemQty, pRate, tCost)
 
-        return {
+        const confirmedItem = {
           ...item,
           selectedFpoOfferId: selectedOfferId,
           confirmedOfferId: selectedOfferId,
@@ -1435,6 +1585,33 @@ export function confirmProcurementOrder(demandId, selectedOffersPerItem = {}) {
           status: 'ORDER CONFIRMED',
           responses: updatedResponses
         }
+
+        builtOrderItems.push({
+          itemId: itemKey,
+          crop: item.crop,
+          variety: item.variety,
+          quantity: selectedResp?.offeredQty || item.quantity,
+          quantityVal: itemQty,
+          grade: selectedResp?.offeredGrade || item.grade,
+          selectedFpoId: selectedResp?.fpoId,
+          selectedFpoName: selectedResp?.fpoName,
+          selectedFpo: selectedResp?.fpoName,
+          location: selectedResp?.location,
+          producePrice: fin.producePrice,
+          producePriceVal: fin.producePriceVal,
+          produceValue: fin.produceValue,
+          produceValueVal: fin.produceValueVal,
+          transportCost: fin.transportCost,
+          transportCostVal: fin.transportCostVal,
+          deliveredTotal: fin.deliveredTotal,
+          deliveredTotalVal: fin.deliveredTotalVal,
+          effectivePrice: fin.effectivePrice,
+          effectivePriceVal: fin.effectivePriceVal,
+          deliveryDate: selectedResp?.deliveryDate || d.deliveryDate,
+          status: 'Confirmed'
+        })
+
+        return confirmedItem
       })
 
       const anyConfirmed = updatedItems.some((it) => it.isConfirmed)
@@ -1451,7 +1628,67 @@ export function confirmProcurementOrder(demandId, selectedOffersPerItem = {}) {
     })
 
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
-    return targetUpdatedDemand || demands.find((d) => d.id === demandId)
+
+    // Create & register Order Record in Hub / Buyer Orders State
+    if (builtOrderItems.length > 0) {
+      const totalProduceVal = builtOrderItems.reduce((sum, it) => sum + (it.produceValueVal || 0), 0)
+      const totalTransportVal = builtOrderItems.reduce((sum, it) => sum + (it.transportCostVal || 0), 0)
+      const totalDeliveredVal = totalProduceVal + totalTransportVal
+      const totalQtyVal = builtOrderItems.reduce((sum, it) => sum + (it.quantityVal || 0), 0)
+      const primaryFpo = builtOrderItems[0]?.selectedFpoName || 'Godavari Farmers FPO'
+      const primaryCrop = builtOrderItems.length === 1 ? builtOrderItems[0].crop : `${builtOrderItems.length} Commodities`
+
+      const newOrderRecord = {
+        orderId,
+        requestId: demandId,
+        buyer: targetUpdatedDemand?.buyer || 'AgroFresh Enterprise',
+        destination: targetUpdatedDemand?.deliveryLocation || 'Vijayawada Processing Hub',
+        deliveryDate: builtOrderItems[0]?.deliveryDate || targetUpdatedDemand?.deliveryDate || '25 Sep 2026',
+        crop: primaryCrop,
+        variety: builtOrderItems[0]?.variety || 'Hybrid Roma',
+        requiredGrade: builtOrderItems[0]?.grade || 'Grade A',
+        totalRequiredQty: totalQtyVal,
+        hubAllocatedQty: totalQtyVal,
+        hubName: builtOrderItems[0]?.location || 'Rajahmundry Central Hub',
+        status: 'Confirmed',
+        selectedFpo: primaryFpo,
+        fpo: primaryFpo,
+        items: builtOrderItems,
+        produceValueVal: totalProduceVal,
+        transportCostVal: totalTransportVal,
+        deliveredTotalVal: totalDeliveredVal,
+        shortfallState: {
+          hasShortfall: false,
+          orderedQty: totalQtyVal,
+          acceptedQty: totalQtyVal,
+          shortfallQty: 0,
+          hubNotifiedFpo: false,
+          fpoNotifiedBuyer: false,
+          buyerDecision: null,
+          notes: 'Order confirmed across selected FPOs.'
+        }
+      }
+
+      try {
+        const rawHub = localStorage.getItem('farmlink_hub_operations_state_v1')
+        const hubState = rawHub ? JSON.parse(rawHub) : { activeOrder: {}, orders: [] }
+        hubState.activeOrder = newOrderRecord
+        hubState.orders = [newOrderRecord, ...(hubState.orders || []).filter((o) => o.orderId !== orderId)]
+        localStorage.setItem('farmlink_hub_operations_state_v1', JSON.stringify(hubState))
+      } catch (err) {
+        console.error(err)
+      }
+    }
+
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('storage'))
+    }
+
+    return {
+      updatedDemand: targetUpdatedDemand || demands.find((d) => d.id === demandId),
+      orderId,
+      demandId
+    }
   } catch (e) {
     console.error(e)
   }
@@ -1463,7 +1700,8 @@ export function submitFpoResponse(demandId, fpoInfo, responsesPerItem) {
     const demands = getStoredDemands()
     const updated = demands.map((d) => {
       if (d.id !== demandId) return d
-      const updatedItems = (d.items || []).map((item) => {
+      const updatedItems = (d.items || []).map((item, itemIdx) => {
+        const itemKey = item.itemId || item.id || `item-${itemIdx + 1}`
         if (item.isConfirmed && item.confirmedOfferId) {
           const myResp = (item.responses || []).find(
             (r) => r.fpoId === fpoInfo.id || r.fpoName === fpoInfo.name
@@ -1473,7 +1711,7 @@ export function submitFpoResponse(demandId, fpoInfo, responsesPerItem) {
           }
         }
 
-        const itemResp = responsesPerItem[item.itemId]
+        const itemResp = responsesPerItem[itemKey] || responsesPerItem[item.itemId] || responsesPerItem[item.id] || responsesPerItem[`item-${itemIdx + 1}`]
         if (!itemResp) return item
 
         const existingResponses = (item.responses || []).filter(
@@ -1488,7 +1726,9 @@ export function submitFpoResponse(demandId, fpoInfo, responsesPerItem) {
 
         if (itemResp.type === 'ACCEPT') {
           newRespObj = {
-            id: `resp-${demandId}-${item.itemId}-${fpoInfo.id || 'fpo-godavari'}`,
+            id: `resp-${demandId}-${itemKey}-${fpoInfo.id || 'fpo-godavari'}`,
+            requestId: demandId,
+            itemId: itemKey,
             fpoId: fpoInfo.id || 'fpo-godavari',
             fpoName: fpoInfo.name || 'Godavari Farmers FPO',
             location: fpoInfo.location || 'Rajamahendravaram, East Godavari',
@@ -1496,6 +1736,9 @@ export function submitFpoResponse(demandId, fpoInfo, responsesPerItem) {
             statusLabel: 'ACCEPTED',
             statusStyle: 'bg-[#e6ecd5] text-[#1b6e53] border border-[#c3cda7]',
             offeredQty: `${rawQty.toLocaleString()} kg`,
+            quantity: `${rawQty.toLocaleString()} kg`,
+            offeredGrade: itemResp.offeredGrade || item.grade || 'Grade A',
+            grade: itemResp.offeredGrade || item.grade || 'Grade A',
             offeredPrice: fin.producePrice,
             producePrice: fin.producePrice,
             producePriceVal: fin.producePriceVal,
@@ -1516,7 +1759,9 @@ export function submitFpoResponse(demandId, fpoInfo, responsesPerItem) {
           }
         } else if (itemResp.type === 'BACK_OFFER') {
           newRespObj = {
-            id: `resp-${demandId}-${item.itemId}-${fpoInfo.id || 'fpo-godavari'}`,
+            id: `resp-${demandId}-${itemKey}-${fpoInfo.id || 'fpo-godavari'}`,
+            requestId: demandId,
+            itemId: itemKey,
             fpoId: fpoInfo.id || 'fpo-godavari',
             fpoName: fpoInfo.name || 'Godavari Farmers FPO',
             location: fpoInfo.location || 'Rajamahendravaram, East Godavari',
@@ -1525,6 +1770,9 @@ export function submitFpoResponse(demandId, fpoInfo, responsesPerItem) {
             statusStyle: 'bg-[#fceace] text-[#683600] border border-[#c3cda7]',
             requestedQty: item.quantity,
             offeredQty: `${rawQty.toLocaleString()} kg`,
+            quantity: `${rawQty.toLocaleString()} kg`,
+            offeredGrade: itemResp.offeredGrade || item.grade || 'Grade A',
+            grade: itemResp.offeredGrade || item.grade || 'Grade A',
             counterPrice: fin.producePrice,
             offeredPrice: fin.producePrice,
             producePrice: fin.producePrice,
@@ -1538,20 +1786,21 @@ export function submitFpoResponse(demandId, fpoInfo, responsesPerItem) {
             effectivePrice: fin.effectivePrice,
             effectivePriceVal: fin.effectivePriceVal,
             transportStatus: 'Recorded',
-            offeredGrade: itemResp.offeredGrade || item.grade,
             deliveryDate: itemResp.deliveryDate || d.deliveryDate,
             hub: fpoInfo.primaryHub || 'Rajahmundry Central Hub #01',
             notes: itemResp.notes || 'Commercial back offer proposed.',
             counterReasons: itemResp.counterReasons || [
               `Produce rate adjusted to ${fin.producePrice}`,
-              `Delivered total: ${fin.deliveredTotal} (including ${fin.transportCost} internal transport)`
+              `Delivered total: ${fin.deliveredTotal} (including ${fin.transportCost} transport)`
             ],
             timestamp: 'Just now',
             contact: fpoInfo.contactPerson || 'Hub Director Desk'
           }
         } else if (itemResp.type === 'DECLINE') {
           newRespObj = {
-            id: `resp-${demandId}-${item.itemId}-${fpoInfo.id || 'fpo-godavari'}`,
+            id: `resp-${demandId}-${itemKey}-${fpoInfo.id || 'fpo-godavari'}`,
+            requestId: demandId,
+            itemId: itemKey,
             fpoId: fpoInfo.id || 'fpo-godavari',
             fpoName: fpoInfo.name || 'Godavari Farmers FPO',
             location: fpoInfo.location || 'Rajamahendravaram, East Godavari',
@@ -1580,6 +1829,9 @@ export function submitFpoResponse(demandId, fpoInfo, responsesPerItem) {
     })
 
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('storage'))
+    }
     return updated
   } catch (e) {
     console.error(e)

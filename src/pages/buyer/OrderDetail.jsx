@@ -37,17 +37,16 @@ export default function BuyerOrderDetail() {
   }, [])
 
   const kpis = calculateHubKPIs(hubState)
-  const activeOrder = hubState.activeOrder
-  const currentStatus = activeOrder.status
+  const foundOrder = orderId
+    ? (hubState.activeOrder?.orderId === orderId ? hubState.activeOrder : (hubState.orders || []).find((o) => o.orderId === orderId))
+    : hubState.activeOrder
+  const activeOrder = foundOrder || hubState.activeOrder || { orderId: orderId || 'ORD-1030', status: 'Confirmed', buyer: 'AgroFresh Enterprise' }
+  const currentStatus = activeOrder.status || 'Confirmed'
   const isTargetOrder = !orderId || orderId === activeOrder.orderId
 
-  // 11-stage tracking timeline as strictly specified
+  // 7-stage tracking timeline starting with Order Confirmed
   const timelineStages = [
-    { key: 'Confirmed', label: 'Confirmed', desc: 'Commercial terms accepted' },
-    { key: 'Fulfillment Planned', label: 'Fulfillment Planned', desc: 'Hub & quota planned' },
-    { key: 'Collection', label: 'Collection', desc: 'Gate intake verified' },
-    { key: 'Quality Approved', label: 'Quality Approved', desc: 'Lab QA passed' },
-    { key: 'Aggregated', label: 'Aggregated', desc: 'Consignment palletized' },
+    { key: 'Confirmed', label: 'Order Confirmed', desc: 'Procurement contract confirmed' },
     { key: 'Dispatched', label: 'Dispatched', desc: 'Outbound manifest issued' },
     { key: 'In Transit', label: 'In Transit', desc: 'Carrier on transit corridor' },
     { key: 'Delivered', label: 'Delivered', desc: 'Arrived at destination dock' },
@@ -56,21 +55,16 @@ export default function BuyerOrderDetail() {
     { key: 'Completed', label: 'Completed', desc: 'Order fulfilled & settled' },
   ]
 
-  // Map currentStatus to active step index
+  // Map currentStatus to active step index (0 to 6)
   const getStageIndex = (status) => {
-    if (status === 'Confirmed') return 0
-    if (status === 'Fulfillment Planned') return 1
-    if (status === 'Collection' || status === 'Collected') return 2
-    if (status === 'Quality Approved' || status === 'Quality Inspection' || status === 'Aggregation In Progress') return 3
-    if (status === 'Aggregated' || status === 'Ready for Dispatch' || status === 'Partial Fulfillment Available' || status === 'Buyer Review Required' || status === 'Ready for Partial Dispatch') return 4
-    if (status === 'Dispatched' || status === 'Partially Dispatched') return 5
-    if (status === 'In Transit') return 6
-    if (status === 'Delivered') return 7
-    if (status === 'Buyer Verified' || status === 'Ready for Settlement') return 8
-    if (status === 'Payment Confirmed') return 9
-    if (status === 'Completed') return 10
-    if (status === 'Delivery Issue') return 7
-    return 5
+    if (status === 'Confirmed' || status === 'Fulfillment Planned' || status === 'Collection' || status === 'Quality Approved' || status === 'Aggregated' || status === 'Ready for Dispatch' || status === 'Ready for Partial Dispatch') return 0
+    if (status === 'Dispatched' || status === 'Partially Dispatched') return 1
+    if (status === 'In Transit') return 2
+    if (status === 'Delivered' || status === 'Delivery Issue') return 3
+    if (status === 'Buyer Verified' || status === 'Ready for Settlement') return 4
+    if (status === 'Payment Confirmed') return 5
+    if (status === 'Completed') return 6
+    return 0
   }
 
   const currentStageIndex = getStageIndex(currentStatus)
@@ -81,11 +75,11 @@ export default function BuyerOrderDetail() {
   const hasDeliveryIssue = currentStatus === 'Delivery Issue'
 
   // Calculations for verified delivered value
-  const verifiedQty = kpis.totalAccepted || 700
-  const produceValue = 27000 // Tomato produce value
-  const transportCost = 1500 // Recorded transportation cost
-  const agreedOrderValue = produceValue + transportCost // ₹28,500 total delivered cost
-  const agreedRate = (agreedOrderValue / verifiedQty).toFixed(2) // ₹40.71/kg effective
+  const verifiedQty = activeOrder.hubAllocatedQty || activeOrder.totalRequiredQty || kpis.totalAccepted || 1000
+  const produceValue = activeOrder.produceValueVal != null ? activeOrder.produceValueVal : 27000
+  const transportCost = activeOrder.transportCostVal != null ? activeOrder.transportCostVal : 1500
+  const agreedOrderValue = activeOrder.deliveredTotalVal != null ? activeOrder.deliveredTotalVal : (produceValue + transportCost)
+  const agreedRate = (verifiedQty > 0 ? agreedOrderValue / verifiedQty : 28.5).toFixed(2)
 
   // Actions
   const handleSimulateInTransit = () => {
@@ -221,7 +215,7 @@ export default function BuyerOrderDetail() {
           <div className="text-right">
             <span className="text-[10px] uppercase font-mono text-[#6d6d6d] block">Supplier FPO</span>
             <strong className="text-base text-[#00372a] font-editorial block">
-              Godavari Farmers Producer Org
+              {activeOrder.selectedFpo || activeOrder.fpo || 'Godavari Farmers Producer Org'}
             </strong>
             <span className="text-xs font-mono text-[#1b6e53]">Verified Aggregator Federation</span>
           </div>
@@ -231,7 +225,7 @@ export default function BuyerOrderDetail() {
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3.5 font-mono text-xs">
           <div className="p-3.5 rounded-[16px] bg-[#f1efdf] border border-[#c3cda7] space-y-0.5">
             <span className="text-[10px] text-[#6d6d6d] uppercase block">Ordered Quantity</span>
-            <div className="text-base font-bold text-[#00372a]">{activeOrder.hubAllocatedQty || 700} kg</div>
+            <div className="text-base font-bold text-[#00372a]">{activeOrder.hubAllocatedQty || activeOrder.totalRequiredQty || 1000} kg</div>
             <p className="text-[10px] text-[#6d6d6d] font-sans">Target Contract Volume</p>
           </div>
 
@@ -243,25 +237,25 @@ export default function BuyerOrderDetail() {
 
           <div className="p-3.5 rounded-[16px] bg-[#f1efdf] border border-[#c3cda7] space-y-0.5">
             <span className="text-[10px] text-[#6d6d6d] uppercase block">Produce Value</span>
-            <div className="text-base font-bold text-[#00372a]">₹27,000</div>
+            <div className="text-base font-bold text-[#00372a]">₹{produceValue.toLocaleString('en-IN')}</div>
             <p className="text-[10px] text-[#6d6d6d] font-sans">Commodity Base Value</p>
           </div>
 
           <div className="p-3.5 rounded-[16px] bg-[#f1efdf] border border-[#c3cda7] space-y-0.5">
             <span className="text-[10px] text-[#6d6d6d] uppercase block">Transportation</span>
-            <div className="text-base font-bold text-[#1b6e53]">+ ₹1,500</div>
+            <div className="text-base font-bold text-[#1b6e53]">+ ₹{transportCost.toLocaleString('en-IN')}</div>
             <p className="text-[10px] text-[#1b6e53] font-sans">Recorded Transport</p>
           </div>
 
           <div className="p-3.5 rounded-[16px] bg-[#e6ecd5] border border-[#1b6e53] space-y-0.5">
             <span className="text-[10px] text-[#1b6e53] uppercase font-bold block">Delivered Total</span>
-            <div className="text-lg font-extrabold text-[#00372a]">₹28,500</div>
+            <div className="text-lg font-extrabold text-[#00372a]">₹{agreedOrderValue.toLocaleString('en-IN')}</div>
             <p className="text-[10px] text-[#1b6e53] font-sans">Total Order Landed Cost</p>
           </div>
         </div>
       </section>
 
-      {/* 3. STATUS TIMELINE (11 STAGES) */}
+      {/* 3. STATUS TIMELINE (6 STAGES) */}
       <section className="rounded-[24px] bg-[#ffffff] border border-[#c3cda7] p-6 lg:p-7 shadow-xs space-y-5">
         <div className="flex items-center justify-between pb-3 border-b border-[#c3cda7]/50">
           <div className="flex items-center gap-2">
@@ -276,53 +270,64 @@ export default function BuyerOrderDetail() {
         </div>
 
         {/* Timeline Bar */}
-        <div className="relative pt-2 pb-4 overflow-x-auto">
-          <div className="flex items-start justify-between min-w-[880px] relative">
-            {/* Connecting Track */}
-            <div className="absolute top-4 left-6 right-6 h-1 bg-[#f1efdf] border-t border-b border-[#c3cda7]/50 z-0"></div>
+        <div className="py-2">
+          <div className="max-w-4xl mx-auto relative">
+            {/* Background Track */}
+            <div className="absolute top-[18px] left-[calc(100%/14)] right-[calc(100%/14)] h-1 bg-[#e6ecd5] rounded-full z-0">
+              {/* Completed Progress Track */}
+              <div
+                className="h-full bg-[#1b6e53] rounded-full transition-all duration-500 ease-out"
+                style={{
+                  width: `${currentStageIndex <= 0 ? 0 : Math.min(100, (currentStageIndex / (timelineStages.length - 1)) * 100)}%`,
+                }}
+              />
+            </div>
 
-            {timelineStages.map((stage, idx) => {
-              const isPast = idx < currentStageIndex
-              const isCurrent = idx === currentStageIndex
+            {/* Steps Grid */}
+            <div className="grid grid-cols-7 relative z-10">
+              {timelineStages.map((stage, idx) => {
+                const isPast = idx < currentStageIndex
+                const isCurrent = idx === currentStageIndex
 
-              return (
-                <div key={stage.key} className="flex flex-col items-center text-center relative z-10 w-20 px-0.5">
-                  {/* Step Marker Dot */}
-                  <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center font-mono text-xs font-bold transition-all shadow-xs ${
-                      isPast
-                        ? 'bg-[#1b6e53] text-[#ffffff] ring-2 ring-[#e8fe85]'
-                        : isCurrent
-                        ? 'bg-[#e8fe85] text-[#1b6e53] ring-3 ring-[#1b6e53] scale-110'
-                        : 'bg-[#ffffff] text-[#6d6d6d] border border-[#c3cda7]'
-                    }`}
-                  >
-                    {isPast ? (
-                      <span className="material-symbols-outlined text-[15px]">check</span>
-                    ) : isCurrent ? (
-                      <span className="w-2 h-2 rounded-full bg-[#1b6e53] animate-ping"></span>
-                    ) : (
-                      idx + 1
-                    )}
-                  </div>
-
-                  {/* Stage Label */}
-                  <div className="mt-2 space-y-0.5">
-                    <span
-                      className={`text-[10px] font-mono block leading-tight ${
-                        isCurrent
-                          ? 'font-bold text-[#1b6e53]'
-                          : isPast
-                          ? 'font-semibold text-[#00372a]'
-                          : 'text-[#6d6d6d]'
+                return (
+                  <div key={stage.key} className="flex flex-col items-center text-center px-1">
+                    {/* Step Marker Dot */}
+                    <div
+                      className={`w-9 h-9 rounded-full flex items-center justify-center font-mono text-xs font-bold transition-all shadow-sm ${
+                        isPast
+                          ? 'bg-[#1b6e53] text-[#ffffff] ring-4 ring-[#ffffff]'
+                          : isCurrent
+                          ? 'bg-[#e8fe85] text-[#1b6e53] ring-4 ring-[#ffffff] border-2 border-[#1b6e53] scale-110'
+                          : 'bg-[#ffffff] text-[#6d6d6d] border-2 border-[#c3cda7]'
                       }`}
                     >
-                      {stage.label}
-                    </span>
+                      {isPast ? (
+                        <span className="material-symbols-outlined text-[16px] font-bold">check</span>
+                      ) : isCurrent ? (
+                        <span className="w-2.5 h-2.5 rounded-full bg-[#1b6e53] animate-pulse"></span>
+                      ) : (
+                        idx + 1
+                      )}
+                    </div>
+
+                    {/* Stage Label */}
+                    <div className="mt-2.5">
+                      <span
+                        className={`text-xs font-mono block leading-snug ${
+                          isCurrent
+                            ? 'font-bold text-[#1b6e53]'
+                            : isPast
+                            ? 'font-semibold text-[#00372a]'
+                            : 'text-[#6d6d6d]'
+                        }`}
+                      >
+                        {stage.label}
+                      </span>
+                    </div>
                   </div>
-                </div>
-              )
-            })}
+                )
+              })}
+            </div>
           </div>
         </div>
       </section>
@@ -855,12 +860,13 @@ export default function BuyerOrderDetail() {
 
         <div className="flex items-center gap-2 flex-wrap">
           {[
-            { id: 'dispatched', label: '1. Dispatched' },
-            { id: 'in_transit', label: '2. In Transit' },
-            { id: 'delivered', label: '3. Delivered' },
-            { id: 'buyer_verified', label: '4. Buyer Verified' },
-            { id: 'completed', label: '5. Payment Confirmed / Completed' },
-            { id: 'issue', label: '6. Report Issue Exception' },
+            { id: 'confirmed', label: '1. Confirmed' },
+            { id: 'dispatched', label: '2. Dispatched' },
+            { id: 'in_transit', label: '3. In Transit' },
+            { id: 'delivered', label: '4. Delivered' },
+            { id: 'buyer_verified', label: '5. Buyer Verified' },
+            { id: 'completed', label: '6. Payment Confirmed / Completed' },
+            { id: 'issue', label: '7. Report Issue Exception' },
           ].map((btn) => (
             <button
               key={btn.id}

@@ -1178,7 +1178,14 @@ export function setOrderTestScenario(scenario = 'dispatched') {
   order.hubAllocatedQty = 700
   order.deliveryIssue = null
 
-  if (scenario === 'dispatched') {
+  if (scenario === 'confirmed') {
+    order.status = 'Confirmed'
+    order.dispatchDetails = null
+    order.transitDetails = null
+    order.deliveryDetails = null
+    order.buyerConfirmation = null
+    order.paymentStatus = 'PENDING'
+  } else if (scenario === 'dispatched') {
     order.status = 'Dispatched'
     order.dispatchDetails = {
       vehicleNo: 'AP-39-TX-8841',
