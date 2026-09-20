@@ -968,9 +968,9 @@ export const initialFpoOrders = [
     deliveryDate: '22 Sep 2026',
     deliveryLocation: 'Visakhapatnam Warehouse #2',
     totalValue: '₹7,200',
-    status: 'Ready',
-    fulfillmentStage: 'Collection',
-    statusStyle: 'bg-[#e6ecd5] text-[#1b6e53]',
+    status: 'Completed',
+    fulfillmentStage: 'Completed',
+    statusStyle: 'bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold',
     items: [
       {
         itemId: 'item-1025-1',

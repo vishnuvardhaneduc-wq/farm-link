@@ -19,14 +19,16 @@ const buyerNavSections = [
     ],
   },
   {
-    title: 'Orders & Contracts',
+    title: 'Orders & Settlements',
     items: [
       { to: '/buyer/orders', label: 'Orders & Fulfillment', icon: 'local_shipping', textBadge: '3 En Route' },
+      { to: '/buyer/payments', label: 'Payment & Settlements', icon: 'currency_rupee', textBadge: '₹28.5k' },
+      { to: '/buyer/settings', label: 'Company Settings', icon: 'settings' },
     ],
   },
 ]
 
-export default function BuyerSidebar({ isOpen = false, onClose = () => {} }) {
+export default function BuyerSidebar({ isOpen = false, onClose = () => { } }) {
   return (
     <>
       {/* Mobile backdrop */}
@@ -39,9 +41,8 @@ export default function BuyerSidebar({ isOpen = false, onClose = () => {} }) {
 
       {/* Sidebar container matching FPO Sidebar */}
       <aside
-        className={`fixed top-0 bottom-0 left-0 z-50 w-[270px] shrink-0 bg-[#1b6e53] text-[#ffffff] flex flex-col justify-between transition-transform duration-200 ease-in-out lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto shadow-sm ${
-          isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
-        }`}
+        className={`fixed top-0 bottom-0 left-0 z-50 w-[270px] shrink-0 bg-[#1b6e53] text-[#ffffff] flex flex-col justify-between transition-transform duration-200 ease-in-out lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto shadow-sm ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+          }`}
       >
         <div className="flex flex-col">
           {/* Brand Header */}
@@ -86,10 +87,9 @@ export default function BuyerSidebar({ isOpen = false, onClose = () => {} }) {
                     end={true}
                     onClick={onClose}
                     className={({ isActive }) =>
-                      `flex items-center justify-between px-3.5 py-2 rounded-[100px] transition ${
-                        isActive
-                          ? 'bg-[#e8fe85] text-[#1b6e53] font-semibold shadow-xs'
-                          : 'text-white/90 hover:text-white hover:bg-white/10'
+                      `flex items-center justify-between px-3.5 py-2 rounded-[100px] transition ${isActive
+                        ? 'bg-[#e8fe85] text-[#1b6e53] font-semibold shadow-xs'
+                        : 'text-white/90 hover:text-white hover:bg-white/10'
                       }`
                     }
                   >
@@ -97,13 +97,12 @@ export default function BuyerSidebar({ isOpen = false, onClose = () => {} }) {
                       <>
                         <div className="flex items-center gap-2.5">
                           <span
-                            className={`material-symbols-outlined text-[18px] ${
-                              isActive
+                            className={`material-symbols-outlined text-[18px] ${isActive
                                 ? 'text-[#1b6e53]'
                                 : item.badgeSolid
-                                ? 'text-[#e8fe85]'
-                                : 'text-white/70'
-                            }`}
+                                  ? 'text-[#e8fe85]'
+                                  : 'text-white/70'
+                              }`}
                           >
                             {item.icon}
                           </span>
@@ -190,11 +189,11 @@ export default function BuyerSidebar({ isOpen = false, onClose = () => {} }) {
               </div>
             </div>
             <Link
-              to="/buyer/dashboard"
+              to="/buyer/settings"
               className="text-white/70 hover:text-white p-1 rounded-full hover:bg-white/10 transition"
-              title="Buyer Workspace"
+              title="Buyer Company Settings"
             >
-              <span className="material-symbols-outlined text-[18px]">verified</span>
+              <span className="material-symbols-outlined text-[18px]">settings</span>
             </Link>
           </div>
         </div>

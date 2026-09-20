@@ -8,6 +8,8 @@ const navSections = [
       { to: '/fpo/dashboard', label: 'Dashboard', icon: 'dashboard', isCurrent: true },
       { to: '/fpo/requests', label: 'Incoming Requests', icon: 'mark_email_unread', badge: '4 New', badgeHighlight: true },
       { to: '/fpo/orders', label: 'Active Orders', icon: 'shopping_bag', badge: '4 Active' },
+      { to: '/fpo/products', label: 'Products We Supply', icon: 'category', badge: '6 Crops' },
+      { to: '/fpo/hubs', label: 'All Hubs', icon: 'hub', badge: '4 Hubs' },
       { to: '/fpo/farmers', label: 'Farmers', icon: 'group', badge: '42' },
       { to: '/fpo/buyers', label: 'Buyers', icon: 'apartment', badge: '8' },
       { to: '/fpo/supply', label: 'Supply Inward', icon: 'inventory_2', badge: '3.9 T' },
@@ -26,13 +28,13 @@ const navSections = [
     title: 'Settlement & Audit',
     items: [
       { to: '/fpo/settlements', label: 'Settlements', icon: 'currency_rupee', textBadge: '₹1.84L' },
-      { to: '/fpo/reserve-fund', label: 'Reserve Fund', icon: 'shield_with_heart' },
       { to: '/fpo/analytics', label: 'Analytics & Reports', icon: 'bar_chart' },
+      { to: '/fpo/settings', label: 'Profile & Settings', icon: 'settings' },
     ],
   },
 ]
 
-export default function FPOSidebar({ isOpen = false, onClose = () => {} }) {
+export default function FPOSidebar({ isOpen = false, onClose = () => { } }) {
   return (
     <>
       {/* Mobile backdrop */}
@@ -45,9 +47,8 @@ export default function FPOSidebar({ isOpen = false, onClose = () => {} }) {
 
       {/* Sidebar container */}
       <aside
-        className={`fixed top-0 bottom-0 left-0 z-50 w-[270px] shrink-0 bg-[#1b6e53] text-[#ffffff] flex flex-col justify-between transition-transform duration-200 ease-in-out lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto shadow-sm ${
-          isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
-        }`}
+        className={`fixed top-0 bottom-0 left-0 z-50 w-[270px] shrink-0 bg-[#1b6e53] text-[#ffffff] flex flex-col justify-between transition-transform duration-200 ease-in-out lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto shadow-sm ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+          }`}
       >
         <div className="flex flex-col">
           {/* Brand Header */}
@@ -92,10 +93,9 @@ export default function FPOSidebar({ isOpen = false, onClose = () => {} }) {
                     end={true}
                     onClick={onClose}
                     className={({ isActive }) =>
-                      `flex items-center justify-between px-3.5 py-2 rounded-[100px] transition ${
-                        isActive
-                          ? 'bg-[#e8fe85] text-[#1b6e53] font-semibold'
-                          : 'text-white/90 hover:text-white hover:bg-white/10'
+                      `flex items-center justify-between px-3.5 py-2 rounded-[100px] transition ${isActive
+                        ? 'bg-[#e8fe85] text-[#1b6e53] font-semibold'
+                        : 'text-white/90 hover:text-white hover:bg-white/10'
                       }`
                     }
                   >
@@ -103,13 +103,12 @@ export default function FPOSidebar({ isOpen = false, onClose = () => {} }) {
                       <>
                         <div className="flex items-center gap-2.5">
                           <span
-                            className={`material-symbols-outlined text-[18px] ${
-                              isActive
+                            className={`material-symbols-outlined text-[18px] ${isActive
                                 ? 'text-[#1b6e53]'
                                 : item.badgeSolid
-                                ? 'text-[#e8fe85]'
-                                : 'text-white/70'
-                            }`}
+                                  ? 'text-[#e8fe85]'
+                                  : 'text-white/70'
+                              }`}
                           >
                             {item.icon}
                           </span>
@@ -173,12 +172,13 @@ export default function FPOSidebar({ isOpen = false, onClose = () => {} }) {
                 <span className="text-[10px] text-[#e6ecd5]/80 truncate">Hub Director • Nashik</span>
               </div>
             </div>
-            <button
+            <Link
+              to="/fpo/settings"
               className="text-white/70 hover:text-white p-1 rounded-full hover:bg-white/10 transition cursor-pointer"
-              title="Settings"
+              title="FPO Settings & Profile"
             >
-              <span className="material-symbols-outlined text-[18px]">more_vert</span>
-            </button>
+              <span className="material-symbols-outlined text-[18px]">settings</span>
+            </Link>
           </div>
         </div>
       </aside>

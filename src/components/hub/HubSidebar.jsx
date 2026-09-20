@@ -3,14 +3,17 @@ import { NavLink, Link } from 'react-router'
 
 const hubNavItems = [
   { to: '/hub/dashboard', label: 'Dashboard', icon: 'dashboard' },
-  { to: '/hub/collection', label: 'Collection', icon: 'move_to_inbox' },
-  { to: '/hub/weighing', label: 'Weighing', icon: 'scale' },
+  { to: '/hub/collection', label: 'Today\'s Collection', icon: 'move_to_inbox' },
+  { to: '/hub/weighing', label: 'Weighing & Load Cells', icon: 'scale' },
   { to: '/hub/quality', label: 'Quality Inspection', icon: 'science' },
-  { to: '/hub/aggregation', label: 'Aggregation', icon: 'inventory_2' },
-  { to: '/hub/dispatch', label: 'Dispatch', icon: 'local_shipping' },
+  { to: '/hub/aggregation', label: 'Aggregation & Crating', icon: 'inventory_2' },
+  { to: '/hub/dispatch', label: 'Outbound Dispatch', icon: 'local_shipping' },
+  { to: '/hub/receipts', label: 'Thermal Receipts & Slips', icon: 'receipt' },
+  { to: '/hub/farmers', label: 'Farmer Directory', icon: 'groups' },
+  { to: '/hub/settings', label: 'Hub Hardware Settings', icon: 'settings' },
 ]
 
-export default function HubSidebar({ isOpen = false, onClose = () => {} }) {
+export default function HubSidebar({ isOpen = false, onClose = () => { } }) {
   return (
     <>
       {/* Mobile backdrop */}
@@ -23,9 +26,8 @@ export default function HubSidebar({ isOpen = false, onClose = () => {} }) {
 
       {/* Sidebar container matching FPO/Buyer Sidebar */}
       <aside
-        className={`fixed top-0 bottom-0 left-0 z-50 w-[270px] shrink-0 bg-[#1b6e53] text-[#ffffff] flex flex-col justify-between transition-transform duration-200 ease-in-out lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto shadow-sm ${
-          isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
-        }`}
+        className={`fixed top-0 bottom-0 left-0 z-50 w-[270px] shrink-0 bg-[#1b6e53] text-[#ffffff] flex flex-col justify-between transition-transform duration-200 ease-in-out lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto shadow-sm ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+          }`}
       >
         <div className="flex flex-col">
           {/* Brand Header */}
@@ -71,10 +73,9 @@ export default function HubSidebar({ isOpen = false, onClose = () => {} }) {
                 end={item.to === '/hub/dashboard'}
                 onClick={onClose}
                 className={({ isActive }) =>
-                  `flex items-center justify-between px-3.5 py-2.5 rounded-[100px] transition ${
-                    isActive
-                      ? 'bg-[#e8fe85] text-[#1b6e53] font-semibold shadow-xs'
-                      : 'text-white/90 hover:text-white hover:bg-white/10'
+                  `flex items-center justify-between px-3.5 py-2.5 rounded-[100px] transition ${isActive
+                    ? 'bg-[#e8fe85] text-[#1b6e53] font-semibold shadow-xs'
+                    : 'text-white/90 hover:text-white hover:bg-white/10'
                   }`
                 }
               >
@@ -82,9 +83,8 @@ export default function HubSidebar({ isOpen = false, onClose = () => {} }) {
                   <>
                     <div className="flex items-center gap-2.5">
                       <span
-                        className={`material-symbols-outlined text-[18px] ${
-                          isActive ? 'text-[#1b6e53]' : 'text-white/70'
-                        }`}
+                        className={`material-symbols-outlined text-[18px] ${isActive ? 'text-[#1b6e53]' : 'text-white/70'
+                          }`}
                       >
                         {item.icon}
                       </span>

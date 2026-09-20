@@ -101,14 +101,29 @@ export default function Home() {
             </div>
           </Link>
 
+          {/* Nav Links Desktop */}
+          <nav className="hidden lg:flex items-center gap-6 text-xs font-medium text-white/90">
+            <Link to="/how-it-works" className="hover:text-[#e8fe85] transition">How It Works</Link>
+            <Link to="/why-farmlink" className="hover:text-[#e8fe85] transition">Why FarmLink</Link>
+            <Link to="/for-buyers" className="hover:text-[#e8fe85] transition">For Buyers</Link>
+            <Link to="/for-fpos" className="hover:text-[#e8fe85] transition">For FPOs</Link>
+            <Link to="/for-hubs" className="hover:text-[#e8fe85] transition">For Hubs</Link>
+            <Link to="/contact" className="hover:text-[#e8fe85] transition">Contact</Link>
+          </nav>
+
           <div className="flex items-center gap-3.5">
-            <span className="text-xs sm:text-sm font-medium tracking-wide text-emerald-100/80 hidden md:inline-block">
-              <span className="text-white/90">Transparent Procurement</span>{' '}
-              <span className="text-[#e8fe85] px-1.5">•</span>{' '}
-              <span className="text-white/90">Organized FPO Supply</span>{' '}
-              <span className="text-[#e8fe85] px-1.5">•</span>{' '}
-              <span className="text-white/90">Farmer-First</span>
-            </span>
+            <Link
+              to="/buyer/login"
+              className="hidden sm:inline-block px-3 py-1.5 rounded-[100px] bg-white/10 hover:bg-white/20 text-white text-xs font-semibold transition"
+            >
+              Buyer Portal
+            </Link>
+            <Link
+              to="/fpo/login"
+              className="px-3.5 py-1.5 rounded-[100px] bg-[#e8fe85] hover:bg-[#d8ee75] text-[#1b6e53] text-xs font-bold transition shadow-xs"
+            >
+              FPO Login
+            </Link>
           </div>
         </div>
       </header>

@@ -11,7 +11,6 @@ export default function FPOOrders() {
   const [hubState, setHubState] = useState(getStoredHubOperations())
   const [filterStage, setFilterStage] = useState('all')
   const [toastMsg, setToastMsg] = useState('')
-  const [shortfallModalOrder, setShortfallModalOrder] = useState(null)
 
   useEffect(() => {
     setOrders(getStoredFpoOrders())
@@ -30,20 +29,30 @@ export default function FPOOrders() {
   const handleNotifyBuyer = (orderId) => {
     fpoNotifyBuyerOfShortfall(orderId)
     setHubState(getStoredHubOperations())
-    setShortfallModalOrder(null)
     setToastMsg(`Partial fulfillment notification transmitted to ${activeHubOrder.buyer}. Awaiting buyer decision.`)
     setTimeout(() => setToastMsg(''), 4500)
   }
 
+  const getOrderStatus = (order) => {
+    if (order.orderId === activeHubOrder?.orderId) {
+      return activeHubOrder.status || order.status
+    }
+    return order.status
+  }
+
   const filteredOrders = orders.filter((order) => {
+    const status = getOrderStatus(order)
     if (filterStage === 'confirmed') {
-      return order.status === 'Confirmed'
+      return status === 'Confirmed'
     }
     if (filterStage === 'planned') {
-      return order.status === 'Fulfillment Planned' || order.fulfillmentStage === 'Fulfillment Planned'
+      return status === 'Fulfillment Planned' || order.fulfillmentStage === 'Fulfillment Planned'
     }
     if (filterStage === 'in-transit') {
-      return order.fulfillmentStage === 'Delivery' || order.status === 'Dispatched' || order.status === 'Partially Dispatched'
+      return ['Dispatched', 'Partially Dispatched', 'In Transit', 'Delivered', 'Delivery Issue'].includes(status)
+    }
+    if (filterStage === 'completed') {
+      return ['Completed', 'Buyer Verified', 'Payment Confirmed'].includes(status)
     }
     return true
   })
@@ -60,7 +69,7 @@ export default function FPOOrders() {
             Active Orders &amp; <span className="italic font-normal">Fulfillment Management</span>
           </h1>
           <p className="text-xs sm:text-sm text-[#6d6d6d] mt-1 font-sans">
-            Track confirmed institutional buyer orders, plan hub allocations, and manage partial fulfillment reviews.
+            Track confirmed institutional buyer orders, plan hub allocations, and manage delivery and settlements.
           </p>
         </div>
 
@@ -135,7 +144,8 @@ export default function FPOOrders() {
             { id: 'all', label: 'All Orders' },
             { id: 'confirmed', label: 'Confirmed (Needs Planning)' },
             { id: 'planned', label: 'Fulfillment Planned' },
-            { id: 'in-transit', label: 'In Transit / Dispatched' }
+            { id: 'in-transit', label: 'In Transit / Dispatched' },
+            { id: 'completed', label: 'Completed' },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -154,7 +164,7 @@ export default function FPOOrders() {
 
       {/* 4. Orders Table */}
       <section className="rounded-[24px] bg-[#ffffff] border border-[#c3cda7] overflow-hidden shadow-xs">
-        <div className="p-5 border-b border-[#c3cda7]/50 flex items-center justify-between flex-wrap gap-3">
+        <div className="p-4 sm:p-5 border-b border-[#c3cda7]/50 flex items-center justify-between flex-wrap gap-3">
           <div className="flex items-start gap-3.5">
             <div className="w-10 h-10 rounded-full bg-[#1b6e53] text-[#ffffff] flex items-center justify-center shrink-0 shadow-sm mt-0.5">
               <span className="material-symbols-outlined text-[20px]">local_shipping</span>
@@ -164,7 +174,7 @@ export default function FPOOrders() {
                 Confirmed Buyer Orders
               </h3>
               <p className="text-xs text-[#6d6d6d] mt-1 font-sans">
-                Stage progression: Confirmed → Fulfillment Planned → Hub Collection → Aggregation → Dispatch
+                Stage progression: Confirmed → Fulfillment Planned → Hub Collection → Aggregation → Dispatch → Completed
               </p>
             </div>
           </div>
@@ -175,152 +185,171 @@ export default function FPOOrders() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs min-w-[760px]">
+          <table className="w-full text-left text-xs">
             <thead className="bg-[#f1efdf] text-[#353535] uppercase text-[10px] tracking-wider border-b border-[#c3cda7]/50 font-mono">
               <tr>
-                <th className="py-3 px-4">Order Ref</th>
+                <th className="py-3 px-3.5 whitespace-nowrap">Order Ref</th>
                 <th className="py-3 px-3">Buyer &amp; Destination</th>
-                <th className="py-3 px-3">Commodities &amp; Volumes</th>
-                <th className="py-3 px-3">Delivery Date</th>
-                <th className="py-3 px-3">Gross Value</th>
-                <th className="py-3 px-3 text-center">Fulfillment Status</th>
-                <th className="py-3 px-4 text-right">Actions</th>
+                <th className="py-3 px-3">Items &amp; Volumes</th>
+                <th className="py-3 px-3 whitespace-nowrap">Delivery Date</th>
+                <th className="py-3 px-3 whitespace-nowrap">Gross Value</th>
+                <th className="py-3 px-3 text-center whitespace-nowrap">Fulfillment Status</th>
+                <th className="py-3 px-3.5 text-right whitespace-nowrap">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#c3cda7]/30 text-[#212529]">
               {filteredOrders.map((order) => {
                 const itemsList = order.items || []
-                const itemsNames = itemsList.map((i) => i.crop).join(' • ')
-                const isConfirmed = order.status === 'Confirmed'
-                const isPlanned = order.status === 'Fulfillment Planned'
-
-                // Check live hub status override for ORD-1031
-                const currentStatus = order.orderId === 'ORD-1031' ? activeHubOrder.status : order.status
+                const currentStatus = getOrderStatus(order)
+                const isConfirmed = currentStatus === 'Confirmed'
+                const isPlanned = currentStatus === 'Fulfillment Planned'
+                const isCompleted = ['Completed', 'Buyer Verified', 'Payment Confirmed'].includes(currentStatus)
+                const isDispatched = ['Dispatched', 'Partially Dispatched', 'In Transit', 'Delivered', 'Delivery Issue'].includes(currentStatus)
+                const isShortfallReview = currentStatus === 'Buyer Review Required'
 
                 return (
                   <tr key={order.orderId} className="hover:bg-[#faf9f0] transition">
-                    <td className="py-4 px-4 font-mono font-bold text-[#1b6e53] whitespace-nowrap">
+                    {/* 1. Order Ref */}
+                    <td className="py-3.5 px-3.5 font-mono font-bold text-[#1b6e53] whitespace-nowrap align-middle">
                       {order.orderId}
                     </td>
 
-                    <td className="py-4 px-3">
+                    {/* 2. Buyer & Destination */}
+                    <td className="py-3.5 px-3 align-middle max-w-[200px]">
                       <div className="space-y-0.5">
-                        <span className="font-bold text-[#00372a] block font-editorial text-base leading-tight">
+                        <span className="font-bold text-[#00372a] block font-editorial text-sm leading-tight">
                           {order.buyer}
                         </span>
-                        <span className="text-[10px] font-mono text-[#6d6d6d] block">
+                        <span className="text-[10px] font-mono text-[#6d6d6d] block truncate" title={order.deliveryLocation}>
                           📍 {order.deliveryLocation}
                         </span>
                       </div>
                     </td>
 
-                    <td className="py-4 px-3">
+                    {/* 3. Items & Volumes */}
+                    <td className="py-3.5 px-3 align-middle max-w-[220px]">
                       <div className="space-y-1">
-                        <span className="font-bold text-[#212529] block font-mono text-[11px]">
-                          {itemsList.length} {itemsList.length === 1 ? 'Item' : 'Items'}: {itemsNames}
-                        </span>
-                        <div className="flex flex-col gap-1 pt-0.5">
-                          {itemsList.map((item, idx) => (
-                            <div key={idx} className="text-[11px] font-mono text-[#353535] flex items-center gap-1.5">
-                              <span className="w-1.5 h-1.5 rounded-full bg-[#1b6e53]"></span>
-                              <span>{item.crop}</span>
-                              <span className="text-[#1b6e53] font-bold">({item.quantity} • {item.grade})</span>
-                            </div>
-                          ))}
-                        </div>
+                        {itemsList.map((item, idx) => (
+                          <div key={idx} className="text-[11px] font-mono text-[#353535] flex items-center gap-1.5 flex-wrap">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#1b6e53] shrink-0"></span>
+                            <span className="font-semibold text-[#00372a]">{item.crop}</span>
+                            <span className="text-[#1b6e53] font-bold">({item.quantity} • {item.grade})</span>
+                          </div>
+                        ))}
                       </div>
                     </td>
 
-                    <td className="py-4 px-3 font-mono text-[#353535] whitespace-nowrap">
+                    {/* 4. Delivery Date */}
+                    <td className="py-3.5 px-3 font-mono text-[#353535] whitespace-nowrap align-middle">
                       {order.deliveryDate}
                     </td>
 
-                    <td className="py-4 px-3 font-mono font-extrabold text-[#683600] text-sm whitespace-nowrap">
+                    {/* 5. Gross Value */}
+                    <td className="py-3.5 px-3 font-mono font-extrabold text-[#683600] text-xs whitespace-nowrap align-middle">
                       {order.totalValue}
                     </td>
 
-                    <td className="py-4 px-3 text-center whitespace-nowrap">
-                      <div className="space-y-1">
-                        <span
-                          className={`inline-block px-3 py-1 rounded-[100px] text-[10px] font-mono font-bold uppercase tracking-wider ${
-                            currentStatus === 'Dispatched' || currentStatus === 'Partially Dispatched'
-                              ? 'bg-[#b2cee7] text-[#00372a] border border-[#00372a]/30'
-                              : currentStatus === 'Buyer Review Required'
-                              ? 'bg-[#fceace] text-[#683600] border border-[#683600]/40'
-                              : currentStatus === 'Ready for Partial Dispatch' || currentStatus === 'Ready for Dispatch'
-                              ? 'bg-[#e8fe85] text-[#1b6e53] border border-[#1b6e53]'
-                              : isPlanned
-                              ? 'bg-[#e8fe85] text-[#1b6e53] border border-[#1b6e53]'
-                              : isConfirmed
-                              ? 'bg-rose-50 text-rose-700 border border-rose-300'
-                              : order.statusStyle || 'bg-[#e6ecd5] text-[#1b6e53]'
-                          }`}
-                        >
-                          {currentStatus === 'Ready for Partial Dispatch'
-                            ? 'Buyer Approved Partial'
-                            : currentStatus}
-                        </span>
-                      </div>
+                    {/* 6. Fulfillment Status Badge */}
+                    <td className="py-3.5 px-3 text-center whitespace-nowrap align-middle">
+                      <span
+                        className={`inline-block px-2.5 py-1 rounded-[100px] text-[10px] font-mono font-bold uppercase tracking-wider ${
+                          isCompleted
+                            ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                            : isDispatched
+                            ? 'bg-[#b2cee7] text-[#00372a] border border-[#00372a]/30'
+                            : isShortfallReview
+                            ? 'bg-[#fceace] text-[#683600] border border-[#683600]/40'
+                            : currentStatus === 'Ready for Partial Dispatch' || currentStatus === 'Ready for Dispatch'
+                            ? 'bg-[#e8fe85] text-[#1b6e53] border border-[#1b6e53]'
+                            : isPlanned
+                            ? 'bg-[#e8fe85] text-[#1b6e53] border border-[#1b6e53]'
+                            : isConfirmed
+                            ? 'bg-rose-50 text-rose-700 border border-rose-300'
+                            : order.statusStyle || 'bg-[#e6ecd5] text-[#1b6e53]'
+                        }`}
+                      >
+                        {currentStatus === 'Ready for Partial Dispatch'
+                          ? 'Buyer Approved Partial'
+                          : currentStatus}
+                      </span>
                     </td>
 
-                    <td className="py-4 px-4 text-right whitespace-nowrap">
-                      <div className="flex items-center justify-end gap-2">
-                        {order.orderId === 'ORD-1031' && currentStatus === 'Buyer Review Required' && (
-                          <button
-                            type="button"
-                            onClick={() => handleNotifyBuyer(order.orderId)}
-                            className="py-1.5 px-3 rounded-[100px] bg-[#683600] hover:bg-[#4a2700] text-[#ffffff] text-xs font-bold transition shadow-2xs inline-flex items-center gap-1 font-mono cursor-pointer"
-                          >
-                            <span className="material-symbols-outlined text-[14px]">send</span>
-                            <span>Notify Buyer</span>
-                          </button>
-                        )}
-
-                        {order.orderId === 'ORD-1031' && (
+                    {/* 7. Action Buttons (Strictly per status & using order.orderId) */}
+                    <td className="py-3.5 px-3.5 text-right whitespace-nowrap align-middle">
+                      {/* Case A: Completed Status -> Hub Ops + Track + Ledger */}
+                      {isCompleted ? (
+                        <div className="flex items-center justify-end gap-1.5 flex-nowrap">
                           <Link
-                            to="/hub/aggregation"
-                            className="py-1.5 px-3 rounded-[100px] bg-[#f1efdf] hover:bg-[#e6ecd5] text-[#1b6e53] border border-[#c3cda7] text-xs font-bold transition inline-flex items-center gap-1"
+                            to={`/fpo/orders/${order.orderId}/fulfillment`}
+                            className="py-1 px-2.5 rounded-[100px] bg-[#f1efdf] hover:bg-[#e6ecd5] text-[#1b6e53] border border-[#c3cda7] text-[11px] font-bold transition inline-flex items-center gap-1 font-mono shadow-2xs"
+                            title="View Hub & Allocation Plan"
                           >
                             <span>Hub Ops</span>
                             <span className="material-symbols-outlined text-[13px]">warehouse</span>
                           </Link>
-                        )}
-
-                        {['Dispatched', 'In Transit', 'Delivered', 'Buyer Verified', 'Payment Confirmed', 'Completed', 'Delivery Issue'].includes(currentStatus) ? (
-                          <div className="flex items-center gap-1.5">
-                            <Link
-                              to={`/fpo/orders/${order.orderId}/tracking`}
-                              className="py-1.5 px-3 rounded-[100px] bg-[#1b6e53] hover:bg-[#00372a] text-[#ffffff] text-xs font-bold transition shadow-2xs inline-flex items-center gap-1 font-mono"
-                            >
-                              <span className="material-symbols-outlined text-[13px]">my_location</span>
-                              <span>Track</span>
-                            </Link>
-                            {['Buyer Verified', 'Payment Confirmed', 'Completed'].includes(currentStatus) && (
-                              <Link
-                                to={`/fpo/settlements/${order.orderId}`}
-                                className="py-1.5 px-3 rounded-[100px] bg-[#e6ecd5] hover:bg-[#c3cda7]/60 text-[#1b6e53] border border-[#c3cda7] text-xs font-bold transition inline-flex items-center gap-1 font-mono"
-                              >
-                                <span className="material-symbols-outlined text-[13px]">receipt_long</span>
-                                <span>Ledger</span>
-                              </Link>
-                            )}
-                          </div>
-                        ) : (
+                          <Link
+                            to={`/fpo/orders/${order.orderId}/tracking`}
+                            className="py-1 px-2.5 rounded-[100px] bg-[#1b6e53] hover:bg-[#00372a] text-[#ffffff] text-[11px] font-bold transition shadow-2xs inline-flex items-center gap-1 font-mono"
+                            title="Track Fulfillment Stages"
+                          >
+                            <span className="material-symbols-outlined text-[13px]">my_location</span>
+                            <span>Track</span>
+                          </Link>
+                          <Link
+                            to={`/fpo/settlements/${order.orderId}`}
+                            className="py-1 px-2.5 rounded-[100px] bg-[#e6ecd5] hover:bg-[#c3cda7]/60 text-[#1b6e53] border border-[#c3cda7] text-[11px] font-bold transition inline-flex items-center gap-1 font-mono shadow-2xs"
+                            title="View Settlement & Payout Ledger"
+                          >
+                            <span className="material-symbols-outlined text-[13px]">receipt_long</span>
+                            <span>Ledger</span>
+                          </Link>
+                        </div>
+                      ) : isDispatched ? (
+                        /* Case B: Dispatched / In Transit / Delivered -> Track */
+                        <Link
+                          to={`/fpo/orders/${order.orderId}/tracking`}
+                          className="py-1 px-3 rounded-[100px] bg-[#1b6e53] hover:bg-[#00372a] text-[#ffffff] text-xs font-bold transition shadow-2xs inline-flex items-center gap-1 font-mono"
+                        >
+                          <span className="material-symbols-outlined text-[14px]">my_location</span>
+                          <span>Track</span>
+                        </Link>
+                      ) : isShortfallReview ? (
+                        /* Case C: Shortfall Buyer Review Required -> Notify Buyer + View Plan */
+                        <div className="flex items-center justify-end gap-1.5 flex-nowrap">
+                          <button
+                            type="button"
+                            onClick={() => handleNotifyBuyer(order.orderId)}
+                            className="py-1 px-2.5 rounded-[100px] bg-[#683600] hover:bg-[#4a2700] text-[#ffffff] text-xs font-bold transition shadow-2xs inline-flex items-center gap-1 font-mono cursor-pointer"
+                          >
+                            <span className="material-symbols-outlined text-[13px]">forward_to_inbox</span>
+                            <span>Notify Buyer</span>
+                          </button>
                           <Link
                             to={`/fpo/orders/${order.orderId}/fulfillment`}
-                            className={`py-1.5 px-4 rounded-[100px] text-xs font-bold transition shadow-2xs inline-flex items-center gap-1.5 cursor-pointer ${
-                              isConfirmed
-                                ? 'bg-[#1b6e53] hover:bg-[#00372a] text-[#ffffff]'
-                                : 'bg-[#e6ecd5] hover:bg-[#c3cda7]/60 text-[#1b6e53] border border-[#c3cda7]'
-                            }`}
+                            className="py-1 px-2.5 rounded-[100px] bg-[#e6ecd5] hover:bg-[#c3cda7]/60 text-[#1b6e53] border border-[#c3cda7] text-xs font-bold transition inline-flex items-center gap-1 font-mono"
                           >
-                            <span>{isConfirmed ? 'Plan Fulfillment' : 'View Plan'}</span>
-                            <span className="material-symbols-outlined text-[14px]">
-                              {isConfirmed ? 'alt_route' : 'arrow_forward'}
-                            </span>
+                            <span>View Plan</span>
                           </Link>
-                        )}
-                      </div>
+                        </div>
+                      ) : isPlanned ? (
+                        /* Case D: Fulfillment Planned -> View Plan */
+                        <Link
+                          to={`/fpo/orders/${order.orderId}/fulfillment`}
+                          className="py-1 px-3.5 rounded-[100px] bg-[#e6ecd5] hover:bg-[#c3cda7]/60 text-[#1b6e53] border border-[#c3cda7] text-xs font-bold transition inline-flex items-center gap-1 font-mono shadow-2xs"
+                        >
+                          <span>View Plan</span>
+                          <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
+                        </Link>
+                      ) : (
+                        /* Case E: Confirmed / Default -> Plan Fulfillment */
+                        <Link
+                          to={`/fpo/orders/${order.orderId}/fulfillment`}
+                          className="py-1 px-3.5 rounded-[100px] bg-[#1b6e53] hover:bg-[#00372a] text-[#ffffff] text-xs font-bold transition shadow-2xs inline-flex items-center gap-1 font-mono"
+                        >
+                          <span>Plan Fulfillment</span>
+                          <span className="material-symbols-outlined text-[14px]">alt_route</span>
+                        </Link>
+                      )}
                     </td>
                   </tr>
                 )
