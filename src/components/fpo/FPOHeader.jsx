@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useLocation } from 'react-router'
+import { Link } from 'react-router'
 
 export default function FPOHeader({ hubInfo, onMenuClick }) {
   const [isVisible, setIsVisible] = useState(true)
@@ -68,12 +69,9 @@ export default function FPOHeader({ hubInfo, onMenuClick }) {
             <h1 className="font-editorial text-2xl lg:text-3xl font-light text-[#212529] tracking-tight">
               <span className="italic font-normal">Good morning,</span> FPO Manager
             </h1>
-            <span className="px-3 py-0.5 rounded-full bg-[#e6ecd5] text-[#1b6e53] text-[11px] font-mono uppercase tracking-widest border border-[#c3cda7] hidden sm:inline-block">
-              {hubInfo.cycle}
-            </span>
           </div>
           <p className="text-[11px] text-[#6d6d6d] mt-1 font-mono uppercase tracking-widest">
-            Nashik Agri-Cluster • Hub Terminal #04 • Window: {hubInfo.operatingWindow}
+            {hubInfo.name} • FPO Operations
           </p>
         </div>
 
@@ -90,11 +88,14 @@ export default function FPOHeader({ hubInfo, onMenuClick }) {
             />
           </div>
 
-          <button className="flex items-center gap-2 px-5 py-2 rounded-[100px] bg-[#1b6e53] text-[#ffffff] text-xs font-semibold hover:bg-[#165a44] transition shrink-0 shadow-sm uppercase tracking-wider cursor-pointer">
-            <span className="material-symbols-outlined text-[16px]">receipt_long</span>
-            <span className="hidden sm:inline">+ New Inward Slip</span>
-            <span className="sm:hidden">+ Slip</span>
-          </button>
+          <Link
+            to="/fpo/requests"
+            className="flex items-center gap-2 px-5 py-2 rounded-[100px] bg-[#1b6e53] text-[#ffffff] text-xs font-semibold hover:bg-[#165a44] transition shrink-0 shadow-sm uppercase tracking-wider cursor-pointer"
+          >
+            <span className="material-symbols-outlined text-[16px]">add_circle</span>
+            <span className="hidden sm:inline">New Procurement Request</span>
+            <span className="sm:hidden">+ Request</span>
+          </Link>
 
           <button
             className="w-9 h-9 rounded-full bg-[#ffffff] border border-[#c3cda7] text-[#212529] flex items-center justify-center hover:bg-[#faf9f0] transition relative shrink-0 cursor-pointer"

@@ -12,7 +12,6 @@ const navSections = [
       { to: '/fpo/hubs', label: 'All Hubs', icon: 'hub', badge: '4 Hubs' },
       { to: '/fpo/farmers', label: 'Farmers', icon: 'group', badge: '42' },
       { to: '/fpo/buyers', label: 'Buyers', icon: 'apartment', badge: '8' },
-      { to: '/fpo/supply', label: 'Supply Inward', icon: 'inventory_2', badge: '3.9 T' },
       { to: '/fpo/matching', label: 'Matching Engine', icon: 'tune', badge: 'Live', badgeSolid: true },
     ],
   },

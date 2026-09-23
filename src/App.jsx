@@ -34,7 +34,6 @@ import Farmers from './pages/fpo/Farmers'
 import Buyers from './pages/fpo/Buyers'
 import FPORequests from './pages/fpo/Requests'
 import FPORequestDetail from './pages/fpo/RequestDetail'
-import Supply from './pages/fpo/Supply'
 import Matching from './pages/fpo/Matching'
 import Collection from './pages/fpo/Collection'
 import Quality from './pages/fpo/Quality'
@@ -111,7 +110,6 @@ function App() {
           <Route path="requests" element={<FPORequests />} />
           <Route path="requests/:id" element={<FPORequestDetail />} />
           <Route path="demand" element={<FPORequests />} />
-          <Route path="supply" element={<Supply />} />
           <Route path="matching" element={<Matching />} />
           <Route path="orders" element={<FPOOrders />} />
           <Route path="orders/:orderId" element={<OrderTracking />} />
