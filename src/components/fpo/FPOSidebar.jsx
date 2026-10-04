@@ -1,5 +1,7 @@
-import React from 'react'
-import { NavLink, Link } from 'react-router'
+import React, { useState } from 'react'
+import { NavLink, Link, useNavigate } from 'react-router'
+import { useAuth } from '../../hooks'
+import LogoutConfirmModal from '../auth/LogoutConfirmModal'
 
 const navSections = [
   {
@@ -34,6 +36,37 @@ const navSections = [
 ]
 
 export default function FPOSidebar({ isOpen = false, onClose = () => { } }) {
+  const { fpoProfile, signOut } = useAuth()
+  const navigate = useNavigate()
+  const [showConfirmModal, setShowConfirmModal] = useState(false)
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
+
+  const handleConfirmLogout = async () => {
+    setIsLoggingOut(true)
+    try {
+      await signOut()
+      setShowConfirmModal(false)
+      navigate('/fpo/login')
+    } catch (err) {
+      setIsLoggingOut(false)
+      setShowConfirmModal(false)
+      console.error('Logout error:', err)
+      alert(err.message || 'Logout failed. Please try again.')
+    }
+  }
+
+  const nameInitial = (fpoProfile?.contactPerson || fpoProfile?.fpoName || 'PV')
+    .split(' ')
+    .map((n) => n[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase() || 'FP'
+
+  const contactName = fpoProfile?.contactPerson || 'p.vishnu vardhan'
+  const locationSub = fpoProfile?.fpoName
+    ? `${fpoProfile.district || 'FPO'}, ${fpoProfile.state || 'India'}`
+    : 'Hub Director • Nashik'
+
   return (
     <>
       {/* Mobile backdrop */}
@@ -67,7 +100,9 @@ export default function FPOSidebar({ isOpen = false, onClose = () => { } }) {
                     OS
                   </span>
                 </div>
-                <p className="text-[10px] text-[#e6ecd5]/80 tracking-wide">Nashik Central Hub #04</p>
+                <p className="text-[10px] text-[#e6ecd5]/80 tracking-wide">
+                  {fpoProfile?.fpoRegId || 'Nashik Central Hub #04'}
+                </p>
               </div>
             </Link>
             <button
@@ -156,31 +191,49 @@ export default function FPOSidebar({ isOpen = false, onClose = () => { } }) {
           </nav>
         </div>
 
-        {/* Manager Account Tile */}
+        {/* Manager Account Tile with Logout */}
         <div className="p-4 border-t border-white/10">
           <div className="flex items-center justify-between p-2.5 rounded-[20px] bg-white/10 border border-white/15">
             <div className="flex items-center gap-3 min-w-0">
               <div className="relative shrink-0">
                 <div className="w-8 h-8 rounded-full bg-[#e6ecd5] text-[#1b6e53] flex items-center justify-center font-bold text-xs">
-                  PV
+                  {nameInitial}
                 </div>
                 <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-[#e8fe85] rounded-full ring-2 ring-[#1b6e53]"></span>
               </div>
               <div className="flex flex-col min-w-0">
-                <span className="text-xs font-semibold text-white truncate">p.vishnu vardhan</span>
-                <span className="text-[10px] text-[#e6ecd5]/80 truncate">Hub Director • Nashik</span>
+                <span className="text-xs font-semibold text-white truncate">{contactName}</span>
+                <span className="text-[10px] text-[#e6ecd5]/80 truncate">{locationSub}</span>
               </div>
             </div>
-            <Link
-              to="/fpo/settings"
-              className="text-white/70 hover:text-white p-1 rounded-full hover:bg-white/10 transition cursor-pointer"
-              title="FPO Settings & Profile"
-            >
-              <span className="material-symbols-outlined text-[18px]">settings</span>
-            </Link>
+            <div className="flex items-center gap-1">
+              <Link
+                to="/fpo/settings"
+                className="text-white/70 hover:text-white p-1 rounded-full hover:bg-white/10 transition cursor-pointer"
+                title="FPO Settings & Profile"
+              >
+                <span className="material-symbols-outlined text-[18px]">settings</span>
+              </Link>
+              <button
+                onClick={() => setShowConfirmModal(true)}
+                disabled={isLoggingOut}
+                className="text-white/70 hover:text-[#ba1a1a] p-1 rounded-full hover:bg-white/10 transition cursor-pointer disabled:opacity-50"
+                title="Sign Out"
+              >
+                <span className="material-symbols-outlined text-[18px]">logout</span>
+              </button>
+            </div>
           </div>
         </div>
       </aside>
+
+      {/* Confirmation Modal */}
+      <LogoutConfirmModal
+        isOpen={showConfirmModal}
+        onClose={() => setShowConfirmModal(false)}
+        onConfirm={handleConfirmLogout}
+        isLoading={isLoggingOut}
+      />
     </>
   )
 }

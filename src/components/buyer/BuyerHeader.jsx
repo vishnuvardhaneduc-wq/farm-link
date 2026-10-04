@@ -1,11 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useLocation, Link } from 'react-router'
+import { useAuth } from '../../hooks'
 
 export default function BuyerHeader({ onMenuClick }) {
+  const { buyerProfile, user } = useAuth()
   const [isVisible, setIsVisible] = useState(true)
   const isVisibleRef = useRef(true)
   const ticking = useRef(false)
   const location = useLocation()
+
+  const contactName = buyerProfile?.contact_person || user?.user_metadata?.contact_person || 'Buyer'
+  const companyName = buyerProfile?.org_name || user?.user_metadata?.org_name || 'AgroFresh Enterprise'
 
   // Always reset scroll to top & make header visible when route changes
   useEffect(() => {
@@ -62,10 +67,10 @@ export default function BuyerHeader({ onMenuClick }) {
               <span className="material-symbols-outlined text-[24px]">menu</span>
             </button>
             <h1 className="font-editorial text-2xl lg:text-3xl font-light text-[#212529] tracking-tight">
-              <span className="italic font-normal">Good morning,</span> Buyer
+              <span className="italic font-normal">Good morning,</span> {contactName}
             </h1>
             <span className="px-3 py-0.5 rounded-full bg-[#b2cee7]/50 text-[#00372a] text-[11px] font-mono uppercase tracking-widest border border-[#c3cda7] hidden sm:inline-block font-bold">
-              AgroFresh Enterprise
+              {companyName}
             </span>
           </div>
           <p className="text-[11px] text-[#6d6d6d] mt-1 font-mono uppercase tracking-widest">

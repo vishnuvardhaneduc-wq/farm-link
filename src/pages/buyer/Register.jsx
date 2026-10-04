@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router'
+import { supabase } from '../../lib/supabase'
 import AuthHeader from '../../components/auth/AuthHeader'
 import AuthFooter from '../../components/auth/AuthFooter'
 import SuccessState from '../../components/auth/SuccessState'
@@ -7,23 +8,25 @@ import SuccessState from '../../components/auth/SuccessState'
 export default function BuyerRegister() {
   // Form State
   const [formData, setFormData] = useState({
-    orgName: 'AgriFresh Retail Corp.',
+    orgName: '',
     businessType: 'Retail Chain / Supermarket',
-    contactPerson: 'Ananya Deshmukh (Head of Sourcing)',
-    phoneNumber: '+91 98450 67890',
-    emailAddress: 'ananya@agrifreshretail.com',
-    state: 'Maharashtra',
-    city: 'Mumbai',
-    password: 'password123',
-    confirmPassword: 'password123',
+    contactPerson: '',
+    phoneNumber: '',
+    emailAddress: '',
+    state: '',
+    city: '',
+    password: '',
+    confirmPassword: '',
   })
 
   const [errors, setErrors] = useState({})
+  const [submitError, setSubmitError] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
-  const [generatedBuyerId, setGeneratedBuyerId] = useState('BUY-00482')
+  const [needsEmailConfirmation, setNeedsEmailConfirmation] = useState(false)
+  const [generatedBuyerId, setGeneratedBuyerId] = useState('')
 
   const businessTypes = [
     'Retail Chain / Supermarket',
@@ -56,6 +59,9 @@ export default function BuyerRegister() {
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: '' }))
     }
+    if (submitError) {
+      setSubmitError('')
+    }
   }
 
   const validate = () => {
@@ -71,11 +77,11 @@ export default function BuyerRegister() {
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!formData.emailAddress || !emailRegex.test(formData.emailAddress)) {
+    if (!formData.emailAddress || !emailRegex.test(formData.emailAddress.trim())) {
       newErrors.emailAddress = 'Enter a valid official email address'
     }
 
-    if (!formData.city.trim()) newErrors.city = 'City is required'
+    if (!formData.district && !formData.city.trim()) newErrors.city = 'City is required'
 
     if (!formData.password || formData.password.length < 6) {
       newErrors.password = 'Password must be at least 6 characters'
@@ -89,18 +95,98 @@ export default function BuyerRegister() {
     return Object.keys(newErrors).length === 0
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
+    setSubmitError('')
     if (!validate()) return
 
     setIsLoading(true)
-    setTimeout(() => {
+
+    const randomNum = Math.floor(1000 + Math.random() * 9000)
+    const newBuyerId = `BUY-${randomNum}`
+
+    try {
+      // 1. Sign up user with Supabase Auth including metadata
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: formData.emailAddress.trim(),
+        password: formData.password,
+        options: {
+          data: {
+            role: 'buyer',
+            buyer_id: newBuyerId,
+            org_name: formData.orgName.trim(),
+            business_type: formData.businessType,
+            contact_person: formData.contactPerson.trim(),
+            phone: formData.phoneNumber.trim(),
+            email: formData.emailAddress.trim(),
+            state: formData.state,
+            city: formData.city.trim(),
+          },
+        },
+      })
+
+      if (authError) {
+        setIsLoading(false)
+        console.error('Supabase Buyer Auth error:', authError)
+        setSubmitError(authError.message || 'Unable to create buyer account. Please check your details and try again.')
+        return
+      }
+
+      // Check if user already exists
+      if (authData.user && authData.user.identities && authData.user.identities.length === 0) {
+        setIsLoading(false)
+        setSubmitError('An account with this email address already exists. Please sign in instead.')
+        return
+      }
+
+      const user = authData?.user
+      if (!user) {
+        setIsLoading(false)
+        setSubmitError('Buyer signup could not be completed. Please try again.')
+        return
+      }
+
+      // 2. Attempt to insert Buyer profile into database (Password is never included)
+      try {
+        await supabase
+          .from('buyer_profiles')
+          .insert([
+            {
+              user_id: user.id,
+              buyer_id: newBuyerId,
+              org_name: formData.orgName.trim(),
+              business_type: formData.businessType,
+              contact_person: formData.contactPerson.trim(),
+              phone: formData.phoneNumber.trim(),
+              email: formData.emailAddress.trim(),
+              state: formData.state,
+              city: formData.city.trim(),
+            },
+          ])
+      } catch (insertErr) {
+        console.warn('Initial buyer profile insert deferred or pending verification:', insertErr)
+      }
+
+      // 3. Handle email confirmation requirement if active session is null
+      setGeneratedBuyerId(newBuyerId)
+      if (!authData.session) {
+        setIsLoading(false)
+        setNeedsEmailConfirmation(true)
+        setIsSuccess(true)
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+        return
+      }
+
+      // 4. Registration & profile creation complete
       setIsLoading(false)
-      const randomNum = Math.floor(100 + Math.random() * 900)
-      setGeneratedBuyerId(`BUY-00${randomNum}`)
+      setNeedsEmailConfirmation(false)
       setIsSuccess(true)
       window.scrollTo({ top: 0, behavior: 'smooth' })
-    }, 700)
+    } catch (err) {
+      setIsLoading(false)
+      console.error('Unexpected buyer registration error:', err)
+      setSubmitError('An unexpected error occurred during registration. Please try again.')
+    }
   }
 
   return (
@@ -415,6 +501,13 @@ export default function BuyerRegister() {
                     .
                   </p>
 
+                  {submitError && (
+                    <div className="p-3.5 rounded-[12px] bg-[#ba1a1a]/10 border border-[#ba1a1a]/30 text-[#ba1a1a] text-xs font-medium flex items-center gap-2">
+                      <span className="material-symbols-outlined text-[18px] shrink-0">error</span>
+                      <span>{submitError}</span>
+                    </div>
+                  )}
+
                   <button
                     type="submit"
                     disabled={isLoading}
@@ -451,12 +544,16 @@ export default function BuyerRegister() {
                 /* SUCCESS STATE VIEW                                           */
                 /* ============================================================ */
                 <SuccessState
-                  title="Buyer Account Created"
-                  description="Your enterprise workspace is active. You can now publish procurement demands and contract with verified FPO suppliers."
-                  idLabel="Buyer ID"
-                  idValue={generatedBuyerId}
-                  actionTo="/buyer/dashboard"
-                  actionLabel="Continue to Buyer Dashboard"
+                  title={needsEmailConfirmation ? 'Verification Email Sent' : 'Buyer Account Created'}
+                  description={
+                    needsEmailConfirmation
+                      ? `We've sent a verification link to ${formData.emailAddress}. Please confirm your email address to complete activation and log in.`
+                      : 'Your enterprise workspace is active. You can now publish procurement demands and contract with verified FPO suppliers.'
+                  }
+                  idLabel={generatedBuyerId ? 'Buyer ID' : undefined}
+                  idValue={generatedBuyerId || undefined}
+                  actionTo={needsEmailConfirmation ? '/buyer/login' : '/buyer/dashboard'}
+                  actionLabel={needsEmailConfirmation ? 'Proceed to Sign In' : 'Continue to Buyer Dashboard'}
                   secondaryAction={
                     <p className="font-sans text-xs text-[#6d6d6d]">
                       Need to revise enterprise details?{' '}

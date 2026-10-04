@@ -7,18 +7,18 @@ import SuccessState from '../../components/auth/SuccessState'
 export default function HubSetup() {
   // Form State
   const [formData, setFormData] = useState({
-    hubName: 'Dindori Aggregation Hub 01',
-    hubId: 'HUB-NSK-01',
-    fpoName: 'Sahyadri Farmers Producer Co. Ltd.',
-    hubLocation: 'Gate 4, APMC Market Yard, Dindori, Nashik',
-    contactPerson: 'Suresh Shinde (Lead Operator)',
-    phoneNumber: '+91 98221 44556',
-    operatingHours: '06:00 AM - 08:00 PM',
-    supportedProducts: 'Fresh Onions, Grapes, Tomatoes, Pomegranate',
-    capacity: '50 MT / Day',
-    emailAddress: 'dindori.hub01@sahyadri.org',
-    password: 'password123',
-    confirmPassword: 'password123',
+    hubName: '',
+    hubId: '',
+    fpoName: '',
+    hubLocation: '',
+    contactPerson: '',
+    phoneNumber: '',
+    operatingHours: '',
+    supportedProducts: '',
+    capacity: '',
+    emailAddress: '',
+    password: '',
+    confirmPassword: '',
   })
 
   const [errors, setErrors] = useState({})

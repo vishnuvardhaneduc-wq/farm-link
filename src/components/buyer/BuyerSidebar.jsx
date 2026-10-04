@@ -1,5 +1,7 @@
-import React from 'react'
-import { NavLink, Link } from 'react-router'
+import React, { useState } from 'react'
+import { NavLink, Link, useNavigate } from 'react-router'
+import { useAuth } from '../../hooks'
+import LogoutConfirmModal from '../auth/LogoutConfirmModal'
 
 const buyerNavSections = [
   {
@@ -29,6 +31,36 @@ const buyerNavSections = [
 ]
 
 export default function BuyerSidebar({ isOpen = false, onClose = () => { } }) {
+  const { buyerProfile, user, signOut } = useAuth()
+  const navigate = useNavigate()
+  const [showConfirmModal, setShowConfirmModal] = useState(false)
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
+
+  const handleConfirmLogout = async () => {
+    setIsLoggingOut(true)
+    try {
+      await signOut()
+      setShowConfirmModal(false)
+      navigate('/buyer/login')
+    } catch (err) {
+      setIsLoggingOut(false)
+      setShowConfirmModal(false)
+      console.error('Buyer logout error:', err)
+      alert(err.message || 'Logout failed. Please try again.')
+    }
+  }
+
+  const contactName = buyerProfile?.contact_person || user?.user_metadata?.contact_person || 'Buyer Officer'
+  const companyName = buyerProfile?.org_name || user?.user_metadata?.org_name || 'AgroFresh Enterprise'
+
+  const nameInitial = (contactName || companyName || 'BO')
+    .split(' ')
+    .filter(Boolean)
+    .map((n) => n[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase()
+
   return (
     <>
       {/* Mobile backdrop */}
@@ -62,7 +94,7 @@ export default function BuyerSidebar({ isOpen = false, onClose = () => { } }) {
                     BUYER
                   </span>
                 </div>
-                <p className="text-[10px] text-[#e6ecd5]/80 tracking-wide">AgroFresh Enterprise Workspace</p>
+                <p className="text-[10px] text-[#e6ecd5]/80 tracking-wide truncate max-w-[140px]">{companyName}</p>
               </div>
             </Link>
             <button
@@ -174,30 +206,50 @@ export default function BuyerSidebar({ isOpen = false, onClose = () => { } }) {
             </div>
           </div>
 
-          {/* Buyer Officer Account Tile */}
+          {/* Buyer Officer Account Tile with Logout */}
           <div className="flex items-center justify-between p-2.5 rounded-[20px] bg-white/10 border border-white/15">
             <div className="flex items-center gap-3 min-w-0">
               <div className="relative shrink-0">
                 <div className="w-8 h-8 rounded-full bg-[#b2cee7] text-[#00372a] flex items-center justify-center font-bold text-xs">
-                  AR
+                  {nameInitial}
                 </div>
                 <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-[#e8fe85] rounded-full ring-2 ring-[#1b6e53]"></span>
               </div>
               <div className="flex flex-col min-w-0">
-                <span className="text-xs font-semibold text-white truncate">Anita Rao</span>
-                <span className="text-[10px] text-[#e6ecd5]/80 truncate">AgroFresh Enterprise</span>
+                <span className="text-xs font-semibold text-white truncate">{contactName}</span>
+                <span className="text-[10px] text-[#e6ecd5]/80 truncate">{companyName}</span>
               </div>
             </div>
-            <Link
-              to="/buyer/settings"
-              className="text-white/70 hover:text-white p-1 rounded-full hover:bg-white/10 transition"
-              title="Buyer Company Settings"
-            >
-              <span className="material-symbols-outlined text-[18px]">settings</span>
-            </Link>
+            <div className="flex items-center gap-1">
+              <Link
+                to="/buyer/settings"
+                className="text-white/70 hover:text-white p-1 rounded-full hover:bg-white/10 transition cursor-pointer"
+                title="Buyer Company Settings"
+              >
+                <span className="material-symbols-outlined text-[18px]">settings</span>
+              </Link>
+              <button
+                onClick={() => setShowConfirmModal(true)}
+                disabled={isLoggingOut}
+                className="text-white/70 hover:text-[#ba1a1a] p-1 rounded-full hover:bg-white/10 transition cursor-pointer disabled:opacity-50"
+                title="Sign Out"
+              >
+                <span className="material-symbols-outlined text-[18px]">logout</span>
+              </button>
+            </div>
           </div>
         </div>
       </aside>
+
+      {/* Confirmation Modal */}
+      <LogoutConfirmModal
+        isOpen={showConfirmModal}
+        onClose={() => setShowConfirmModal(false)}
+        onConfirm={handleConfirmLogout}
+        isLoading={isLoggingOut}
+        title="Confirm Buyer Sign Out"
+        message="Do you want to log out of your Buyer Enterprise desk? You will need to sign in again to access procurement orders and requests."
+      />
     </>
   )
 }

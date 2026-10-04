@@ -1,21 +1,98 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router'
+import { supabase } from '../../lib/supabase'
+import { saveStoredFpoProfile } from '../../data/fpoProfileData'
 
 export default function FPOLogin() {
   const navigate = useNavigate()
-  const [identifier, setIdentifier] = useState('manager@agricoop.org')
-  const [password, setPassword] = useState('password123')
+  const [identifier, setIdentifier] = useState('')
+  const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
-  const [rememberMe, setRememberMe] = useState(true)
+  const [rememberMe, setRememberMe] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [loginError, setLoginError] = useState('')
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
+    setLoginError('')
+
+    const email = identifier.trim()
+    if (!email || !password) {
+      setLoginError('Please enter both email and password.')
+      return
+    }
+
     setIsLoading(true)
-    setTimeout(() => {
+
+    try {
+      // 1. Authenticate with Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+
+      if (authError) {
+        setIsLoading(false)
+        console.error('Supabase Auth login error:', authError)
+        if (authError.message?.toLowerCase().includes('email not confirmed')) {
+          setLoginError('Please verify your email address before signing in.')
+        } else if (authError.message?.toLowerCase().includes('invalid login credentials')) {
+          setLoginError('Invalid email or password. Please check your credentials and try again.')
+        } else {
+          setLoginError(authError.message || 'Unable to sign in. Please try again.')
+        }
+        return
+      }
+
+      const user = authData?.user
+      if (!user) {
+        setIsLoading(false)
+        console.error('No user object returned from Supabase Auth session')
+        setLoginError('Authentication failed. No user session returned.')
+        return
+      }
+
+      // 2. Query fpo_profiles for the row belonging strictly to that user
+      const { data: profileData, error: profileError } = await supabase
+        .from('fpo_profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle()
+
+      if (profileError) {
+        setIsLoading(false)
+        console.error('FPO profile retrieval error:', profileError)
+        setLoginError('Unable to load FPO profile. Please try again.')
+        return
+      }
+
+      // 3. If no matching fpo_profiles row exists
+      if (!profileData) {
+        setIsLoading(false)
+        console.error('No matching FPO profile found for user ID:', user.id)
+        setLoginError('No FPO profile found for this account. Please register an FPO workspace.')
+        return
+      }
+
+      // 4. Login and profile retrieval succeeded -> Store profile & navigate to FPO Dashboard
+      saveStoredFpoProfile({
+        fpoName: profileData.fpo_name,
+        registrationId: profileData.fpo_reg_id,
+        contactPerson: profileData.contact_person,
+        phoneNumber: profileData.phone,
+        emailAddress: profileData.email || user.email,
+        state: profileData.state,
+        district: profileData.district,
+        primaryOperatingArea: profileData.operating_area,
+      })
+
       setIsLoading(false)
-      navigate('/fpo/dashboard')
-    }, 600)
+      navigate('/fpo/dashboard', { state: { fpoProfile: profileData } })
+    } catch (err) {
+      setIsLoading(false)
+      console.error('Unexpected login exception:', err)
+      setLoginError('An unexpected error occurred during sign in. Please try again.')
+    }
   }
 
   return (
@@ -188,8 +265,11 @@ export default function FPOLogin() {
                       type="text"
                       required
                       value={identifier}
-                      onChange={(e) => setIdentifier(e.target.value)}
-                      placeholder="e.g. FPO-NSK-402 or manager@agricoop.org"
+                      onChange={(e) => {
+                        setIdentifier(e.target.value)
+                        if (loginError) setLoginError('')
+                      }}
+                      placeholder="e.g. manager@agricoop.org"
                       className="w-full pl-10 pr-4 py-3 rounded-[14px] bg-[#f1efdf]/40 border border-[#c3cda7] text-[#212529] font-sans text-xs sm:text-sm placeholder:text-[#6d6d6d]/70 focus:outline-none focus:border-[#1b6e53] focus:ring-1 focus:ring-[#1b6e53] transition-all"
                     />
                   </div>
@@ -205,7 +285,7 @@ export default function FPOLogin() {
                       Access Token / Password
                     </label>
                     <Link
-                      to="/forgot-password"
+                      to="/forgot-password?role=fpo"
                       className="font-sans text-xs font-semibold text-[#1b6e53] hover:underline transition-colors"
                     >
                       Forgot Password?
@@ -220,7 +300,10 @@ export default function FPOLogin() {
                       type={showPassword ? 'text' : 'password'}
                       required
                       value={password}
-                      onChange={(e) => setPassword(e.target.value)}
+                      onChange={(e) => {
+                        setPassword(e.target.value)
+                        if (loginError) setLoginError('')
+                      }}
                       placeholder="••••••••••••"
                       className="w-full pl-10 pr-11 py-3 rounded-[14px] bg-[#f1efdf]/40 border border-[#c3cda7] text-[#212529] font-sans text-xs sm:text-sm placeholder:text-[#6d6d6d]/70 focus:outline-none focus:border-[#1b6e53] focus:ring-1 focus:ring-[#1b6e53] transition-all"
                     />
@@ -251,6 +334,14 @@ export default function FPOLogin() {
                     </span>
                   </label>
                 </div>
+
+                {/* Error Banner */}
+                {loginError && (
+                  <div className="p-3.5 rounded-[12px] bg-[#ba1a1a]/10 border border-[#ba1a1a]/30 text-[#ba1a1a] text-xs font-medium flex items-center gap-2">
+                    <span className="material-symbols-outlined text-[18px] shrink-0">error</span>
+                    <span>{loginError}</span>
+                  </div>
+                )}
 
                 {/* Sign In Button */}
                 <div className="pt-2">

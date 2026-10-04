@@ -1,29 +1,32 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router'
+import { supabase } from '../../lib/supabase'
 
 export default function FPORegister() {
   const navigate = useNavigate()
 
   // Form State
   const [formData, setFormData] = useState({
-    fpoName: 'Sahyadri Farmers Producer Co. Ltd.',
-    fpoRegId: 'FPO-MH-2024-8891',
-    contactPerson: 'Rajesh Patil (Managing Director)',
-    phoneNumber: '+91 98230 12345',
-    emailAddress: 'contact@sahyadrifarmers.org',
-    state: 'Maharashtra',
-    district: 'Nashik',
-    operatingArea: 'Dindori & Niphad Talukas',
-    password: 'password123',
-    confirmPassword: 'password123',
+    fpoName: '',
+    fpoRegId: '',
+    contactPerson: '',
+    phoneNumber: '',
+    emailAddress: '',
+    state: '',
+    district: '',
+    operatingArea: '',
+    password: '',
+    confirmPassword: '',
   })
 
   const [errors, setErrors] = useState({})
+  const [submitError, setSubmitError] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
-  const [generatedFpoId, setGeneratedFpoId] = useState('FPO-00124')
+  const [needsEmailConfirmation, setNeedsEmailConfirmation] = useState(false)
+  const [generatedFpoId, setGeneratedFpoId] = useState('')
 
   const states = [
     'Maharashtra',
@@ -44,6 +47,9 @@ export default function FPORegister() {
     // Clear error for this field on edit
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: '' }))
+    }
+    if (submitError) {
+      setSubmitError('')
     }
   }
 
@@ -83,19 +89,96 @@ export default function FPORegister() {
     return Object.keys(newErrors).length === 0
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
+    setSubmitError('')
     if (!validate()) return
 
     setIsLoading(true)
-    setTimeout(() => {
+
+    try {
+      // 1. Sign up user with Supabase Auth including metadata
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: formData.emailAddress,
+        password: formData.password,
+        options: {
+          data: {
+            role: 'fpo',
+            fpo_name: formData.fpoName,
+            fpo_reg_id: formData.fpoRegId,
+            contact_person: formData.contactPerson,
+            phone: formData.phoneNumber,
+            email: formData.emailAddress,
+            state: formData.state,
+            district: formData.district,
+            operating_area: formData.operatingArea,
+          },
+        },
+      })
+
+      if (authError) {
+        setIsLoading(false)
+        console.error('Supabase Auth error:', authError)
+        setSubmitError(authError.message || 'Unable to create account. Please check your details and try again.')
+        return
+      }
+
+      // Check if user already exists (Supabase returns empty identities array when email confirmation is enabled and user already exists)
+      if (authData.user && authData.user.identities && authData.user.identities.length === 0) {
+        setIsLoading(false)
+        setSubmitError('An account with this email address already exists. Please sign in instead.')
+        return
+      }
+
+      const user = authData?.user
+      if (!user) {
+        setIsLoading(false)
+        setSubmitError('Signup could not be completed. Please try again.')
+        return
+      }
+
+      // 2. Attempt to insert FPO profile into database (Password is never included)
+      try {
+        await supabase
+          .from('fpo_profiles')
+          .insert([
+            {
+              user_id: user.id,
+              fpo_name: formData.fpoName,
+              fpo_reg_id: formData.fpoRegId,
+              contact_person: formData.contactPerson,
+              phone: formData.phoneNumber,
+              email: formData.emailAddress,
+              state: formData.state,
+              district: formData.district,
+              operating_area: formData.operatingArea,
+            },
+          ])
+      } catch (insertErr) {
+        console.warn('Initial profile insert deferred or pending verification:', insertErr)
+      }
+
+      // 3. Handle email confirmation requirement if active session is null
+      if (!authData.session) {
+        setIsLoading(false)
+        setGeneratedFpoId(formData.fpoRegId)
+        setNeedsEmailConfirmation(true)
+        setIsSuccess(true)
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+        return
+      }
+
+      // 4. Registration & profile creation complete
       setIsLoading(false)
-      // Generate realistic mock FPO ID
-      const randomNum = Math.floor(10000 + Math.random() * 90000)
-      setGeneratedFpoId(`FPO-MH-${randomNum}`)
+      setGeneratedFpoId(formData.fpoRegId)
+      setNeedsEmailConfirmation(false)
       setIsSuccess(true)
       window.scrollTo({ top: 0, behavior: 'smooth' })
-    }, 700)
+    } catch (err) {
+      setIsLoading(false)
+      console.error('Unexpected registration error:', err)
+      setSubmitError('An unexpected error occurred during registration. Please try again.')
+    }
   }
 
   return (
@@ -476,6 +559,13 @@ export default function FPORegister() {
                     .
                   </p>
 
+                  {submitError && (
+                    <div className="p-3.5 rounded-[12px] bg-[#ba1a1a]/10 border border-[#ba1a1a]/30 text-[#ba1a1a] text-xs font-medium flex items-center gap-2">
+                      <span className="material-symbols-outlined text-[18px] shrink-0">error</span>
+                      <span>{submitError}</span>
+                    </div>
+                  )}
+
                   <button
                     type="submit"
                     disabled={isLoading}
@@ -513,31 +603,53 @@ export default function FPORegister() {
                 /* ============================================================ */
                 <div className="py-8 px-6 bg-[#e6ecd5]/50 rounded-[24px] border border-[#c3cda7] text-center space-y-6">
                   <div className="w-16 h-16 rounded-full bg-[#1b6e53] text-[#ffffff] flex items-center justify-center mx-auto shadow-sm">
-                    <span className="material-symbols-outlined text-[32px]">check_circle</span>
+                    <span className="material-symbols-outlined text-[32px]">
+                      {needsEmailConfirmation ? 'mark_email_unread' : 'check_circle'}
+                    </span>
                   </div>
 
                   <div>
                     <h3 className="font-editorial text-3xl text-[#00372a] font-normal tracking-tight mb-2">
-                      FPO Account Created
+                      {needsEmailConfirmation ? 'Verification Email Sent' : 'FPO Account Created'}
                     </h3>
                     <p className="font-sans text-xs sm:text-sm text-[#353535] max-w-md mx-auto leading-relaxed">
-                      Your organization account is ready. Continue to complete your FPO setup and connect your primary hubs.
+                      {needsEmailConfirmation ? (
+                        <>
+                          We've sent a verification link to{' '}
+                          <strong className="text-[#00372a]">{formData.emailAddress}</strong>. Please confirm your
+                          email address to complete activation and log in.
+                        </>
+                      ) : (
+                        'Your organization account is ready. Continue to complete your FPO setup and connect your primary hubs.'
+                      )}
                     </p>
                   </div>
 
-                  <div className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full bg-[#ffffff] border border-[#c3cda7] text-[#1b6e53] font-sans text-sm font-bold shadow-xs">
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#1b6e53] animate-pulse"></span>
-                    <span className="font-mono">FPO ID: {generatedFpoId}</span>
-                  </div>
+                  {generatedFpoId && (
+                    <div className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full bg-[#ffffff] border border-[#c3cda7] text-[#1b6e53] font-sans text-sm font-bold shadow-xs">
+                      <span className="w-2.5 h-2.5 rounded-full bg-[#1b6e53] animate-pulse"></span>
+                      <span className="font-mono">FPO ID: {generatedFpoId}</span>
+                    </div>
+                  )}
 
                   <div className="pt-2">
-                    <Link
-                      to="/fpo/setup"
-                      className="w-full sm:w-auto px-8 h-12 rounded-full bg-[#1b6e53] hover:bg-[#00372a] text-[#ffffff] font-sans text-xs sm:text-sm font-bold uppercase tracking-wider inline-flex items-center justify-center gap-2 shadow-sm transition-all duration-150 active:scale-[0.99]"
-                    >
-                      <span>Continue to FPO Setup</span>
-                      <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
-                    </Link>
+                    {needsEmailConfirmation ? (
+                      <Link
+                        to="/fpo/login"
+                        className="w-full sm:w-auto px-8 h-12 rounded-full bg-[#1b6e53] hover:bg-[#00372a] text-[#ffffff] font-sans text-xs sm:text-sm font-bold uppercase tracking-wider inline-flex items-center justify-center gap-2 shadow-sm transition-all duration-150 active:scale-[0.99]"
+                      >
+                        <span>Proceed to Sign In</span>
+                        <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+                      </Link>
+                    ) : (
+                      <Link
+                        to="/fpo/setup"
+                        className="w-full sm:w-auto px-8 h-12 rounded-full bg-[#1b6e53] hover:bg-[#00372a] text-[#ffffff] font-sans text-xs sm:text-sm font-bold uppercase tracking-wider inline-flex items-center justify-center gap-2 shadow-sm transition-all duration-150 active:scale-[0.99]"
+                      >
+                        <span>Continue to FPO Setup</span>
+                        <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+                      </Link>
+                    )}
                   </div>
 
                   <p className="font-sans text-xs text-[#6d6d6d]">

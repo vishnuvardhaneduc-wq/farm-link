@@ -5,10 +5,10 @@ import AuthFooter from '../../components/auth/AuthFooter'
 
 export default function HubLogin() {
   const navigate = useNavigate()
-  const [identifier, setIdentifier] = useState('hub.operator@sahyadri-hub1.fl')
-  const [password, setPassword] = useState('password123')
+  const [identifier, setIdentifier] = useState('')
+  const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
-  const [rememberMe, setRememberMe] = useState(true)
+  const [rememberMe, setRememberMe] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
   const handleSubmit = (e) => {

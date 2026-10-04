@@ -87,7 +87,7 @@ export default function PublicLayout() {
             </Link>
             <Link
               to="/fpo/login"
-              className="px-3 py-1.5 rounded-[100px] bg-[#e8fe85] hover:bg-[#d8ee75] text-[#1b6e53] text-xs font-bold transition shadow-xs"
+              className="px-3 py-1.5 rounded-[100px] bg-white hover:bg-[#f1efdf] text-[#1b6e53] text-xs font-bold transition shadow-xs"
             >
               FPO Login
             </Link>

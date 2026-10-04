@@ -12,3 +12,5 @@ export function useWindowWidth() {
 
   return width
 }
+
+export { useAuth } from '../context/AuthContext'

@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
+import { supabase } from '../../lib/supabase'
 import AuthHeader from '../../components/auth/AuthHeader'
 import AuthFooter from '../../components/auth/AuthFooter'
 import SuccessState from '../../components/auth/SuccessState'
@@ -9,9 +10,10 @@ export default function ForgotPassword() {
   const initialRole = searchParams.get('role') || 'fpo'
   const [selectedRole, setSelectedRole] = useState(initialRole)
 
-  const [identifier, setIdentifier] = useState('manager@agricoop.org')
+  const [identifier, setIdentifier] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
 
   const roleConfig = {
     fpo: {
@@ -20,8 +22,8 @@ export default function ForgotPassword() {
       badge: 'FPO FEDERATION',
       loginTo: '/fpo/login',
       loginLabel: 'Back to FPO Login',
-      placeholder: 'e.g. FPO-NSK-402 or manager@agricoop.org',
-      label: 'FPO Registered Email or ID',
+      placeholder: 'e.g. manager@agricoop.org',
+      label: 'FPO Registered Email Address',
     },
     buyer: {
       name: 'Buyer Enterprise',
@@ -29,8 +31,8 @@ export default function ForgotPassword() {
       badge: 'BUYER ENTERPRISE',
       loginTo: '/buyer/login',
       loginLabel: 'Back to Buyer Login',
-      placeholder: 'e.g. BUY-00482 or procurement@agrifreshretail.com',
-      label: 'Buyer Official Email or ID',
+      placeholder: 'e.g. procurement@agrifreshretail.com',
+      label: 'Buyer Official Email Address',
     },
     hub: {
       name: 'Hub Aggregation',
@@ -38,8 +40,8 @@ export default function ForgotPassword() {
       badge: 'HUB OPERATIONS',
       loginTo: '/hub/login',
       loginLabel: 'Back to Hub Login',
-      placeholder: 'e.g. HUB-NSK-01 or operator@sahyadri-hub1.fl',
-      label: 'Hub Terminal Email or ID',
+      placeholder: 'e.g. operator@sahyadri-hub1.fl',
+      label: 'Hub Terminal Email Address',
     },
   }
 
@@ -48,19 +50,45 @@ export default function ForgotPassword() {
   const handleRoleChange = (role) => {
     setSelectedRole(role)
     setSearchParams({ role })
-    if (role === 'fpo') setIdentifier('manager@agricoop.org')
-    else if (role === 'buyer') setIdentifier('procurement@agrifreshretail.com')
-    else if (role === 'hub') setIdentifier('operator@sahyadri-hub1.fl')
+    setIdentifier('')
+    setErrorMessage('')
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
+    setErrorMessage('')
+
+    const email = identifier.trim()
+    if (!email) {
+      setErrorMessage('Please enter your registered email address.')
+      return
+    }
+
     setIsLoading(true)
-    setTimeout(() => {
+
+    try {
+      const redirectTo = selectedRole === 'buyer'
+        ? `${window.location.origin}/buyer/reset-password`
+        : `${window.location.origin}/fpo/reset-password`
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo,
+      })
+
+      if (error) {
+        console.error('Password reset error:', error)
+        setIsLoading(false)
+        setErrorMessage(error.message || 'Unable to send password reset link. Please check the email address.')
+        return
+      }
+
       setIsLoading(false)
       setIsSubmitted(true)
       window.scrollTo({ top: 0, behavior: 'smooth' })
-    }, 600)
+    } catch (err) {
+      console.error('Unexpected error requesting password reset:', err)
+      setIsLoading(false)
+      setErrorMessage('An unexpected error occurred. Please try again.')
+    }
   }
 
   return (
@@ -243,6 +271,13 @@ export default function ForgotPassword() {
                       />
                     </div>
                   </div>
+
+                  {errorMessage && (
+                    <div className="p-3.5 rounded-[12px] bg-[#ba1a1a]/10 border border-[#ba1a1a]/30 text-[#ba1a1a] text-xs font-medium flex items-center gap-2">
+                      <span className="material-symbols-outlined text-[18px] shrink-0">error</span>
+                      <span>{errorMessage}</span>
+                    </div>
+                  )}
 
                   <div className="pt-2">
                     <button

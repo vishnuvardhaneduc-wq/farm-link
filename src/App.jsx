@@ -6,6 +6,7 @@ import PublicLayout from './layouts/PublicLayout'
 import FPOLayout from './layouts/FPOLayout'
 import BuyerLayout from './layouts/BuyerLayout'
 import HubLayout from './layouts/HubLayout'
+import ProtectedRoute from './components/auth/ProtectedRoute'
 
 // Public Pages
 import Home from './pages/Home'
@@ -24,6 +25,8 @@ import BuyerRegister from './pages/buyer/Register'
 import HubLogin from './pages/hub/Login'
 import HubSetup from './pages/hub/Setup'
 import ForgotPassword from './pages/auth/ForgotPassword'
+import ResetPassword from './pages/fpo/ResetPassword'
+import BuyerResetPassword from './pages/buyer/ResetPassword'
 import VerificationSuccess from './pages/auth/Verification'
 
 // FPO Pages
@@ -91,6 +94,9 @@ function App() {
         {/* Standalone Phase 2 Auth Routes */}
         <Route path="/fpo/login" element={<FPOLogin />} />
         <Route path="/fpo/register" element={<FPORegister />} />
+        <Route path="/fpo/reset-password" element={<ResetPassword />} />
+        <Route path="/buyer/reset-password" element={<BuyerResetPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/buyer/login" element={<BuyerLogin />} />
         <Route path="/buyer/register" element={<BuyerRegister />} />
         <Route path="/hub/login" element={<HubLogin />} />
@@ -98,8 +104,15 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/verification" element={<VerificationSuccess />} />
 
-        {/* FPO Portal Routes */}
-        <Route path="/fpo" element={<FPOLayout />}>
+        {/* FPO Portal Routes (Protected by Supabase Session) */}
+        <Route
+          path="/fpo"
+          element={
+            <ProtectedRoute redirectTo="/fpo/login">
+              <FPOLayout />
+            </ProtectedRoute>
+          }
+        >
           <Route index element={<Navigate to="/fpo/dashboard" replace />} />
           <Route path="setup" element={<Navigate to="/fpo/dashboard" replace />} />
           <Route path="dashboard" element={<FPODashboard />} />
@@ -126,8 +139,15 @@ function App() {
           <Route path="profile" element={<FPOSettings />} />
         </Route>
 
-        {/* Buyer Portal Routes */}
-        <Route path="/buyer" element={<BuyerLayout />}>
+        {/* Buyer Portal Routes (Protected by Supabase Session) */}
+        <Route
+          path="/buyer"
+          element={
+            <ProtectedRoute redirectTo="/buyer/login">
+              <BuyerLayout />
+            </ProtectedRoute>
+          }
+        >
           <Route index element={<Navigate to="/buyer/dashboard" replace />} />
           <Route path="dashboard" element={<BuyerDashboard />} />
           <Route path="products" element={<Products />} />

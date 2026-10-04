@@ -1,12 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { useLocation } from 'react-router'
-import { Link } from 'react-router'
+import { useLocation, useNavigate, Link } from 'react-router'
+import { useAuth } from '../../hooks'
+import LogoutConfirmModal from '../auth/LogoutConfirmModal'
 
 export default function FPOHeader({ hubInfo, onMenuClick }) {
   const [isVisible, setIsVisible] = useState(true)
   const isVisibleRef = useRef(true)
   const ticking = useRef(false)
   const location = useLocation()
+  const navigate = useNavigate()
+  const { fpoProfile, signOut } = useAuth()
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
+  const [showConfirmModal, setShowConfirmModal] = useState(false)
+  const [logoutError, setLogoutError] = useState('')
 
   // Always reset scroll to top & make header visible when route changes
   useEffect(() => {
@@ -49,63 +55,108 @@ export default function FPOHeader({ hubInfo, onMenuClick }) {
     }
   }, [])
 
+  const handleConfirmLogout = async () => {
+    setIsLoggingOut(true)
+    setLogoutError('')
+    try {
+      await signOut()
+      setShowConfirmModal(false)
+      navigate('/fpo/login')
+    } catch (err) {
+      setIsLoggingOut(false)
+      setShowConfirmModal(false)
+      setLogoutError(err.message || 'Logout failed. Please try again.')
+      console.error('Logout error:', err)
+    }
+  }
+
+  const managerDisplayName = fpoProfile?.contactPerson || fpoProfile?.fpoName || 'FPO Manager'
+
   return (
-    <header
-      className={`bg-[#f1efdf] border-b border-[#c3cda7]/50 px-6 lg:px-10 py-5 sticky top-0 z-10 backdrop-blur-sm bg-opacity-95 transform transition-all duration-[600ms] ease-in-out ${
-        isVisible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0 pointer-events-none'
-      }`}
-    >
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        {/* Left Title & Status */}
-        <div>
-          <div className="flex items-center gap-3">
-            {/* Mobile Hamburger */}
-            <button
-              onClick={onMenuClick}
-              className="p-1 rounded-md text-[#212529] hover:bg-[#e6ecd5] lg:hidden cursor-pointer"
+    <>
+      <header
+        className={`bg-[#f1efdf] border-b border-[#c3cda7]/50 px-6 lg:px-10 py-5 sticky top-0 z-10 backdrop-blur-sm bg-opacity-95 transform transition-all duration-[600ms] ease-in-out ${
+          isVisible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0 pointer-events-none'
+        }`}
+      >
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          {/* Left Title & Status */}
+          <div>
+            <div className="flex items-center gap-3">
+              {/* Mobile Hamburger */}
+              <button
+                onClick={onMenuClick}
+                className="p-1 rounded-md text-[#212529] hover:bg-[#e6ecd5] lg:hidden cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-[24px]">menu</span>
+              </button>
+              <h1 className="font-editorial text-2xl lg:text-3xl font-light text-[#212529] tracking-tight">
+                <span className="italic font-normal">Good morning,</span> {managerDisplayName}
+              </h1>
+            </div>
+            <p className="text-[11px] text-[#6d6d6d] mt-1 font-mono uppercase tracking-widest">
+              {fpoProfile?.fpoName ? `${fpoProfile.fpoName} • ` : ''}{hubInfo?.name || 'FPO Operations'}
+            </p>
+          </div>
+
+          {/* Right Search & CTAs */}
+          <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end flex-wrap sm:flex-nowrap">
+            <div className="relative w-full md:w-64 lg:w-80">
+              <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[18px] text-[#6d6d6d]">
+                search
+              </span>
+              <input
+                type="text"
+                placeholder="Search farmers, buyer POs, slip ID..."
+                className="w-full pl-9 pr-4 py-2 text-xs bg-[#ffffff] border border-[#c3cda7] rounded-[100px] text-[#212529] placeholder-[#6d6d6d] focus:outline-none focus:ring-1 focus:ring-[#1b6e53] focus:border-[#1b6e53] transition shadow-none font-sans"
+              />
+            </div>
+
+            <Link
+              to="/fpo/requests"
+              className="flex items-center gap-2 px-4 py-2 rounded-[100px] bg-[#1b6e53] text-[#ffffff] text-xs font-semibold hover:bg-[#165a44] transition shrink-0 shadow-sm uppercase tracking-wider cursor-pointer"
             >
-              <span className="material-symbols-outlined text-[24px]">menu</span>
+              <span className="material-symbols-outlined text-[16px]">add_circle</span>
+              <span className="hidden sm:inline">New Procurement Request</span>
+              <span className="sm:hidden">+ Request</span>
+            </Link>
+
+            <button
+              className="w-9 h-9 rounded-full bg-[#ffffff] border border-[#c3cda7] text-[#212529] flex items-center justify-center hover:bg-[#faf9f0] transition relative shrink-0 cursor-pointer"
+              title="Notifications"
+            >
+              <span className="material-symbols-outlined text-[18px]">notifications</span>
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#e8fe85] ring-1 ring-[#1b6e53] rounded-full"></span>
             </button>
-            <h1 className="font-editorial text-2xl lg:text-3xl font-light text-[#212529] tracking-tight">
-              <span className="italic font-normal">Good morning,</span> FPO Manager
-            </h1>
+
+            {/* Sign Out Action Button */}
+            <button
+              onClick={() => setShowConfirmModal(true)}
+              disabled={isLoggingOut}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-[100px] bg-[#ffffff] border border-[#ba1a1a]/30 text-[#ba1a1a] hover:bg-[#ba1a1a]/10 hover:border-[#ba1a1a]/60 transition text-xs font-semibold uppercase tracking-wider cursor-pointer shrink-0 disabled:opacity-50"
+              title="Sign Out of FPO Terminal"
+            >
+              <span className="material-symbols-outlined text-[16px]">logout</span>
+              <span className="hidden sm:inline">Sign Out</span>
+            </button>
           </div>
-          <p className="text-[11px] text-[#6d6d6d] mt-1 font-mono uppercase tracking-widest">
-            {hubInfo.name} • FPO Operations
-          </p>
         </div>
 
-        {/* Right Search & CTAs */}
-        <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end">
-          <div className="relative w-full md:w-72 lg:w-96">
-            <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[18px] text-[#6d6d6d]">
-              search
-            </span>
-            <input
-              type="text"
-              placeholder="Search farmers, buyer POs, slip ID..."
-              className="w-full pl-9 pr-4 py-2 text-xs bg-[#ffffff] border border-[#c3cda7] rounded-[100px] text-[#212529] placeholder-[#6d6d6d] focus:outline-none focus:ring-1 focus:ring-[#1b6e53] focus:border-[#1b6e53] transition shadow-none font-sans"
-            />
+        {logoutError && (
+          <div className="mt-3 p-2.5 rounded-lg bg-[#ba1a1a]/10 border border-[#ba1a1a]/30 text-[#ba1a1a] text-xs flex items-center gap-2">
+            <span className="material-symbols-outlined text-[16px]">error</span>
+            <span>{logoutError}</span>
           </div>
+        )}
+      </header>
 
-          <Link
-            to="/fpo/requests"
-            className="flex items-center gap-2 px-5 py-2 rounded-[100px] bg-[#1b6e53] text-[#ffffff] text-xs font-semibold hover:bg-[#165a44] transition shrink-0 shadow-sm uppercase tracking-wider cursor-pointer"
-          >
-            <span className="material-symbols-outlined text-[16px]">add_circle</span>
-            <span className="hidden sm:inline">New Procurement Request</span>
-            <span className="sm:hidden">+ Request</span>
-          </Link>
-
-          <button
-            className="w-9 h-9 rounded-full bg-[#ffffff] border border-[#c3cda7] text-[#212529] flex items-center justify-center hover:bg-[#faf9f0] transition relative shrink-0 cursor-pointer"
-            title="Notifications"
-          >
-            <span className="material-symbols-outlined text-[18px]">notifications</span>
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#e8fe85] ring-1 ring-[#1b6e53] rounded-full"></span>
-          </button>
-        </div>
-      </div>
-    </header>
+      {/* Confirmation Modal */}
+      <LogoutConfirmModal
+        isOpen={showConfirmModal}
+        onClose={() => setShowConfirmModal(false)}
+        onConfirm={handleConfirmLogout}
+        isLoading={isLoggingOut}
+      />
+    </>
   )
 }
